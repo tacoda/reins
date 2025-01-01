@@ -3,6 +3,10 @@
 require_relative "reins/version"
 
 module Reins
-  class Error < StandardError; end
-  # Your code goes here...
+  class Application
+    def call(env)
+      [200, {'content-type' => 'text/html'},
+        ["Hello from Ruby on Reins!"]]
+    end
+  end
 end
