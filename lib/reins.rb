@@ -2,13 +2,28 @@
 
 require "reins/version"
 require "reins/array"
+require "reins/routing"
 
 module Reins
   class Application
     def call(env)
-      `echo debug > debug.txt`;
+      # `echo debug > debug.txt`;
+      klass, act = get_controller_and_action(env)
+      controller = klass.new(env)
+      text = controller.send(act)
       [200, {'content-type' => 'text/html'},
-        ["Hello from Ruby on Reins!"]]
+        [text]]
+    end
+  end
+
+  class Controller
+    def initialize(env)
+      @env = env
+    end
+  
+    def env
+      @env
     end
   end
 end
+
