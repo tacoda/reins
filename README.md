@@ -1,6 +1,6 @@
 # Reins
 
-TODO: Delete this and the text below, and describe your gem
+A Rack-based web framework with extra awesome! Reins is an exercise to understand Rails better by rebuilding it from scratch.
 
 Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/reins`. To experiment with that code, run `bin/console` for an interactive prompt.
 
@@ -28,4 +28,11 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/reins.
+Bug reports and pull requests are welcome on GitHub at https://github.com/tacoda/reins.
+
+## Resources
+
+Useful resources to make the framework more robust:
+
+- [Rack Spec](https://github.com/rack/rack/blob/main/SPEC.rdoc)
+- [Rails on Rack](https://guides.rubyonrails.org/rails_on_rack.html)
