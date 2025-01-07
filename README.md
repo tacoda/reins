@@ -18,7 +18,18 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+```sh
+mkdir $APP_NAME
+cd $APP_NAME
+git init
+mkdir config
+mkdir app
+touch Gemfile
+echo "source 'https://rubygems.org'" > Gemfile
+echo "gem \"reins\'" >> Gemfile
+bundle install
+rackup -p 3001
+```
 
 ## Development
 
