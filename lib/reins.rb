@@ -12,9 +12,19 @@ module Reins
         return [404, {'content-type' => 'text/html'}, []]
       end
 
+      if env['PATH_INFO'] == '/'
+        return [200, {'content-type' => 'text/html'},
+          ["root"]]
+      end
+
       klass, act = get_controller_and_action(env)
       controller = klass.new(env)
-      text = controller.send(act)
+      begin
+        text = controller.send(act)
+      rescue
+        return [500, {'content-type' => 'text/html'},
+          ['Server Error']]
+      end
       [200, {'content-type' => 'text/html'},
         [text]]
     end
