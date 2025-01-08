@@ -4,6 +4,7 @@ require "reins/version"
 require "reins/array"
 require "reins/routing"
 require "reins/util"
+require "reins/dependencies"
 
 module Reins
   class Application
