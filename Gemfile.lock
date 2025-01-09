@@ -1,12 +1,14 @@
 PATH
   remote: .
   specs:
-    reins (0.0.1)
+    reins (0.0.3)
+      erubis
       rack
 
 GEM
   remote: https://rubygems.org/
   specs:
+    erubis (2.7.0)
     minitest (5.25.4)
     rack (3.1.8)
     rack-test (2.2.0)

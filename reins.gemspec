@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rack"
+  spec.add_dependency "erubis"
   spec.add_development_dependency "rack-test"
   spec.add_development_dependency "minitest"
 

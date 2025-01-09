@@ -5,8 +5,13 @@ require "reins/array"
 require "reins/routing"
 require "reins/util"
 require "reins/dependencies"
+require "reins/controller"
 
 module Reins
+  def self.framework_root
+    __dir__
+  end
+
   class Application
     def call(env)
       # `echo debug > debug.txt`;
@@ -29,16 +34,6 @@ module Reins
       end
       [200, {'content-type' => 'text/html'},
         [text]]
-    end
-  end
-
-  class Controller
-    def initialize(env)
-      @env = env
-    end
-  
-    def env
-      @env
     end
   end
 end
