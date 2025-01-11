@@ -1,7 +1,10 @@
 require 'erubis'
+require "reins/file_model"
 
 module Reins
   class Controller
+    include Reins::Model
+
     def initialize(env)
       @env = env
     end
@@ -19,6 +22,7 @@ module Reins
     def render(view_name, locals = {})
       filename = File.join "app", "views",
         controller_name, "#{view_name}.html.erb"
+      # TODO: Add instance variables to template
       template = File.read filename
       eruby = Erubis::Eruby.new(template)
       eruby.result locals.merge(:env => env)

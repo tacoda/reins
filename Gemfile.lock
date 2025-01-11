@@ -3,6 +3,7 @@ PATH
   specs:
     reins (0.0.3)
       erubis
+      multi_json
       rack
 
 GEM
@@ -10,6 +11,7 @@ GEM
   specs:
     erubis (2.7.0)
     minitest (5.25.4)
+    multi_json (1.15.0)
     rack (3.1.8)
     rack-test (2.2.0)
       rack (>= 1.3)
