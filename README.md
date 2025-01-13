@@ -26,9 +26,12 @@ mkdir config
 mkdir app
 touch Gemfile
 echo "source 'https://rubygems.org'" > Gemfile
-echo "gem \"reins\'" >> Gemfile
+echo "gem \"reins\"" >> Gemfile
 bundle install
+
 rackup -p 3001
+
+bundle exec rerun -- rackup -p 3001
 ```
 
 ## Development
@@ -48,3 +51,7 @@ Useful resources to make the framework more robust:
 - [Rack Spec](https://github.com/rack/rack/blob/main/SPEC.rdoc)
 - [Rails on Rack](https://guides.rubyonrails.org/rails_on_rack.html)
 - [ActiveModel: Make Any Ruby Object Feel Like ActiveRecord](https://yehudakatz.com/2010/01/10/activemodel-make-any-ruby-object-feel-like-activerecord/)
+
+## TODO
+
+- Find examples in Rails and add them to this repository for extra functionality

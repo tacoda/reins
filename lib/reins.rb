@@ -27,14 +27,23 @@ module Reins
 
       klass, act = get_controller_and_action(env)
       controller = klass.new(env)
-      begin
-        text = controller.send(act)
-      rescue
-        return [500, {'content-type' => 'text/html'},
-          ['Server Error']]
+      text = controller.send(act)
+      r = controller.get_response
+      if r
+        [r.status, r.headers, [r.body].flatten]
+      else
+        controller.render(act)
+        r = controller.get_response
+        [r.status, r.headers, [r.body].flatten]
       end
-      [200, {'content-type' => 'text/html'},
-        [text]]
+      # begin
+      #   text = controller.send(act)
+      # rescue
+      #   return [500, {'content-type' => 'text/html'},
+      #     ['Server Error']]
+      # end
+      # [200, {'content-type' => 'text/html'},
+      #   [text]]
     end
   end
 end
