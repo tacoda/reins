@@ -7,6 +7,7 @@ require "reins/util"
 require "reins/dependencies"
 require "reins/controller"
 require "reins/file_model"
+require "reins/sqlite_model"
 
 module Reins
   def self.framework_root
