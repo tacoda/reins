@@ -18,21 +18,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-```sh
-mkdir $APP_NAME
-cd $APP_NAME
-git init
-mkdir config
-mkdir app
-touch Gemfile
-echo "source 'https://rubygems.org'" > Gemfile
-echo "gem \"reins\"" >> Gemfile
-bundle install
-
-rackup -p 3001
-
-bundle exec rerun -- rackup -p 3001
-```
+For example usage, see [Best Quotes](https://github.com/tacoda/best_quotes)
 
 ## Development
 
