@@ -100,6 +100,10 @@ SQL
         end
         @schema
       end
+
+      def method_missing(name)
+        self[name]
+      end
     end
   end
 end

@@ -41,3 +41,4 @@ Useful resources to make the framework more robust:
 ## TODO
 
 - Find examples in Rails and add them to this repository for extra functionality
+- Add before_save and after_initialize callbacks
