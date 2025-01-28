@@ -26,17 +26,20 @@ module Reins
           ["root"]]
       end
 
-      klass, act = get_controller_and_action(env)
-      controller = klass.new(env)
-      text = controller.send(act)
-      r = controller.get_response
-      if r
-        [r.status, r.headers, [r.body].flatten]
-      else
-        controller.render(act)
-        r = controller.get_response
-        [r.status, r.headers, [r.body].flatten]
-      end
+      rack_app = get_rack_app(env)
+      rack_app.call(env)
+
+      # klass, act = get_controller_and_action(env)
+      # controller = klass.new(env)
+      # text = controller.send(act)
+      # r = controller.get_response
+      # if r
+      #   [r.status, r.headers, [r.body].flatten]
+      # else
+      #   controller.render(act)
+      #   r = controller.get_response
+      #   [r.status, r.headers, [r.body].flatten]
+      # end
       # begin
       #   text = controller.send(act)
       # rescue
@@ -48,4 +51,3 @@ module Reins
     end
   end
 end
-
