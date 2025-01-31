@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "reins/cli"
 require "reins/version"
 require "reins/array"
 require "reins/routing"
@@ -26,9 +27,13 @@ module Reins
           ["root"]]
       end
 
-      rack_app = get_rack_app(env)
-      rack_app.call(env)
-
+      begin
+        rack_app = get_rack_app(env)
+        rack_app.call(env)
+      rescue
+        return [500, {'content-type' => 'text/html'},
+            [File.read('public/500.html')]]
+      end
       # klass, act = get_controller_and_action(env)
       # controller = klass.new(env)
       # text = controller.send(act)
