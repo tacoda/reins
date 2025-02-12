@@ -1,6 +1,6 @@
 require 'rack'
-require 'erubis'
 require "reins/file_model"
+require "reins/view"
 
 module Reins
   class Controller
@@ -55,16 +55,27 @@ module Reins
       Reins.to_underscore klass
     end
 
+    def instance_hash
+      h = {}
+      instance_variables.each do |i|
+        h[i] = instance_variable_get i
+      end
+      h
+    end
+
     def render(view_name, locals = {})
       filename = File.join "app", "views",
         controller_name, "#{view_name}.html.erb"
       template = File.read filename
-      instance_vars = instance_variables.each_with_object({}) do |var, hash|
-        hash[var.to_s.delete("@").to_sym] = instance_variable_get(var)
-      end
-      eruby = Erubis::Eruby.new(template)
-      result = eruby.result locals.merge(instance_vars) # locals.merge(:env => env)
-      response(result)
+      v = View.new
+      v.set_vars instance_hash
+      v.evaluate template
+      # instance_vars = instance_variables.each_with_object({}) do |var, hash|
+      #   hash[var.to_s.delete("@").to_sym] = instance_variable_get(var)
+      # end
+      # eruby = Erubis::Eruby.new(template)
+      # result = eruby.result locals.merge(instance_vars) # locals.merge(:env => env)
+      # response(result)
     end
   end
 end
