@@ -22,11 +22,6 @@ module Reins
         return [404, {'content-type' => 'text/html'}, []]
       end
 
-      if env['PATH_INFO'] == '/'
-        return [200, {'content-type' => 'text/html'},
-          ["root"]]
-      end
-
       begin
         rack_app = get_rack_app(env)
         rack_app.call(env)
