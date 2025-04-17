@@ -3,17 +3,17 @@
 require_relative "lib/reins/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "reins"
+  spec.name = "reins-web"
   spec.version = Reins::VERSION
   spec.authors = ["Ian Johnson"]
   spec.email = ["tacoda@hey.com"]
 
   spec.summary = "A Rack-based Web Framework"
   spec.description = "A Rack-based Web Framework, but with extra awesome."
-  spec.homepage = "https://github.com/tacoda/reins"
+  spec.homepage = "https://www.tacoda.dev/reins/"
   spec.required_ruby_version = ">= 2.6.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
+  # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/tacoda/reins"
