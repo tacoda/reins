@@ -34,6 +34,10 @@ Style/MissingRespondToMissing:
   Enabled: false
 Naming/PredicateMethod:
   Enabled: false
+# has_many / has_one are Rails-shaped DSL keywords, not predicates.
+Naming/PredicatePrefix:
+  Exclude:
+    - "lib/reins/model/associations.rb"
 
 # Legacy proof-of-concept files. Each is scheduled for a rewrite in a later
 # milestone (cli/dependencies). Excluding them from style cops keeps the

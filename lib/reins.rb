@@ -13,7 +13,7 @@ require "reins/routes/rule"
 require "reins/routes/resources"
 require "reins/routes/dsl"
 require "reins/database"
-require "reins/sqlite_model"
+require "reins/model/base"
 require "reins/controller"
 require "reins/view"
 

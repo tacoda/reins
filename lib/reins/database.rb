@@ -12,7 +12,11 @@ module Reins
       end
 
       def connection
-        @connection ||= SQLite3::Database.new(path)
+        @connection ||= begin
+          db = SQLite3::Database.new(path)
+          db.results_as_hash = true
+          db
+        end
       end
 
       def reset!
