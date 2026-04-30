@@ -32,10 +32,10 @@ module Reins
       Reins::Application.instances << self
     end
 
-    def route(&block)
+    def route(&)
       @routes ||= Reins::Routes::DSL.new
       Reins::Routes::UrlHelpers.reset!
-      @routes.instance_eval(&block)
+      @routes.instance_eval(&)
     end
 
     def call(env)

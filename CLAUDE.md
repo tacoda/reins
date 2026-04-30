@@ -6,7 +6,7 @@ Guidance for Claude Code when working in **Reins**.
 
 A Rack-based Ruby web framework, built as an exercise to rebuild Rails from scratch. Currently a proof-of-concept — request lifecycle, routing, controllers, ERB views, and a SQLite model — being grown to v1.0 with full Rails-core features (resourceful routing, validations/associations, migrations, layouts and partials, generators, middleware stack, environments).
 
-**Tech Stack:** Ruby (>= 3.0), Rack, Erubis, SQLite3, Thor, Puma, RSpec
+**Tech Stack:** Ruby (>= 3.3), Rack, Erubis, SQLite3, Thor, Puma, RSpec
 
 **Main branch:** `main`
 **Task tracker:** none

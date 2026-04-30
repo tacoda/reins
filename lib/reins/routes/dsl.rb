@@ -11,18 +11,18 @@ module Reins
         @rules = []
       end
 
-      def get(path, dest = nil, **opts) = add(:get, path, dest, **opts)
-      def post(path, dest = nil, **opts) = add(:post, path, dest, **opts)
-      def put(path, dest = nil, **opts) = add(:put, path, dest, **opts)
-      def patch(path, dest = nil, **opts) = add(:patch, path, dest, **opts)
-      def delete(path, dest = nil, **opts) = add(:delete, path, dest, **opts)
+      def get(path, dest = nil, **) = add(:get, path, dest, **)
+      def post(path, dest = nil, **) = add(:post, path, dest, **)
+      def put(path, dest = nil, **) = add(:put, path, dest, **)
+      def patch(path, dest = nil, **) = add(:patch, path, dest, **)
+      def delete(path, dest = nil, **) = add(:delete, path, dest, **)
 
-      def root(dest, **opts)
-        get("/", dest, **opts, as: :root)
+      def root(dest, **)
+        get("/", dest, **, as: :root)
       end
 
-      def match(path, dest = nil, **opts)
-        add(:all, path, dest, **opts)
+      def match(path, dest = nil, **)
+        add(:all, path, dest, **)
       end
 
       def resources(name)

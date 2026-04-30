@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "A Rack-based Web Framework"
   spec.description = "A Rack-based Web Framework, but with extra awesome."
   spec.homepage = "https://www.tacoda.dev/reins/"
-  spec.required_ruby_version = ">= 3.0.0"
+  spec.required_ruby_version = ">= 3.3.0"
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
