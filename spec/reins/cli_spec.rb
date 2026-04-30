@@ -156,6 +156,8 @@ RSpec.describe Reins::Cli do
           File.write("config/database.yml", <<~YAML)
             development:
               database: db/dev.sqlite3
+            test:
+              database: db/dev.sqlite3
           YAML
           example.run
         ensure

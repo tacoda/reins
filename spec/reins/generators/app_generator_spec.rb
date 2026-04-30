@@ -67,4 +67,17 @@ RSpec.describe "Reins::Cli#new (app generator)" do
       expect(app.routes.rules).not_to be_empty
     end
   end
+
+  it "writes meaningful environment files (not just placeholder comments)" do
+    %w[development test production].each do |env|
+      content = File.read("myapp/config/environments/#{env}.rb")
+      expect(content).to include("Reins.configure"), "env file #{env}.rb has no Reins.configure call"
+    end
+  end
+
+  it "writes the standard error pages under public/" do
+    %w[404 422 500].each do |status|
+      expect(File.exist?("myapp/public/#{status}.html")).to be(true), "missing public/#{status}.html"
+    end
+  end
 end

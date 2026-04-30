@@ -40,16 +40,18 @@ module Reins
           "config/application.rb" => config_application,
           "config/database.yml" => config_database,
           "config/routes.rb" => config_routes,
-          "config/environments/development.rb" => env_placeholder("development"),
-          "config/environments/test.rb" => env_placeholder("test"),
-          "config/environments/production.rb" => env_placeholder("production"),
+          "config/environments/development.rb" => env_development,
+          "config/environments/test.rb" => env_test,
+          "config/environments/production.rb" => env_production,
           "app/controllers/application_controller.rb" => application_controller,
           "app/controllers/welcome_controller.rb" => welcome_controller,
           "app/models/application_record.rb" => application_record,
           "app/views/layouts/application.html.erb" => layout_view,
           "app/views/welcome/index.html.erb" => welcome_view,
           "db/migrate/.keep" => "",
-          "public/500.html" => five_hundred_page,
+          "public/404.html" => error_page("404"),
+          "public/422.html" => error_page("422"),
+          "public/500.html" => error_page("500"),
           "spec/spec_helper.rb" => spec_helper,
           "tmp/.keep" => ""
         }
@@ -180,10 +182,34 @@ module Reins
         RUBY
       end
 
-      def env_placeholder(env)
+      def env_development
         <<~RUBY
-          # Configuration for the #{env} environment.
-          # Populated by M7 (middleware, environments, autoloading).
+          Reins.configure do |config|
+            config.eager_load = false
+            config.reload_classes = true
+            config.log_level = :debug
+          end
+        RUBY
+      end
+
+      def env_test
+        <<~RUBY
+          Reins.configure do |config|
+            config.eager_load = false
+            config.reload_classes = false
+            config.log_level = :warn
+          end
+        RUBY
+      end
+
+      def env_production
+        <<~RUBY
+          Reins.configure do |config|
+            config.eager_load = true
+            config.reload_classes = false
+            config.log_level = :info
+            config.middleware.use Rack::Deflater
+          end
         RUBY
       end
 
@@ -231,9 +257,9 @@ module Reins
         ERB
       end
 
-      def five_hundred_page
-        path = File.expand_path("../../assets/500.html", __dir__)
-        File.exist?(path) ? File.read(path) : "<h1>Server error</h1>"
+      def error_page(status)
+        path = File.expand_path("../../assets/#{status}.html", __dir__)
+        File.exist?(path) ? File.read(path) : "<h1>HTTP #{status}</h1>"
       end
 
       def spec_helper

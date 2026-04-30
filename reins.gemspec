@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rerun"
   spec.add_dependency "sqlite3"
   spec.add_dependency "thor"
+  spec.add_dependency "zeitwerk"
 
   spec.add_development_dependency "cgi"
   spec.add_development_dependency "rack-test"
