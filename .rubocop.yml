@@ -36,17 +36,13 @@ Naming/PredicateMethod:
   Enabled: false
 
 # Legacy proof-of-concept files. Each is scheduled for a rewrite in a later
-# milestone (cli/controller/dependencies). Excluding them from style cops
-# keeps the lint signal focused on new code; we'll drop these excludes as
-# each file is rewritten.
-# (routing.rb was rewritten in M1 and is now under full lint.)
+# milestone (cli/dependencies). Excluding them from style cops keeps the
+# lint signal focused on new code; we'll drop these excludes as each file
+# is rewritten.
+# (routing.rb was rewritten in M1; controller.rb in M2.)
 Naming/MethodParameterName:
   Exclude:
-    - "lib/reins/controller.rb"
     - "lib/reins/dependencies.rb"
-Naming/AccessorMethodName:
-  Exclude:
-    - "lib/reins/controller.rb"
 
 # Dev deps live in the gemspec by long-standing convention.
 Gemspec/DevelopmentDependencies:

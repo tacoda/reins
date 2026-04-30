@@ -14,9 +14,11 @@ module Reins
     end
     # rubocop:enable Naming/AccessorMethodName
 
-    def evaluate(template)
+    def evaluate(template, locals = {})
       eruby = Erubis::Eruby.new(template)
-      eval eruby.src # rubocop:disable Security/Eval
+      bind = binding
+      locals.each { |k, v| bind.local_variable_set(k, v) }
+      eval(eruby.src, bind) # rubocop:disable Security/Eval
     end
 
     def h(str)

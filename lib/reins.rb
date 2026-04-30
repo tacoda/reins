@@ -5,6 +5,9 @@ require "reins/version"
 require "reins/array"
 require "reins/util"
 require "reins/dependencies"
+require "reins/errors"
+require "reins/parameters"
+require "reins/flash"
 require "reins/routes/url_helpers"
 require "reins/routes/rule"
 require "reins/routes/resources"
@@ -41,13 +44,15 @@ module Reins
     def call(env)
       return [404, { 'content-type' => 'text/html' }, []] if env['PATH_INFO'] == '/favicon.ico'
 
-      begin
-        verb = env['REQUEST_METHOD'].downcase.to_sym
-        path = env['PATH_INFO']
-        result = @routes&.check(verb, path)
-        return not_found if result.nil?
+      verb = env['REQUEST_METHOD'].downcase.to_sym
+      path = env['PATH_INFO']
+      result = @routes&.check(verb, path)
+      return not_found if result.nil?
 
+      begin
         result.call(env)
+      rescue Reins::Error
+        raise
       rescue StandardError
         server_error
       end

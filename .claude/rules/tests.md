@@ -52,6 +52,14 @@ Structure every test with clear separation. One logical assertion per test.
 - Do not assert on exact error message strings — assert on status codes and structure
 - Do not use `sleep()` — use deterministic waits
 
+## Naming Test Fixtures
+
+Do **not** prefix test fixture classes (controllers, models) with milestone tags, ticket IDs, or topic codes — `M2RenderController`, `JIRA1234User`, etc. Names should describe the role of the fixture, not when it was added.
+
+**Why:** Prefixes leak ephemeral context into permanent code. `RenderingController` reads as "the controller that exercises rendering"; `M2RenderController` reads as "the M2 milestone left this here." The milestone is in `git log`, not the class name.
+
+**How to apply:** Use a semantic name. If two specs need the same name, namespace with a module (`module RenderingSpec; class HomeController; end; end`) instead of disambiguating with a prefix.
+
 ## Project-Specific Test Setup
 
 - RSpec 3.13 with `spec/spec_helper.rb`; `--require spec_helper` is set in `.rspec`.

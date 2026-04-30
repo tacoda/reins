@@ -36,6 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "listen"
   spec.add_dependency "puma"
   spec.add_dependency "rack"
+  spec.add_dependency "rack-session"
   spec.add_dependency "rerun"
   spec.add_dependency "sqlite3"
   spec.add_dependency "thor"
