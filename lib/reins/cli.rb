@@ -49,7 +49,95 @@ module Reins
       print_routes_table(app.routes.rules)
     end
 
+    desc "generate TYPE NAME [field:type ...]", "Generate scaffolding (currently: migration)"
+    def generate(type, name, *fields)
+      case type
+      when "migration"
+        generate_migration(name, fields)
+      else
+        warn "unknown generator: #{type}"
+        exit 1
+      end
+    end
+
+    map "db:create" => :db_create
+    desc "db:create", "Create the configured database"
+    def db_create
+      Reins::DatabaseConfig.load!
+      FileUtils.mkdir_p(File.dirname(Reins::Database.path))
+      Reins::Database.connection.execute("SELECT 1")
+      puts "Created #{Reins::Database.path}"
+    end
+
+    map "db:drop" => :db_drop
+    desc "db:drop", "Drop the configured database"
+    def db_drop
+      Reins::DatabaseConfig.load!
+      path = Reins::Database.path
+      Reins::Database.reset!
+      FileUtils.rm_f(path)
+      puts "Dropped #{path}"
+    end
+
+    map "db:migrate" => :db_migrate
+    desc "db:migrate", "Run pending migrations"
+    def db_migrate
+      Reins::DatabaseConfig.load!
+      Reins::Migrator.new.run
+    end
+
+    map "db:rollback" => :db_rollback
+    desc "db:rollback [STEPS]", "Roll back the last STEPS migrations (default 1)"
+    def db_rollback(steps = "1")
+      Reins::DatabaseConfig.load!
+      Reins::Migrator.new.rollback(Integer(steps))
+    end
+
+    map "db:schema:dump" => :db_schema_dump
+    desc "db:schema:dump", "Write db/schema.rb from current database state"
+    def db_schema_dump
+      Reins::DatabaseConfig.load!
+      Reins::Schema.dump
+      puts "Wrote db/schema.rb"
+    end
+
     private
+
+    def generate_migration(name, fields)
+      timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S")
+      snake = Reins.to_underscore(name)
+      file_path = "db/migrate/#{timestamp}_#{snake}.rb"
+      FileUtils.mkdir_p("db/migrate")
+      File.write(file_path, migration_template(name, fields))
+      puts "Created #{file_path}"
+    end
+
+    def migration_template(name, fields)
+      body = migration_body(name, fields)
+      <<~RUBY
+        class #{name} < Reins::Migration
+          def change
+        #{body}  end
+        end
+      RUBY
+    end
+
+    def migration_body(name, fields)
+      return "" if fields.empty?
+
+      table = inferred_table(name)
+      return "" unless table
+
+      fields.map do |field|
+        attr_name, attr_type = field.split(":", 2)
+        "    add_column :#{table}, :#{attr_name}, :#{attr_type}\n"
+      end.join
+    end
+
+    def inferred_table(name)
+      match = name.match(/\AAdd.+?To(.+)\z/) || name.match(/\ARemove.+?From(.+)\z/)
+      Reins.to_underscore(match[1]) if match
+    end
 
     def print_routes_table(rules)
       rows = build_rows(rules)

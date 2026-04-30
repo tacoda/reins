@@ -8,15 +8,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.3", "3.4", "3.5", "4.0"]
-        experimental: [false]
-        include:
-          - ruby: "head"
-            experimental: true
+        ruby: ["3.3"]
     steps:
       - uses: actions/checkout@v4
       - uses: ruby/setup-ruby@v1

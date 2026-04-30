@@ -116,4 +116,121 @@ RSpec.describe Reins::Cli do
       end
     end
   end
+
+  describe "generate migration" do
+    around do |example|
+      Dir.mktmpdir do |tmp|
+        Dir.chdir(tmp) do
+          FileUtils.mkdir_p("db/migrate")
+          example.run
+        end
+      end
+    end
+
+    it "writes a timestamped file with an empty change block" do
+      described_class.start(%w[generate migration AddX])
+      file = Dir["db/migrate/*.rb"].first
+      expect(file).to match(%r{db/migrate/\d{14}_add_x\.rb\z})
+      content = File.read(file)
+      expect(content).to include("class AddX < Reins::Migration")
+      expect(content).to include("def change")
+    end
+
+    it "scaffolds add_column calls when given field:type args" do
+      described_class.start(%w[generate migration AddTitleToPosts title:string published_at:datetime])
+      file = Dir["db/migrate/*.rb"].first
+      content = File.read(file)
+      aggregate_failures do
+        expect(content).to include("add_column :posts, :title, :string")
+        expect(content).to include("add_column :posts, :published_at, :datetime")
+      end
+    end
+  end
+
+  describe "db: commands" do
+    around do |example|
+      Dir.mktmpdir do |tmp|
+        Dir.chdir(tmp) do
+          FileUtils.mkdir_p("config")
+          FileUtils.mkdir_p("db/migrate")
+          File.write("config/database.yml", <<~YAML)
+            development:
+              database: db/dev.sqlite3
+          YAML
+          example.run
+        ensure
+          Reins::Database.reset!
+        end
+      end
+    end
+
+    it "db:create creates the database file" do
+      described_class.start(%w[db:create])
+      expect(File.exist?("db/dev.sqlite3")).to be(true)
+    end
+
+    it "db:drop deletes the database file" do
+      described_class.start(%w[db:create])
+      described_class.start(%w[db:drop])
+      expect(File.exist?("db/dev.sqlite3")).to be(false)
+    end
+
+    it "db:migrate runs pending migrations" do
+      File.write("db/migrate/20260101000000_create_posts.rb", <<~RUBY)
+        class CreatePosts < Reins::Migration
+          def change
+            create_table(:posts) { |t| t.string :title }
+          end
+        end
+      RUBY
+
+      described_class.start(%w[db:create])
+      described_class.start(%w[db:migrate])
+
+      Reins::Database.reset!
+      Reins::DatabaseConfig.load!
+      rows = Reins::Database.connection.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
+      )
+      expect(rows).not_to be_empty
+    end
+
+    it "db:rollback rolls back the most recent migration" do
+      File.write("db/migrate/20260101000000_create_posts.rb", <<~RUBY)
+        class CreatePosts < Reins::Migration
+          def change
+            create_table(:posts) { |t| t.string :title }
+          end
+        end
+      RUBY
+
+      described_class.start(%w[db:create])
+      described_class.start(%w[db:migrate])
+      described_class.start(%w[db:rollback])
+
+      Reins::Database.reset!
+      Reins::DatabaseConfig.load!
+      rows = Reins::Database.connection.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='posts'"
+      )
+      expect(rows).to be_empty
+    end
+
+    it "db:schema:dump writes db/schema.rb" do
+      File.write("db/migrate/20260101000000_create_posts.rb", <<~RUBY)
+        class CreatePosts < Reins::Migration
+          def change
+            create_table(:posts) { |t| t.string :title }
+          end
+        end
+      RUBY
+
+      described_class.start(%w[db:create])
+      described_class.start(%w[db:migrate])
+      described_class.start(%w[db:schema:dump])
+
+      expect(File.exist?("db/schema.rb")).to be(true)
+      expect(File.read("db/schema.rb")).to include("create_table")
+    end
+  end
 end

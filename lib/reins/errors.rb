@@ -4,6 +4,7 @@ module Reins
   class MissingTemplate < Error; end
   class ParameterMissing < Error; end
   class SessionMiddlewareMissing < Error; end
+  class IrreversibleMigration < Error; end
 
   module Model
     class RecordNotFound < Reins::Error; end
