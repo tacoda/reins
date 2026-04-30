@@ -19,6 +19,7 @@ require "reins/migrator"
 require "reins/schema"
 require "reins/model/base"
 require "reins/controller"
+require "reins/generators"
 require "reins/view"
 
 module Reins
@@ -38,7 +39,15 @@ module Reins
     def initialize
       Reins::Application.instances << self
     end
+  end
 
+  def self.application
+    raise "no Reins::Application has been constructed" if Application.instances.empty?
+
+    Application.instances.last
+  end
+
+  class Application
     def route(&)
       @routes ||= Reins::Routes::DSL.new
       Reins::Routes::UrlHelpers.reset!

@@ -5,9 +5,11 @@ require 'rack'
 
 module Reins
   class Cli < Thor
-    desc "new", "Create a new Reins project"
+    desc "new NAME", "Create a new Reins project at NAME"
     def new(name)
-      scaffold_project(name)
+      Reins::Generators::AppGenerator.new(name).run
+      puts "Created #{name}/"
+      puts "Now run: cd #{name} && bin/setup"
     end
 
     desc "server", "Run a local server"
@@ -49,15 +51,36 @@ module Reins
       print_routes_table(app.routes.rules)
     end
 
-    desc "generate TYPE NAME [field:type ...]", "Generate scaffolding (currently: migration)"
+    desc "generate TYPE NAME [field:type ...]", "Generate scaffolding (migration / controller / model / scaffold)"
     def generate(type, name, *fields)
       case type
       when "migration"
         generate_migration(name, fields)
+      when "controller"
+        Reins::Generators::ControllerGenerator.new(name, fields).run
+      when "model"
+        Reins::Generators::ModelGenerator.new(name, fields).run
+      when "scaffold"
+        Reins::Generators::ScaffoldGenerator.new(name, fields).run
       else
         warn "unknown generator: #{type}"
         exit 1
       end
+    end
+
+    desc "console", "Open IRB with the application loaded"
+    def console
+      unless File.exist?("config/application.rb")
+        warn "config/application.rb not found in #{Dir.pwd}"
+        exit 1
+      end
+
+      load "config/application.rb"
+      Reins::Application.subclasses.last&.new
+      load "config/routes.rb" if File.exist?("config/routes.rb")
+
+      require "irb"
+      IRB.start
     end
 
     map "db:create" => :db_create
@@ -163,17 +186,6 @@ module Reins
 
     def format_row(row, widths)
       row.each_with_index.map { |cell, i| cell.ljust(widths[i]) }.join("  ")
-    end
-
-    def scaffold_project(dir)
-      FileUtils.mkdir(dir)
-      FileUtils.mkdir("#{dir}/app")
-      FileUtils.mkdir("#{dir}/app/controllers")
-      FileUtils.mkdir("#{dir}/app/views")
-      FileUtils.mkdir("#{dir}/app/views/welcome")
-      FileUtils.mkdir("#{dir}/config")
-      FileUtils.mkdir("#{dir}/public")
-      FileUtils.cp("#{File.dirname(__FILE__)}/../../assets/500.html", "#{dir}/public/500.html")
     end
   end
 end

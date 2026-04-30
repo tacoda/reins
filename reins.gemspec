@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = %w[bin lib]
 
   spec.add_dependency "erubis"
+  spec.add_dependency "irb"
   spec.add_dependency "listen"
   spec.add_dependency "puma"
   spec.add_dependency "rack"

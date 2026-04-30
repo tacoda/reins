@@ -63,6 +63,10 @@ RSpec/LeakyConstantDeclaration:
   Enabled: false
 RSpec/InstanceVariable:
   Enabled: false
+# Generator specs need to clean up dynamically-created constants from
+# generated app files; remove_const is the right tool there.
+RSpec/RemoveConst:
+  Enabled: false
 # Behavioral specs that describe a feature spanning multiple classes use a
 # string subject. That is intentional.
 RSpec/DescribeClass:

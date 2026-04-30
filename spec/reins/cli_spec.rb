@@ -216,6 +216,19 @@ RSpec.describe Reins::Cli do
       expect(rows).to be_empty
     end
 
+    it "console loads config/application.rb and invokes IRB.start" do
+      require "irb"
+      Reins::Cli.start(%w[new myapp])
+      Dir.chdir("myapp") do
+        called = false
+        allow(IRB).to receive(:start) { called = true }
+        Reins::Cli.start(%w[console])
+        expect(called).to be(true)
+      end
+    ensure
+      Object.send(:remove_const, :Myapp) if Object.const_defined?(:Myapp)
+    end
+
     it "db:schema:dump writes db/schema.rb" do
       File.write("db/migrate/20260101000000_create_posts.rb", <<~RUBY)
         class CreatePosts < Reins::Migration

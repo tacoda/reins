@@ -32,4 +32,13 @@ RSpec.describe Reins::Application do
     instance = subclass.new
     expect(Reins::Application.instances).to include(instance)
   end
+
+  describe "Reins.application" do
+    it "returns the most recently constructed Reins::Application instance" do
+      first  = Reins::Application.new
+      second = Reins::Application.new
+      expect(Reins.application).to be(second)
+      expect(Reins.application).not_to be(first)
+    end
+  end
 end
