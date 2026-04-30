@@ -1,0 +1,86 @@
+plugins:
+  - rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 3.0
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - "bin/console"
+    - "bin/setup"
+    - "vendor/**/*"
+    - "tmp/**/*"
+
+# The framework is small and the proof-of-concept code is intentionally terse.
+# Re-enable individual cops as code matures past M0.
+Style/Documentation:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Metrics:
+  Enabled: false
+
+# Heredocs in sqlite_model.rb intentionally start at column 0 for readable SQL.
+# The whole ORM is rewritten in M4; revisit then.
+Layout/HeredocIndentation:
+  Enabled: false
+Layout/ClosingHeredocIndentation:
+  Enabled: false
+Style/HashConversion:
+  Enabled: false
+Style/MissingRespondToMissing:
+  Enabled: false
+Naming/PredicateMethod:
+  Enabled: false
+
+# Legacy proof-of-concept files. Each is scheduled for a rewrite in a later
+# milestone (cli/routing/controller/dependencies). Excluding them from style
+# cops keeps the lint signal focused on new code; we'll drop these excludes
+# as each file is rewritten.
+Style/RedundantInterpolation:
+  Exclude:
+    - "lib/reins/cli.rb"
+    - "lib/reins/routing.rb"
+Style/LineEndConcatenation:
+  Exclude:
+    - "lib/reins/routing.rb"
+Style/StringConcatenation:
+  Exclude:
+    - "lib/reins/cli.rb"
+Style/NumericPredicate:
+  Exclude:
+    - "lib/reins/routing.rb"
+Style/ZeroLengthPredicate:
+  Exclude:
+    - "lib/reins/routing.rb"
+Style/InverseMethods:
+  Exclude:
+    - "lib/reins/routing.rb"
+Style/SlicingWithRange:
+  Exclude:
+    - "lib/reins/routing.rb"
+Naming/MethodParameterName:
+  Exclude:
+    - "lib/reins/controller.rb"
+    - "lib/reins/dependencies.rb"
+Naming/AccessorMethodName:
+  Exclude:
+    - "lib/reins/controller.rb"
+
+# Dev deps live in the gemspec by long-standing convention.
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+# RSpec house style: keep specs flexible during M0–M3.
+RSpec/MultipleExpectations:
+  Enabled: false
+RSpec/ExampleLength:
+  Enabled: false
+RSpec/DescribedClass:
+  Enabled: false
+RSpec/LeakyConstantDeclaration:
+  Enabled: false
+RSpec/InstanceVariable:
+  Enabled: false

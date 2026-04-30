@@ -1,11 +1,8 @@
 require 'rack'
-require "reins/file_model"
 require "reins/view"
 
 module Reins
   class Controller
-    include Reins::Model
-
     def initialize(env)
       @env = env
       @routing_params = {}
@@ -13,23 +10,21 @@ module Reins
 
     def dispatch(action, routing_params = {})
       @routing_params = routing_params
-      text = self.send(action)
+      text = send(action)
       r = get_response
       if r
         [r.status, r.headers, [r.body].flatten]
       else
-        [200, {'content-type' => 'text/html'},
-          [text].flatten]
+        [200, { 'content-type' => 'text/html' },
+         [text].flatten]
       end
     end
 
     def self.action(act, rp = {})
-      proc { |e| self.new(e).dispatch(act, rp) }
+      proc { |e| new(e).dispatch(act, rp) }
     end
 
-    def env
-      @env
-    end
+    attr_reader :env
 
     def request
       @request ||= Rack::Request.new(@env)
@@ -41,6 +36,7 @@ module Reins
 
     def response(text, status = 200, headers = {})
       raise "Already responded!" if @response
+
       a = [text].flatten
       @response = Rack::Response.new(a, status, headers)
     end
@@ -63,9 +59,9 @@ module Reins
       h
     end
 
-    def render(view_name, locals = {})
+    def render(view_name, _locals = {})
       filename = File.join "app", "views",
-        controller_name, "#{view_name}.html.erb"
+                           controller_name, "#{view_name}.html.erb"
       template = File.read filename
       v = View.new
       v.set_vars instance_hash

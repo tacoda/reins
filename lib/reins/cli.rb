@@ -40,7 +40,7 @@ module Reins
       FileUtils.mkdir(dir + "/app/views/welcome")
       FileUtils.mkdir(dir + "/config")
       FileUtils.mkdir(dir + "/public")
-      FileUtils.cp(File.dirname(__FILE__) + "/../../assets/500.html", "testdir/public/500.html")
+      FileUtils.cp(File.dirname(__FILE__) + "/../../assets/500.html", "#{dir}/public/500.html")
     end
   end
 end

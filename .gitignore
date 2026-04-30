@@ -8,3 +8,6 @@
 /tmp/
 reins-*.gem
 debug.txt
+test.db
+*.sqlite3
+.test-output/

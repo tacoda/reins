@@ -11,13 +11,14 @@ Gem::Specification.new do |spec|
   spec.summary = "A Rack-based Web Framework"
   spec.description = "A Rack-based Web Framework, but with extra awesome."
   spec.homepage = "https://www.tacoda.dev/reins/"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 3.0.0"
 
   # spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/tacoda/reins"
   spec.metadata["changelog_uri"] = "https://github.com/tacoda/reins"
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -28,20 +29,22 @@ Gem::Specification.new do |spec|
   # end
   spec.files = Dir["{bin,lib}/**/*"] # + %w(LICENSE README.md)
   spec.bindir = "bin"
-  spec.executables = [ 'reins' ]
-  spec.require_paths = ["bin", "lib"]
+  spec.executables = ['reins']
+  spec.require_paths = %w[bin lib]
 
-  spec.add_dependency "rack"
   spec.add_dependency "erubis"
-  spec.add_dependency "multi_json"
+  spec.add_dependency "listen"
+  spec.add_dependency "puma"
+  spec.add_dependency "rack"
+  spec.add_dependency "rerun"
   spec.add_dependency "sqlite3"
   spec.add_dependency "thor"
-  spec.add_dependency "puma"
-  spec.add_dependency "rerun"
-  spec.add_dependency "listen"
 
+  spec.add_development_dependency "cgi"
   spec.add_development_dependency "rack-test"
-  spec.add_development_dependency "minitest"
+  spec.add_development_dependency "rspec", "~> 3.13"
+  spec.add_development_dependency "rubocop", "~> 1.79"
+  spec.add_development_dependency "rubocop-rspec", "~> 3.7"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

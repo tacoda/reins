@@ -1,44 +1,83 @@
-# 🏇 Reins
+# Reins
 
-A Rack-based web framework with extra awesome! Reins is an exercise to understand Rails better by rebuilding it from scratch.
+A Rack-based Ruby web framework. Reins is a learning exercise: rebuild Rails from scratch, one feature at a time.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/reins`. To experiment with that code, run `bin/console` for an interactive prompt.
+> **Status:** pre-1.0. The proof-of-concept request lifecycle works. Rails-core features (resourceful routing, validations, associations, migrations, generators, middleware) are landing milestone by milestone toward 1.0. See [Roadmap](#roadmap).
 
-## Installation
+## Install
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+The gem is published as `reins-web` (the name `reins` was already taken on RubyGems).
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+# Gemfile
+gem "reins-web"
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+```sh
+bundle install
+```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+## A minimal app
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+# config.ru
+require "reins"
 
-## Usage
+class GreetController < Reins::Controller
+  def index
+    response("Hello, world!")
+  end
+end
 
-For example usage, see [Best Quotes](https://github.com/tacoda/best_quotes)
+app = Reins::Application.new
+app.route do
+  match "", "greet#index"
+end
+run app
+```
+
+```sh
+bundle exec reins server   # boots Puma on http://localhost:8000
+```
+
+## CLI
+
+```
+reins new <name>     # scaffold a project (work-in-progress; full generators land in M6)
+reins server         # run the app under Puma on port 8000
+```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+```sh
+bundle install
+bundle exec rspec        # run the test suite
+bundle exec rubocop      # lint
+bundle exec rake build   # build the gem
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+The agent harness for this repository (CLAUDE.md, `.claude/`) is scaffolded with [sellier](https://github.com/tacoda/sellier).
 
-## Contributing
+## Roadmap
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/tacoda/reins.
+| Milestone | Theme |
+|---|---|
+| M0 | Tidying — RSpec, harness, bug fixes |
+| M1 | Routing v2 — HTTP verbs, resources, named routes |
+| M2 | Controllers v2 — filters, redirects, strong params, JSON |
+| M3 | Views v2 — layouts, partials, helpers, auto-escape |
+| M4 | Model v2 — validations, associations, query interface |
+| M5 | Migrations and database tooling |
+| M6 | Generators and application skeleton |
+| M7 | Middleware, environments, Zeitwerk-style autoloading |
+| M8 | Testing framework for Reins apps |
+| M9 | 1.0 release |
 
 ## Resources
 
-Useful resources to make the framework more robust:
-
-- [Rack Spec](https://github.com/rack/rack/blob/main/SPEC.rdoc)
+- [Rack SPEC](https://github.com/rack/rack/blob/main/SPEC.rdoc)
 - [Rails on Rack](https://guides.rubyonrails.org/rails_on_rack.html)
-- [ActiveModel: Make Any Ruby Object Feel Like ActiveRecord](https://yehudakatz.com/2010/01/10/activemodel-make-any-ruby-object-feel-like-activerecord/)
 
-## TODO
+## License
 
-- Find examples in Rails and add them to this repository for extra functionality
-- Add before_save and after_initialize callbacks
+MIT.

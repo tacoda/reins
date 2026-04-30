@@ -6,9 +6,9 @@ require "reins/array"
 require "reins/routing"
 require "reins/util"
 require "reins/dependencies"
-require "reins/controller"
-require "reins/file_model"
+require "reins/database"
 require "reins/sqlite_model"
+require "reins/controller"
 
 module Reins
   def self.framework_root
@@ -18,16 +18,14 @@ module Reins
   class Application
     def call(env)
       # `echo debug > debug.txt`;
-      if env['PATH_INFO'] == '/favicon.ico'
-        return [404, {'content-type' => 'text/html'}, []]
-      end
+      return [404, { 'content-type' => 'text/html' }, []] if env['PATH_INFO'] == '/favicon.ico'
 
       begin
         rack_app = get_rack_app(env)
         rack_app.call(env)
-      rescue
-        return [500, {'content-type' => 'text/html'},
-            [File.read('public/500.html')]]
+      rescue StandardError
+        [500, { 'content-type' => 'text/html' },
+         [File.read('public/500.html')]]
       end
       # klass, act = get_controller_and_action(env)
       # controller = klass.new(env)
