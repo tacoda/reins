@@ -36,31 +36,10 @@ Naming/PredicateMethod:
   Enabled: false
 
 # Legacy proof-of-concept files. Each is scheduled for a rewrite in a later
-# milestone (cli/routing/controller/dependencies). Excluding them from style
-# cops keeps the lint signal focused on new code; we'll drop these excludes
-# as each file is rewritten.
-Style/RedundantInterpolation:
-  Exclude:
-    - "lib/reins/cli.rb"
-    - "lib/reins/routing.rb"
-Style/LineEndConcatenation:
-  Exclude:
-    - "lib/reins/routing.rb"
-Style/StringConcatenation:
-  Exclude:
-    - "lib/reins/cli.rb"
-Style/NumericPredicate:
-  Exclude:
-    - "lib/reins/routing.rb"
-Style/ZeroLengthPredicate:
-  Exclude:
-    - "lib/reins/routing.rb"
-Style/InverseMethods:
-  Exclude:
-    - "lib/reins/routing.rb"
-Style/SlicingWithRange:
-  Exclude:
-    - "lib/reins/routing.rb"
+# milestone (cli/controller/dependencies). Excluding them from style cops
+# keeps the lint signal focused on new code; we'll drop these excludes as
+# each file is rewritten.
+# (routing.rb was rewritten in M1 and is now under full lint.)
 Naming/MethodParameterName:
   Exclude:
     - "lib/reins/controller.rb"
@@ -83,4 +62,8 @@ RSpec/DescribedClass:
 RSpec/LeakyConstantDeclaration:
   Enabled: false
 RSpec/InstanceVariable:
+  Enabled: false
+# Behavioral specs that describe a feature spanning multiple classes use a
+# string subject. That is intentional.
+RSpec/DescribeClass:
   Enabled: false

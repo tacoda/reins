@@ -18,6 +18,7 @@ GEM
     diff-lcs (1.6.2)
     erubis (2.7.0)
     ffi (1.17.4-arm64-darwin)
+    ffi (1.17.4-x86_64-linux-gnu)
     json (2.19.4)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -78,6 +79,7 @@ GEM
       rubocop (~> 1.81)
     ruby-progressbar (1.13.0)
     sqlite3 (2.9.3-arm64-darwin)
+    sqlite3 (2.9.3-x86_64-linux-gnu)
     thor (1.5.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
@@ -86,6 +88,7 @@ GEM
 PLATFORMS
   arm64-darwin-24
   arm64-darwin-25
+  x86_64-linux
 
 DEPENDENCIES
   cgi

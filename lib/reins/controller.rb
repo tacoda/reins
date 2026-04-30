@@ -1,8 +1,11 @@
 require 'rack'
 require "reins/view"
+require "reins/routes/url_helpers"
 
 module Reins
   class Controller
+    include Reins::Routes::UrlHelpers
+
     def initialize(env)
       @env = env
       @routing_params = {}

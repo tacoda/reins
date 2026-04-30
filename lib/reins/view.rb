@@ -1,8 +1,11 @@
 require "erubis"
 require "cgi"
+require "reins/routes/url_helpers"
 
 module Reins
   class View
+    include Reins::Routes::UrlHelpers
+
     # rubocop:disable Naming/AccessorMethodName
     def set_vars(instance_vars)
       instance_vars.each do |name, value|

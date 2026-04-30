@@ -26,4 +26,10 @@ RSpec.describe Reins::Application do
     get "/greet"
     expect(last_response.body).to include("Hello")
   end
+
+  it "registers subclass instances in Reins::Application.instances" do
+    subclass = Class.new(Reins::Application)
+    instance = subclass.new
+    expect(Reins::Application.instances).to include(instance)
+  end
 end

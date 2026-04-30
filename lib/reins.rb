@@ -3,12 +3,16 @@
 require "reins/cli"
 require "reins/version"
 require "reins/array"
-require "reins/routing"
 require "reins/util"
 require "reins/dependencies"
+require "reins/routes/url_helpers"
+require "reins/routes/rule"
+require "reins/routes/resources"
+require "reins/routes/dsl"
 require "reins/database"
 require "reins/sqlite_model"
 require "reins/controller"
+require "reins/view"
 
 module Reins
   def self.framework_root
@@ -16,36 +20,48 @@ module Reins
   end
 
   class Application
+    @instances = []
+
+    class << self
+      attr_reader :instances
+    end
+
+    attr_reader :routes
+
+    def initialize
+      Reins::Application.instances << self
+    end
+
+    def route(&block)
+      @routes ||= Reins::Routes::DSL.new
+      Reins::Routes::UrlHelpers.reset!
+      @routes.instance_eval(&block)
+    end
+
     def call(env)
-      # `echo debug > debug.txt`;
       return [404, { 'content-type' => 'text/html' }, []] if env['PATH_INFO'] == '/favicon.ico'
 
       begin
-        rack_app = get_rack_app(env)
-        rack_app.call(env)
+        verb = env['REQUEST_METHOD'].downcase.to_sym
+        path = env['PATH_INFO']
+        result = @routes&.check(verb, path)
+        return not_found if result.nil?
+
+        result.call(env)
       rescue StandardError
-        [500, { 'content-type' => 'text/html' },
-         [File.read('public/500.html')]]
+        server_error
       end
-      # klass, act = get_controller_and_action(env)
-      # controller = klass.new(env)
-      # text = controller.send(act)
-      # r = controller.get_response
-      # if r
-      #   [r.status, r.headers, [r.body].flatten]
-      # else
-      #   controller.render(act)
-      #   r = controller.get_response
-      #   [r.status, r.headers, [r.body].flatten]
-      # end
-      # begin
-      #   text = controller.send(act)
-      # rescue
-      #   return [500, {'content-type' => 'text/html'},
-      #     ['Server Error']]
-      # end
-      # [200, {'content-type' => 'text/html'},
-      #   [text]]
+    end
+
+    private
+
+    def not_found
+      [404, { 'content-type' => 'text/html' }, ['Not Found']]
+    end
+
+    def server_error
+      body = File.exist?('public/500.html') ? File.read('public/500.html') : 'Server Error'
+      [500, { 'content-type' => 'text/html' }, [body]]
     end
   end
 end
