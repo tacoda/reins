@@ -9,6 +9,8 @@ require "reins/routes/url_helpers"
 module Reins
   class Controller
     include Reins::Routes::UrlHelpers
+    include Reins::View::Helpers
+    include Reins::View::Forms
 
     class << self
       def before_action(name, only: nil, except: nil)
@@ -21,6 +23,23 @@ module Reins
 
       def around_action(name, only: nil, except: nil)
         own_filters[:around] << build_filter(name, only, except)
+      end
+
+      def layout(name, only: nil, except: nil)
+        own_layouts << { name: name, only: array_or_nil(only), except: array_or_nil(except) }
+      end
+
+      def layout_for(action)
+        controller_ancestors.each do |a|
+          a.own_layouts.each do |entry|
+            return entry[:name] if filter_applies?(entry, action)
+          end
+        end
+        :default
+      end
+
+      def own_layouts
+        @own_layouts ||= []
       end
 
       def filters_for(kind, action)
@@ -119,10 +138,13 @@ module Reins
       @flash ||= Reins::Flash.new(session)
     end
 
-    def render(view = nil, plain: nil, html: nil, json: nil, template: nil, status: nil, locals: {})
+    def render(view = nil, plain: nil, html: nil, json: nil, template: nil, status: nil, locals: {},
+               layout: :inherit)
       ensure_no_response!
+      layout_choice = layout == :inherit ? self.class.layout_for(@action) : layout
       body, content_type = render_body_and_type(view, plain: plain, html: html, json: json,
-                                                      template: template, locals: locals)
+                                                      template: template, locals: locals,
+                                                      layout: layout_choice)
       build_response(status_code(status || 200), body, "content-type" => content_type)
     end
 
@@ -181,24 +203,20 @@ module Reins
       end
     end
 
-    def render_body_and_type(view, plain:, html:, json:, template:, locals:)
+    def render_body_and_type(view, plain:, html:, json:, template:, locals:, layout:)
       return [plain.to_s,         "text/plain"]       if plain
       return [html.to_s,          "text/html"]        if html
       return [JSON.dump(json),    "application/json"] if json
-      return [render_template(template, locals), "text/html"] if template
-      return [render_template("#{controller_name}/#{view}", locals), "text/html"] if view
+      return [render_template(template, locals, layout), "text/html"] if template
+      return [render_template("#{controller_name}/#{view}", locals, layout), "text/html"] if view
 
       raise ArgumentError, "render: nothing to render"
     end
 
-    def render_template(path, locals)
-      filename = File.join("app", "views", "#{path}.html.erb")
-      raise Reins::MissingTemplate, "missing template: #{filename}" unless File.exist?(filename)
-
-      template = File.read(filename)
+    def render_template(path, locals, layout)
       view = View.new
       view.set_vars(instance_hash)
-      view.evaluate(template, locals)
+      view.render_template(path, locals: locals, layout: layout)
     end
 
     def auto_render
