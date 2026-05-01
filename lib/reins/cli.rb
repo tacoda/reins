@@ -68,6 +68,11 @@ module Reins
       end
     end
 
+    desc "test [ARGS...]", "Run the test suite (shells out to `bundle exec rspec`)"
+    def test(*)
+      system("bundle", "exec", "rspec", *)
+    end
+
     desc "console", "Open IRB with the application loaded"
     def console
       unless File.exist?("config/application.rb")

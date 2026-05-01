@@ -11,6 +11,7 @@ module Reins
       def run
         write_model
         write_migration
+        write_spec
       end
 
       def model_class_name
@@ -49,6 +50,24 @@ module Reins
               create_table :#{table_name} do |t|
           #{column_lines.join("\n")}
               end
+            end
+          end
+        RUBY
+      end
+
+      def write_spec
+        path = "spec/models/#{model_file_basename}_spec.rb"
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, spec_content)
+      end
+
+      def spec_content
+        <<~RUBY
+          require "spec_helper"
+
+          RSpec.describe #{model_class_name}, type: :model do
+            it "is a Reins::Model::Base subclass" do
+              expect(#{model_class_name}.ancestors).to include(Reins::Model::Base)
             end
           end
         RUBY

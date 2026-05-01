@@ -11,6 +11,7 @@ module Reins
       def run
         write_controller
         @actions.each { |action| write_view(action) }
+        write_spec
       end
 
       private
@@ -46,6 +47,18 @@ module Reins
         path = "app/views/#{file_basename}/#{action}.html.erb"
         FileUtils.mkdir_p(File.dirname(path))
         File.write(path, "")
+      end
+
+      def write_spec
+        path = "spec/controllers/#{file_basename}_controller_spec.rb"
+        FileUtils.mkdir_p(File.dirname(path))
+        File.write(path, <<~RUBY)
+          require "spec_helper"
+
+          RSpec.describe #{controller_class}, type: :controller do
+            # Add specs for each action.
+          end
+        RUBY
       end
     end
   end

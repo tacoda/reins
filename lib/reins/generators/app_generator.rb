@@ -266,6 +266,7 @@ module Reins
         <<~RUBY
           ENV["REINS_ENV"] ||= "test"
           require_relative "../config/application"
+          require "reins/spec"
 
           RSpec.configure do |config|
             config.expect_with(:rspec) { |c| c.syntax = :expect }
