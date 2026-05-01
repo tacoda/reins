@@ -10,148 +10,218 @@
             referrerpolicy="no-referrer"
         />
         <style>
-            .guide h2 {
+            .prose h2 {
                 font-size: 1.875rem;
                 font-weight: 600;
                 color: #111827;
                 margin-top: 3rem;
                 margin-bottom: 1rem;
-                border-bottom: 1px solid #e5e7eb;
-                padding-bottom: 0.5rem;
+                letter-spacing: -0.025em;
             }
-            .guide h3 {
+            .prose h3 {
                 font-size: 1.25rem;
                 font-weight: 600;
                 color: #111827;
                 margin-top: 2rem;
                 margin-bottom: 0.75rem;
             }
-            .guide p {
+            .prose p {
                 color: #374151;
                 font-size: 1rem;
                 line-height: 1.75;
                 margin-bottom: 1rem;
             }
-            .guide ul {
+            .prose ul {
                 list-style: disc;
                 margin-left: 1.5rem;
                 margin-bottom: 1rem;
                 color: #374151;
                 line-height: 1.75;
             }
-            .guide ul li {
+            .prose ul li {
                 margin-bottom: 0.25rem;
             }
-            .guide a {
+            .prose a {
                 color: #4f46e5;
-                text-decoration: underline;
+                font-weight: 500;
             }
-            .guide a:hover {
+            .prose a:hover {
                 color: #6366f1;
             }
-            .guide code {
-                background-color: #f3f4f6;
+            .prose :not(pre) > code {
+                background-color: #e5e7eb;
                 color: #111827;
                 padding: 0.125rem 0.375rem;
                 border-radius: 0.25rem;
                 font-size: 0.875em;
                 font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             }
-            .guide pre {
+            .prose pre {
                 background-color: #111827;
                 color: #d1d5db;
                 border-radius: 0.5rem;
                 padding: 1rem;
                 overflow: auto;
-                margin: 1rem 0;
+                margin: 1.25rem 0;
                 font-size: 0.875rem;
                 line-height: 1.6;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
             }
-            .guide pre code {
+            .prose pre code {
                 background-color: transparent;
                 color: inherit;
                 padding: 0;
                 border-radius: 0;
                 font-size: inherit;
             }
-            .guide strong {
+            .prose strong {
                 color: #111827;
                 font-weight: 600;
             }
+            .dark-prose a {
+                color: #818cf8;
+                font-weight: 500;
+            }
+            .dark-prose a:hover {
+                color: #a5b4fc;
+            }
+            .dark-prose code {
+                background-color: #1f2937;
+                color: #e5e7eb;
+                padding: 0.125rem 0.375rem;
+                border-radius: 0.25rem;
+                font-size: 0.875em;
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            }
         </style>
     </head>
-    <body class="bg-white">
-        <!-- Header -->
-        <header class="bg-gray-900">
-            <nav
-                class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
-                aria-label="Global"
-            >
-                <div class="flex lg:flex-1">
-                    <a href="/reins/" class="-m-1.5 p-1.5 text-xl"> 🏇 </a>
-                </div>
-                <div class="flex lg:flex-1 justify-end">
-                    <a
-                        href="https://github.com/tacoda/reins"
-                        class="text-gray-400 hover:text-gray-300 flex items-center gap-2"
-                    >
-                        <span class="sr-only">GitHub</span>
-                        <svg
-                            class="w-6 h-6"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
+    <body>
+        <div class="bg-gray-900">
+            <!-- Header -->
+            <header class="absolute inset-x-0 top-0 z-50">
+                <nav
+                    class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
+                    aria-label="Global"
+                >
+                    <div class="flex lg:flex-1">
+                        <a href="/reins/" class="-m-1.5 p-1.5 text-xl"> 🏇 </a>
+                    </div>
+                    <div class="flex lg:flex-1 justify-end">
+                        <a
+                            href="https://github.com/tacoda/reins"
+                            class="text-gray-400 hover:text-gray-300 flex items-center gap-2"
                         >
-                            <path
-                                fill-rule="evenodd"
-                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </a>
+                            <span class="sr-only">GitHub</span>
+                            <svg
+                                class="w-6 h-6"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                        </a>
+                    </div>
+                </nav>
+            </header>
+
+            <main class="relative isolate">
+                <!-- Background -->
+                <div
+                    class="absolute inset-x-0 top-4 -z-10 flex transform-gpu justify-center overflow-hidden blur-3xl"
+                    aria-hidden="true"
+                >
+                    <div
+                        class="aspect-[1108/632] w-[69.25rem] flex-none bg-gradient-to-r from-[#80caff] to-[#4f46e5] opacity-25"
+                        style="
+                            clip-path: polygon(
+                                73.6% 51.7%,
+                                91.7% 11.8%,
+                                100% 46.4%,
+                                97.4% 82.2%,
+                                92.5% 84.9%,
+                                75.7% 64%,
+                                55.3% 47.5%,
+                                46.5% 49.4%,
+                                45% 62.9%,
+                                50.3% 87.2%,
+                                21.3% 64.1%,
+                                0.1% 100%,
+                                5.4% 51.1%,
+                                21.4% 63.9%,
+                                58.9% 0.2%,
+                                73.6% 51.7%
+                            );
+                        "
+                    ></div>
                 </div>
-            </nav>
-        </header>
 
-        <main class="mx-auto max-w-3xl px-6 py-12 lg:px-8 guide">
-            <p class="text-sm text-gray-500 mb-4">
-                <a href="/reins/">&larr; Back to home</a>
-            </p>
-            <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-gray-900 mb-6">
-                Getting Started with Reins
-            </h1>
-            <p class="text-lg text-gray-700">
-                This guide walks you through building a small blog from scratch
-                using Reins. By the end you'll have created posts, listed them,
-                validated them, and added comments &mdash; exercising every layer
-                of the framework.
-            </p>
-            <p>
-                If you've used Rails, the shape will feel familiar. The
-                differences are noted as we go.
-            </p>
+                <!-- Header section -->
+                <div class="px-6 pt-14 lg:px-8">
+                    <div class="mx-auto max-w-3xl pt-24 text-center sm:pt-40 pb-24">
+                        <p class="text-sm text-gray-400 mb-6">
+                            <a
+                                href="/reins/"
+                                class="hover:text-gray-300"
+                            >&larr; Back to home</a>
+                        </p>
+                        <h1
+                            class="text-5xl font-semibold tracking-tight text-white sm:text-6xl"
+                        >
+                            Getting Started with Reins
+                        </h1>
+                        <p
+                            class="mt-8 text-pretty text-lg font-medium text-gray-400 sm:text-xl/8"
+                        >
+                            Build a small blog from scratch &mdash; exercising
+                            every layer of the framework.
+                        </p>
+                    </div>
+                </div>
 
-            <h2>Prerequisites</h2>
-            <ul>
-                <li><strong>Ruby 3.3+</strong>. Check with <code>ruby -v</code>.</li>
-                <li><strong>Bundler</strong>. <code>gem install bundler</code> if needed.</li>
-                <li>
-                    The <code>reins</code> CLI, available once
-                    <code>reins-web</code> is installed:
-                </li>
-            </ul>
+                <!-- Guide section -->
+                <div class="bg-gray-100 px-4 py-16 sm:py-24">
+                    <article
+                        class="mx-auto max-w-3xl bg-white rounded-lg shadow-lg p-8 sm:p-12 prose"
+                    >
+                        <p>
+                            This guide walks you through building a small blog
+                            from scratch using Reins. By the end you'll have
+                            created posts, listed them, validated them, and
+                            added comments &mdash; exercising every layer of
+                            the framework.
+                        </p>
+                        <p>
+                            If you've used Rails, the shape will feel familiar.
+                            The differences are noted as we go.
+                        </p>
+
+                        <h2>Prerequisites</h2>
+                        <ul>
+                            <li><strong>Ruby 3.3+</strong>. Check with <code>ruby -v</code>.</li>
+                            <li><strong>Bundler</strong>. <code>gem install bundler</code> if needed.</li>
+                            <li>
+                                The <code>reins</code> CLI, available once
+                                <code>reins-web</code> is installed:
+                            </li>
+                        </ul>
 <pre><code>gem install reins-web
 reins -h</code></pre>
 
-            <h2>1. Create the application</h2>
+                        <h2>1. Create the application</h2>
 <pre><code>reins new blog
 cd blog
 bin/setup</code></pre>
-            <p>
-                <code>reins new</code> writes the project skeleton;
-                <code>bin/setup</code> runs <code>bundle install</code> and
-                creates the development database. The tree:
-            </p>
+                        <p>
+                            <code>reins new</code> writes the project skeleton;
+                            <code>bin/setup</code> runs <code>bundle install</code> and
+                            creates the development database. The tree:
+                        </p>
 <pre><code>blog/
 ├── Gemfile             # reins-web pinned, plus rspec, puma, rerun
 ├── config.ru           # Rack entry point
@@ -170,55 +240,57 @@ bin/setup</code></pre>
 ├── db/migrate/
 ├── public/{404,422,500}.html
 └── spec/spec_helper.rb</code></pre>
-            <p>Boot it:</p>
+                        <p>Boot it:</p>
 <pre><code>reins server</code></pre>
-            <p>
-                Visit <code>http://localhost:8000</code> &mdash; you'll see "It
-                works!" served from
-                <code>app/views/welcome/index.html.erb</code>.
-            </p>
+                        <p>
+                            Visit <code>http://localhost:8000</code> &mdash;
+                            you'll see "It works!" served from
+                            <code>app/views/welcome/index.html.erb</code>.
+                        </p>
 
-            <h2>2. Say hello</h2>
-            <p>
-                The welcome page is rendered by
-                <code>WelcomeController#index</code>. Open
-                <code>app/views/welcome/index.html.erb</code> and edit it:
-            </p>
+                        <h2>2. Say hello</h2>
+                        <p>
+                            The welcome page is rendered by
+                            <code>WelcomeController#index</code>. Open
+                            <code>app/views/welcome/index.html.erb</code> and
+                            edit it:
+                        </p>
 <pre><code>&lt;h1&gt;Welcome to my blog&lt;/h1&gt;
 &lt;p&gt;Built with &lt;a href="https://rubygems.org/gems/reins-web"&gt;Reins&lt;/a&gt;.&lt;/p&gt;</code></pre>
-            <p>
-                Refresh &mdash; restart the server with <code>Ctrl-C</code> and
-                <code>reins server</code> again. (For automatic reloading
-                during development, run the server with
-                <code>bundle exec rerun reins server</code>.)
-            </p>
-            <p><code>reins routes</code> shows the route table:</p>
+                        <p>
+                            Refresh &mdash; restart the server with
+                            <code>Ctrl-C</code> and <code>reins server</code>
+                            again. (For automatic reloading during development,
+                            run the server with
+                            <code>bundle exec rerun reins server</code>.)
+                        </p>
+                        <p><code>reins routes</code> shows the route table:</p>
 <pre><code>Prefix  Verb  URI Pattern  Controller#Action
 root    GET   /            welcome#index</code></pre>
 
-            <h2>3. Generate a Post resource</h2>
-            <p>A blog needs posts. Generate the scaffold:</p>
+                        <h2>3. Generate a Post resource</h2>
+                        <p>A blog needs posts. Generate the scaffold:</p>
 <pre><code>reins generate scaffold Post title:string body:text</code></pre>
-            <p>This creates:</p>
-            <ul>
-                <li><code>app/models/post.rb</code> &mdash; <code>class Post &lt; ApplicationRecord</code></li>
-                <li><code>db/migrate/&lt;ts&gt;_create_posts.rb</code> &mdash; table definition</li>
-                <li><code>app/controllers/posts_controller.rb</code> &mdash; full CRUD (index/show/new/create/edit/update/destroy)</li>
-                <li><code>app/views/posts/{index,show,new,edit}.html.erb</code> plus <code>_form.html.erb</code></li>
-                <li>A line appended to <code>config/routes.rb</code>: <code>resources :posts</code></li>
-                <li><code>spec/models/post_spec.rb</code> and <code>spec/controllers/posts_controller_spec.rb</code> stubs</li>
-            </ul>
-            <p>Apply the migration:</p>
+                        <p>This creates:</p>
+                        <ul>
+                            <li><code>app/models/post.rb</code> &mdash; <code>class Post &lt; ApplicationRecord</code></li>
+                            <li><code>db/migrate/&lt;ts&gt;_create_posts.rb</code> &mdash; table definition</li>
+                            <li><code>app/controllers/posts_controller.rb</code> &mdash; full CRUD (index/show/new/create/edit/update/destroy)</li>
+                            <li><code>app/views/posts/{index,show,new,edit}.html.erb</code> plus <code>_form.html.erb</code></li>
+                            <li>A line appended to <code>config/routes.rb</code>: <code>resources :posts</code></li>
+                            <li><code>spec/models/post_spec.rb</code> and <code>spec/controllers/posts_controller_spec.rb</code> stubs</li>
+                        </ul>
+                        <p>Apply the migration:</p>
 <pre><code>reins db:migrate</code></pre>
-            <p>
-                Boot the server again and visit
-                <code>http://localhost:8000/posts</code>. You can create, list,
-                edit, and delete posts.
-            </p>
-            <p>
-                <code>reins routes</code> now includes the seven RESTful routes
-                for posts:
-            </p>
+                        <p>
+                            Boot the server again and visit
+                            <code>http://localhost:8000/posts</code>. You can
+                            create, list, edit, and delete posts.
+                        </p>
+                        <p>
+                            <code>reins routes</code> now includes the seven
+                            RESTful routes for posts:
+                        </p>
 <pre><code>   Prefix  Verb    URI Pattern         Controller#Action
      root  GET     /                   welcome#index
     posts  GET     /posts              posts#index
@@ -229,25 +301,26 @@ edit_post  GET     /posts/:id/edit     posts#edit
            PUT     /posts/:id          posts#update
            PATCH   /posts/:id          posts#update
            DELETE  /posts/:id          posts#destroy</code></pre>
-            <p>
-                The named-route helpers (<code>posts_path</code>,
-                <code>post_path(id)</code>, <code>new_post_path</code>,
-                <code>edit_post_path(id)</code>) are available in views and
-                controllers.
-            </p>
+                        <p>
+                            The named-route helpers (<code>posts_path</code>,
+                            <code>post_path(id)</code>, <code>new_post_path</code>,
+                            <code>edit_post_path(id)</code>) are available in
+                            views and controllers.
+                        </p>
 
-            <h2>4. Add validations</h2>
-            <p>Open <code>app/models/post.rb</code>:</p>
+                        <h2>4. Add validations</h2>
+                        <p>Open <code>app/models/post.rb</code>:</p>
 <pre><code>class Post &lt; ApplicationRecord
   validates :title, presence: true, length: { in: 1..100 }
   validates :body,  presence: true
 end</code></pre>
-            <p>
-                Visit <code>/posts/new</code>, submit an empty form. The
-                scaffold renders the form again with errors &mdash; but it
-                doesn't show them yet. Edit
-                <code>app/views/posts/_form.html.erb</code> to display errors:
-            </p>
+                        <p>
+                            Visit <code>/posts/new</code>, submit an empty
+                            form. The scaffold renders the form again with
+                            errors &mdash; but it doesn't show them yet. Edit
+                            <code>app/views/posts/_form.html.erb</code> to
+                            display errors:
+                        </p>
 <pre><code>&lt;%= form_with(url: "/posts", method: record.persisted? ? :put : :post) %&gt;
   &lt;% if record.errors.full_messages.any? %&gt;
     &lt;ul class="errors"&gt;
@@ -267,17 +340,19 @@ end</code></pre>
   &lt;/div&gt;
   &lt;div&gt;&lt;%= submit %&gt;&lt;/div&gt;
 &lt;/form&gt;</code></pre>
-            <p>
-                Now invalid submissions show their errors inline. The
-                scaffold's <code>create</code> action already returns 422 on
-                validation failure &mdash; this is just how the user sees it.
-            </p>
+                        <p>
+                            Now invalid submissions show their errors inline.
+                            The scaffold's <code>create</code> action already
+                            returns 422 on validation failure &mdash; this is
+                            just how the user sees it.
+                        </p>
 
-            <h2>5. Customize the index view</h2>
-            <p>
-                Open <code>app/views/posts/index.html.erb</code>. The scaffold
-                writes a bare table; replace it with something more useful:
-            </p>
+                        <h2>5. Customize the index view</h2>
+                        <p>
+                            Open <code>app/views/posts/index.html.erb</code>.
+                            The scaffold writes a bare table; replace it with
+                            something more useful:
+                        </p>
 <pre><code>&lt;h1&gt;All posts&lt;/h1&gt;
 
 &lt;p&gt;&lt;%= link_to "New post", new_post_path, class: "btn" %&gt;&lt;/p&gt;
@@ -288,17 +363,19 @@ end</code></pre>
     &lt;p&gt;&lt;%= post.body %&gt;&lt;/p&gt;
   &lt;/article&gt;
 &lt;% end %&gt;</code></pre>
-            <p>
-                <code>link_to</code>, <code>new_post_path</code>, and
-                <code>post_path</code> are all built-in helpers.
-            </p>
+                        <p>
+                            <code>link_to</code>, <code>new_post_path</code>,
+                            and <code>post_path</code> are all built-in
+                            helpers.
+                        </p>
 
-            <h2>6. Use <code>Reins.logger</code></h2>
-            <p>
-                The framework writes to <code>log/&lt;env&gt;.log</code> at the
-                configured level. Add a log line to your <code>create</code>
-                action in <code>app/controllers/posts_controller.rb</code>:
-            </p>
+                        <h2>6. Use <code>Reins.logger</code></h2>
+                        <p>
+                            The framework writes to <code>log/&lt;env&gt;.log</code>
+                            at the configured level. Add a log line to your
+                            <code>create</code> action in
+                            <code>app/controllers/posts_controller.rb</code>:
+                        </p>
 <pre><code>def create
   @record = Post.new(record_params)
   if @record.save
@@ -308,30 +385,30 @@ end</code></pre>
     render :new, status: :unprocessable_entity
   end
 end</code></pre>
-            <p>Tail the log:</p>
+                        <p>Tail the log:</p>
 <pre><code>tail -f log/development.log</code></pre>
 
-            <h2>7. Add comments</h2>
-            <p>Posts need comments. Generate a model + migration:</p>
+                        <h2>7. Add comments</h2>
+                        <p>Posts need comments. Generate a model + migration:</p>
 <pre><code>reins generate model Comment post_id:integer body:text
 reins db:migrate</code></pre>
-            <p>Wire up the association in <code>app/models/post.rb</code>:</p>
+                        <p>Wire up the association in <code>app/models/post.rb</code>:</p>
 <pre><code>class Post &lt; ApplicationRecord
   has_many :comments, foreign_key: "post_id"
 
   validates :title, presence: true, length: { in: 1..100 }
   validates :body,  presence: true
 end</code></pre>
-            <p>And in <code>app/models/comment.rb</code>:</p>
+                        <p>And in <code>app/models/comment.rb</code>:</p>
 <pre><code>class Comment &lt; ApplicationRecord
   belongs_to :post
 
   validates :body, presence: true
 end</code></pre>
-            <p>
-                Now in <code>app/views/posts/show.html.erb</code> you can
-                render the comments:
-            </p>
+                        <p>
+                            Now in <code>app/views/posts/show.html.erb</code>
+                            you can render the comments:
+                        </p>
 <pre><code>&lt;h1&gt;&lt;%= @record.title %&gt;&lt;/h1&gt;
 &lt;p&gt;&lt;%= @record.body %&gt;&lt;/p&gt;
 
@@ -341,24 +418,25 @@ end</code></pre>
     &lt;p&gt;&lt;%= comment.body %&gt;&lt;/p&gt;
   &lt;/article&gt;
 &lt;% end %&gt;</code></pre>
-            <p>
-                <code>@record.comments</code> returns a
-                <code>Reins::Model::Relation</code>, so you can chain:
-                <code>@record.comments.order(created_at: :desc).limit(5)</code>.
-            </p>
-            <p>
-                To let users post comments, add a route in
-                <code>config/routes.rb</code>:
-            </p>
+                        <p>
+                            <code>@record.comments</code> returns a
+                            <code>Reins::Model::Relation</code>, so you can
+                            chain:
+                            <code>@record.comments.order(created_at: :desc).limit(5)</code>.
+                        </p>
+                        <p>
+                            To let users post comments, add a route in
+                            <code>config/routes.rb</code>:
+                        </p>
 <pre><code>Reins.application.route do
   root "welcome#index"
   resources :posts
 
   post "/posts/:post_id/comments", "comments#create", as: :post_comments
 end</code></pre>
-            <p>Generate a <code>CommentsController</code>:</p>
+                        <p>Generate a <code>CommentsController</code>:</p>
 <pre><code>reins generate controller Comments create</code></pre>
-            <p>And edit <code>app/controllers/comments_controller.rb</code>:</p>
+                        <p>And edit <code>app/controllers/comments_controller.rb</code>:</p>
 <pre><code>class CommentsController &lt; ApplicationController
   def create
     post = Post.find(params[:post_id])
@@ -371,22 +449,22 @@ end</code></pre>
     end
   end
 end</code></pre>
-            <p>
-                Add a comment form to
-                <code>app/views/posts/show.html.erb</code>:
-            </p>
+                        <p>
+                            Add a comment form to
+                            <code>app/views/posts/show.html.erb</code>:
+                        </p>
 <pre><code>&lt;h2&gt;Add a comment&lt;/h2&gt;
 &lt;form action="&lt;%= post_comments_path(post_id: @record.id) %&gt;" method="post"&gt;
   &lt;%= text_field :body %&gt;
   &lt;%= submit "Post comment" %&gt;
 &lt;/form&gt;</code></pre>
-            <p>Visit a post &mdash; write a comment &mdash; submit. It appears.</p>
+                        <p>Visit a post &mdash; write a comment &mdash; submit. It appears.</p>
 
-            <h2>8. Test the model</h2>
-            <p>
-                Open <code>spec/models/post_spec.rb</code> (the generator wrote
-                a stub) and add some real specs:
-            </p>
+                        <h2>8. Test the model</h2>
+                        <p>
+                            Open <code>spec/models/post_spec.rb</code> (the
+                            generator wrote a stub) and add some real specs:
+                        </p>
 <pre><code>require "spec_helper"
 
 RSpec.describe Post, type: :model do
@@ -400,16 +478,17 @@ RSpec.describe Post, type: :model do
     expect(Post.count).to eq(1)
   end
 end</code></pre>
-            <p>
-                The <code>type: :model</code> metadata wraps each example in a
-                database transaction that rolls back at the end &mdash; so
-                tests don't leak state. Run them:
-            </p>
+                        <p>
+                            The <code>type: :model</code> metadata wraps each
+                            example in a database transaction that rolls back
+                            at the end &mdash; so tests don't leak state. Run
+                            them:
+                        </p>
 <pre><code>reins test</code></pre>
-            <p>Or directly:</p>
+                        <p>Or directly:</p>
 <pre><code>bundle exec rspec</code></pre>
 
-            <h2>9. Test the controller</h2>
+                        <h2>9. Test the controller</h2>
 <pre><code># spec/controllers/posts_controller_spec.rb
 require "spec_helper"
 
@@ -426,64 +505,155 @@ RSpec.describe PostsController, type: :controller do
     expect(last_response).to redirect_to("/posts/1")
   end
 end</code></pre>
-            <p>
-                The <code>type: :controller</code> metadata includes
-                <code>Rack::Test::Methods</code> and the custom matchers
-                (<code>have_http_status</code>, <code>redirect_to</code>).
-            </p>
+                        <p>
+                            The <code>type: :controller</code> metadata
+                            includes <code>Rack::Test::Methods</code> and the
+                            custom matchers (<code>have_http_status</code>,
+                            <code>redirect_to</code>).
+                        </p>
 
-            <h2>10. Deploy notes</h2>
-            <p>For production:</p>
+                        <h2>10. Deploy notes</h2>
+                        <p>For production:</p>
 <pre><code>REINS_ENV=production reins db:create
 REINS_ENV=production reins db:migrate
 REINS_ENV=production reins server</code></pre>
-            <p>
-                <code>config/environments/production.rb</code> already sets
-                <code>eager_load = true</code> (so the autoloader requires
-                every file at boot &mdash; no per-request
-                <code>Module#autoload</code>) and
-                <code>log_level = :info</code>. Add or remove middleware in
-                that file.
-            </p>
+                        <p>
+                            <code>config/environments/production.rb</code>
+                            already sets <code>eager_load = true</code> (so the
+                            autoloader requires every file at boot &mdash; no
+                            per-request <code>Module#autoload</code>) and
+                            <code>log_level = :info</code>. Add or remove
+                            middleware in that file.
+                        </p>
 
-            <h2>What you've used</h2>
-            <p>You've now exercised every layer of Reins:</p>
-            <ul>
-                <li><strong>Routing</strong> &mdash; <code>root</code>, <code>resources</code>, named verb routes</li>
-                <li><strong>Controllers</strong> &mdash; filters, render, redirect, params, flash</li>
-                <li><strong>Views</strong> &mdash; layouts, partials, helpers, auto-escape</li>
-                <li><strong>Models</strong> &mdash; validations, associations, the chainable <code>Relation</code></li>
-                <li><strong>Migrations</strong> &mdash; scaffolded, <code>db:migrate</code>, <code>db:rollback</code></li>
-                <li><strong>Generators</strong> &mdash; <code>new</code>, <code>generate scaffold</code>, <code>generate model</code>, <code>generate controller</code></li>
-                <li><strong>Environments / autoloading</strong> &mdash; Zeitwerk-backed, <code>Reins.env</code>, <code>Reins.config</code></li>
-                <li><strong>Testing</strong> &mdash; <code>type: :model</code>, <code>type: :controller</code>, custom matchers</li>
-            </ul>
-            <p>
-                To go deeper, read the source &mdash; <code>lib/reins/</code>
-                is intentionally small (one file per concern) and the specs in
-                <code>spec/reins/</code> double as runnable examples.
-            </p>
+                        <h2>What you've used</h2>
+                        <p>You've now exercised every layer of Reins:</p>
+                        <ul>
+                            <li><strong>Routing</strong> &mdash; <code>root</code>, <code>resources</code>, named verb routes</li>
+                            <li><strong>Controllers</strong> &mdash; filters, render, redirect, params, flash</li>
+                            <li><strong>Views</strong> &mdash; layouts, partials, helpers, auto-escape</li>
+                            <li><strong>Models</strong> &mdash; validations, associations, the chainable <code>Relation</code></li>
+                            <li><strong>Migrations</strong> &mdash; scaffolded, <code>db:migrate</code>, <code>db:rollback</code></li>
+                            <li><strong>Generators</strong> &mdash; <code>new</code>, <code>generate scaffold</code>, <code>generate model</code>, <code>generate controller</code></li>
+                            <li><strong>Environments / autoloading</strong> &mdash; Zeitwerk-backed, <code>Reins.env</code>, <code>Reins.config</code></li>
+                            <li><strong>Testing</strong> &mdash; <code>type: :model</code>, <code>type: :controller</code>, custom matchers</li>
+                        </ul>
+                        <p>
+                            To go deeper, read the source &mdash;
+                            <code>lib/reins/</code> is intentionally small (one
+                            file per concern) and the specs in
+                            <code>spec/reins/</code> double as runnable
+                            examples.
+                        </p>
 
-            <h2>Common errors</h2>
-            <ul>
-                <li><strong><code>Reins::DoubleResponse</code></strong> &mdash; your action called <code>render</code>/<code>redirect_to</code>/<code>head</code> twice.</li>
-                <li><strong><code>Reins::MissingTemplate</code></strong> &mdash; auto-render couldn't find the template. Check <code>app/views/&lt;controller&gt;/&lt;action&gt;.html.erb</code>.</li>
-                <li><strong><code>Reins::ParameterMissing</code></strong> &mdash; <code>params.require(...)</code> got a nil/empty value.</li>
-                <li><strong><code>Reins::SessionMiddlewareMissing</code></strong> &mdash; you used <code>session</code> or <code>flash</code> without mounting <code>Rack::Session::Cookie</code>.</li>
-                <li><strong><code>Reins::Model::RecordNotFound</code></strong> &mdash; <code>Model.find(id)</code> couldn't find a row. Use <code>find_by</code> for the nil-on-miss form.</li>
-                <li><strong><code>Reins::Model::RecordInvalid</code></strong> &mdash; <code>save!</code>/<code>create!</code> failed validation. The exception carries the record.</li>
-                <li><strong><code>Reins::IrreversibleMigration</code></strong> &mdash; <code>change</code> used an op that can't be auto-inverted. Add an explicit <code>down</code>.</li>
-            </ul>
+                        <h2>Common errors</h2>
+                        <ul>
+                            <li><strong><code>Reins::DoubleResponse</code></strong> &mdash; your action called <code>render</code>/<code>redirect_to</code>/<code>head</code> twice.</li>
+                            <li><strong><code>Reins::MissingTemplate</code></strong> &mdash; auto-render couldn't find the template. Check <code>app/views/&lt;controller&gt;/&lt;action&gt;.html.erb</code>.</li>
+                            <li><strong><code>Reins::ParameterMissing</code></strong> &mdash; <code>params.require(...)</code> got a nil/empty value.</li>
+                            <li><strong><code>Reins::SessionMiddlewareMissing</code></strong> &mdash; you used <code>session</code> or <code>flash</code> without mounting <code>Rack::Session::Cookie</code>.</li>
+                            <li><strong><code>Reins::Model::RecordNotFound</code></strong> &mdash; <code>Model.find(id)</code> couldn't find a row. Use <code>find_by</code> for the nil-on-miss form.</li>
+                            <li><strong><code>Reins::Model::RecordInvalid</code></strong> &mdash; <code>save!</code>/<code>create!</code> failed validation. The exception carries the record.</li>
+                            <li><strong><code>Reins::IrreversibleMigration</code></strong> &mdash; <code>change</code> used an op that can't be auto-inverted. Add an explicit <code>down</code>.</li>
+                        </ul>
 
-            <h2>Where to go next</h2>
-            <ul>
-                <li><a href="https://github.com/tacoda/reins/blob/main/README.md">README.md</a> &mdash; top-level overview and CLI reference</li>
-                <li><a href="https://github.com/tacoda/reins/blob/main/CHANGELOG.md">CHANGELOG.md</a> &mdash; what landed in each milestone</li>
-                <li>The framework source: <code>lib/reins/</code> is small enough to read end-to-end in an afternoon.</li>
-            </ul>
+                        <h2>License</h2>
+                        <p>MIT.</p>
+                    </article>
+                </div>
 
-            <h2>License</h2>
-            <p>MIT.</p>
-        </main>
+                <!-- Where to go next -->
+                <div
+                    class="mx-auto mt-0 pb-24 pt-24 max-w-7xl px-6 sm:pt-32 lg:px-8 dark-prose"
+                >
+                    <div class="mx-auto max-w-2xl lg:mx-0">
+                        <h2
+                            class="text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl"
+                        >
+                            Where to go next
+                        </h2>
+                        <p class="mt-6 text-lg/8 text-gray-300">
+                            Keep digging.
+                        </p>
+                    </div>
+                    <dl
+                        class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base/7 text-gray-300 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-16"
+                    >
+                        <div class="relative pl-9">
+                            <dt class="font-semibold text-white">
+                                <svg
+                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Zm0 3a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75Z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                                <a
+                                    href="https://github.com/tacoda/reins/blob/main/README.md"
+                                    >README.md</a
+                                >
+                            </dt>
+                            <dd class="inline">
+                                Top-level overview and CLI reference.
+                            </dd>
+                        </div>
+                        <div class="relative pl-9">
+                            <dt class="font-semibold text-white">
+                                <svg
+                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 0 0 0-1.5h-3.25V5Z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                                <a
+                                    href="https://github.com/tacoda/reins/blob/main/CHANGELOG.md"
+                                    >CHANGELOG.md</a
+                                >
+                            </dt>
+                            <dd class="inline">
+                                What landed in each milestone.
+                            </dd>
+                        </div>
+                        <div class="relative pl-9">
+                            <dt class="font-semibold text-white">
+                                <svg
+                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"
+                                    />
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                                <a href="https://github.com/tacoda/reins"
+                                    >Source</a
+                                >
+                            </dt>
+                            <dd class="inline">
+                                <code>lib/reins/</code> is small enough to read
+                                end-to-end in an afternoon.
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </main>
+        </div>
     </body>
 </html>
