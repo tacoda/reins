@@ -27,10 +27,12 @@ Gem::Specification.new do |spec|
   #     (f == __FILE__) || f.match(%r{\A(?:(?:bin|test|spec|features)/|\.(?:git|circleci)|appveyor)})
   #   end
   # end
-  spec.files = Dir["{bin,lib}/**/*"] # + %w(LICENSE README.md)
+  spec.files = Dir["{bin,lib,assets}/**/*"] +
+               %w[README.md GUIDE.md CHANGELOG.md LICENSE]
   spec.bindir = "bin"
   spec.executables = ['reins']
   spec.require_paths = %w[bin lib]
+  spec.licenses = ["MIT"]
 
   spec.add_dependency "erubis"
   spec.add_dependency "irb"

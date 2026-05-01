@@ -1,281 +1,370 @@
-# Reins — Onboarding Guide
+# Getting Started with Reins
 
-A short tour for developers building their first Reins app. If you've used Rails, most of this will look familiar; the API is intentionally Rails-shaped.
+This guide walks you through building a small blog from scratch using Reins. By the end you'll have created posts, listed them, validated them, and added comments — exercising every layer of the framework.
 
-> Reins is pre-1.0. The pieces below all work; some are slimmer than their Rails counterparts. See [README.md](README.md) for the milestone roadmap.
+If you've used Rails, the shape will feel familiar. The differences are noted as we go.
 
-## Install
+## Prerequisites
 
-The gem is published as `reins-web` (the name `reins` was already taken on RubyGems).
+- **Ruby 3.3+**. Check with `ruby -v`.
+- **Bundler**. `gem install bundler` if needed.
+- The `reins` CLI, available once `reins-web` is installed:
 
-```ruby
-# Gemfile
-gem "reins-web"
-```
+  ```sh
+  gem install reins-web
+  reins -h
+  ```
 
-```sh
-bundle install
-```
-
-Reins requires **Ruby 3.3+**.
-
-## A minimal app
-
-```ruby
-# config.ru
-require "reins"
-require "rack/session"
-
-class HomeController < Reins::Controller
-  def index
-    render plain: "Hello, world!"
-  end
-end
-
-app = Reins::Application.new
-app.route do
-  root "home#index"
-end
-
-use Rack::Session::Cookie, secret: "x" * 64
-run app
-```
+## 1. Create the application
 
 ```sh
-bundle exec reins server   # boots Puma on http://localhost:8000
+reins new blog
+cd blog
+bin/setup
 ```
 
-## Project layout
+`reins new` writes the project skeleton; `bin/setup` runs `bundle install` and creates the development database. The tree:
 
 ```
-config.ru                 # Rack entry point
-config/
-├── application.rb        # your app's Reins::Application subclass
-└── database.yml          # database config (per env)
-app/
-├── controllers/          # FooController < Reins::Controller
-├── models/               # Foo < Reins::Model::Base
-└── views/
-    ├── layouts/          # application.html.erb (used by default)
-    └── <controller>/     # <action>.html.erb
-db/
-├── migrate/              # YYYYMMDDHHMMSS_<name>.rb files
-└── schema.rb             # snapshot, written by `reins db:schema:dump`
-public/                   # static files served at /
+blog/
+├── Gemfile             # reins-web pinned, plus rspec, puma, rerun
+├── config.ru           # Rack entry point
+├── bin/{reins,setup,console}
+├── config/
+│   ├── application.rb  # Blog::Application < Reins::Application
+│   ├── routes.rb       # Reins.application.route do ... end
+│   ├── database.yml    # one section per env
+│   └── environments/{development,test,production}.rb
+├── app/
+│   ├── controllers/{application_controller,welcome_controller}.rb
+│   ├── models/application_record.rb
+│   └── views/
+│       ├── layouts/application.html.erb
+│       └── welcome/index.html.erb
+├── db/migrate/
+├── public/{404,422,500}.html
+└── spec/spec_helper.rb
 ```
 
-## Routing
+Boot it:
 
-Routes live inside `app.route do … end`. The DSL mirrors Rails.
+```sh
+reins server
+```
+
+Visit `http://localhost:8000` — you'll see "It works!" served from `app/views/welcome/index.html.erb`.
+
+## 2. Say hello
+
+The welcome page is rendered by `WelcomeController#index`. Open `app/views/welcome/index.html.erb` and edit it:
+
+```erb
+<h1>Welcome to my blog</h1>
+<p>Built with <a href="https://rubygems.org/gems/reins-web">Reins</a>.</p>
+```
+
+Refresh — restart the server with `Ctrl-C` and `reins server` again. (For automatic reloading during development, run the server with `bundle exec rerun reins server`.)
+
+`reins routes` shows the route table:
+
+```
+Prefix  Verb  URI Pattern  Controller#Action
+root    GET   /            welcome#index
+```
+
+## 3. Generate a Post resource
+
+A blog needs posts. Generate the scaffold:
+
+```sh
+reins generate scaffold Post title:string body:text
+```
+
+This creates:
+
+- `app/models/post.rb` — `class Post < ApplicationRecord`
+- `db/migrate/<ts>_create_posts.rb` — table definition
+- `app/controllers/posts_controller.rb` — full CRUD (index/show/new/create/edit/update/destroy)
+- `app/views/posts/{index,show,new,edit}.html.erb` plus `_form.html.erb`
+- A line appended to `config/routes.rb`: `resources :posts`
+- `spec/models/post_spec.rb` and `spec/controllers/posts_controller_spec.rb` stubs
+
+Apply the migration:
+
+```sh
+reins db:migrate
+```
+
+Boot the server again and visit `http://localhost:8000/posts`. You can create, list, edit, and delete posts.
+
+`reins routes` now includes the seven RESTful routes for posts:
+
+```
+   Prefix  Verb    URI Pattern         Controller#Action
+     root  GET     /                   welcome#index
+    posts  GET     /posts              posts#index
+new_post   GET     /posts/new          posts#new
+           POST    /posts              posts#create
+     post  GET     /posts/:id          posts#show
+edit_post  GET     /posts/:id/edit     posts#edit
+           PUT     /posts/:id          posts#update
+           PATCH   /posts/:id          posts#update
+           DELETE  /posts/:id          posts#destroy
+```
+
+The named-route helpers (`posts_path`, `post_path(id)`, `new_post_path`, `edit_post_path(id)`) are available in views and controllers.
+
+## 4. Add validations
+
+Open `app/models/post.rb`:
 
 ```ruby
-app.route do
-  root "home#index"
-
-  get  "/about",      "pages#about", as: :about
-  post "/login",      "sessions#create"
-  get  "/users/:id",  "users#show",
-       as: :user,
-       constraints: { id: /\d+/ }
-
-  resources :posts                              # the seven RESTful routes
-
-  match "/legacy", "legacy#go"                  # back-compat: any verb
+class Post < ApplicationRecord
+  validates :title, presence: true, length: { in: 1..100 }
+  validates :body,  presence: true
 end
 ```
 
-`as: :user` generates `user_path(id)` and `user_url(id, host: "...")` helpers. Resources auto-generate `posts_path`, `post_path(id)`, `new_post_path`, `edit_post_path(id)`.
+Visit `/posts/new`, submit an empty form. The scaffold renders the form again with errors — but it doesn't show them yet. Edit `app/views/posts/_form.html.erb` to display errors:
 
-`reins routes` prints the full table.
+```erb
+<%= form_with(url: "/posts", method: record.persisted? ? :put : :post) %>
+  <% if record.errors.full_messages.any? %>
+    <ul class="errors">
+      <% record.errors.full_messages.each do |msg| %>
+        <li><%== msg %></li>
+      <% end %>
+    </ul>
+  <% end %>
 
-## Controllers
+  <div>
+    <%= label :title %><br>
+    <%= text_field :title, value: record.title %>
+  </div>
+  <div>
+    <%= label :body %><br>
+    <%= text_area :body, value: record.body %>
+  </div>
+  <div><%= submit %></div>
+</form>
+```
+
+Now invalid submissions show their errors inline. The scaffold's `create` action already returns 422 on validation failure — this is just how the user sees it.
+
+## 5. Customize the index view
+
+Open `app/views/posts/index.html.erb`. The scaffold writes a bare table; replace it with something more useful:
+
+```erb
+<h1>All posts</h1>
+
+<p><%= link_to "New post", new_post_path, class: "btn" %></p>
+
+<% @records.each do |post| %>
+  <article>
+    <h2><%= link_to post.title, post_path(post.id) %></h2>
+    <p><%= post.body %></p>
+  </article>
+<% end %>
+```
+
+`link_to`, `new_post_path`, and `post_path` are all built-in helpers.
+
+## 6. Use `Reins.logger`
+
+The framework writes to `log/<env>.log` at the configured level. Add a log line to your `create` action in `app/controllers/posts_controller.rb`:
 
 ```ruby
-class PostsController < Reins::Controller
-  before_action :authenticate
-  before_action :set_post, only: [:show, :update, :destroy]
-  after_action  :log
-
-  def index
-    @posts = Post.all
-    # auto-renders app/views/posts/index.html.erb
-  end
-
-  def show
-    respond_to do |format|
-      format.html
-      format.json { render json: @post }
-    end
-  end
-
-  def create
-    @post = Post.new(post_params)
-    if @post.save
-      flash[:notice] = "Created."
-      redirect_to post_path(@post)
-    else
-      render :new, status: :unprocessable_entity
-    end
-  end
-
-  def destroy
-    @post.destroy
-    head :no_content
-  end
-
-  private
-
-  def post_params
-    params.require(:post).permit(:title, :body)
-  end
-
-  def authenticate
-    redirect_to "/login" unless session[:user_id]
+def create
+  @record = Post.new(record_params)
+  if @record.save
+    Reins.logger.info("Created post #{@record.id} — #{@record.title.inspect}")
+    redirect_to "/posts/#{@record.id}"
+  else
+    render :new, status: :unprocessable_entity
   end
 end
 ```
 
-Key surface:
+Tail the log:
 
-- **`render`** — sets the response. `render :show`, `render plain:`, `render html:`, `render json:`, `render template:`, `status:`, `locals:`, `layout:`. One per request — second call raises `Reins::DoubleResponse`. If the action returns without rendering, the framework auto-renders `app/views/<controller>/<action>.html.erb`.
-- **`redirect_to`** — sets `Location` and 302 (or override with `status:`).
-- **`head`** — empty body with the given status.
-- **`respond_to`** — dispatches by `Accept` header. HTML and JSON are supported.
-- **`params`** — `Reins::Parameters`. `.require(:key)` raises if missing; `.permit(*keys)` filters.
-- **`session`** / **`flash`** — needs `Rack::Session::Cookie` middleware in `config.ru`. `flash[:notice]` survives one request; `flash.now[:alert]` is current-request only.
-- **Filters** — `before_action`, `after_action`, `around_action` with `:only`/`:except`. A `before_action` that emits a response halts the chain.
-
-## Views
-
-ERB templates under `app/views/<controller>/<action>.html.erb`. `<%= %>` auto-escapes; `<%== %>` emits raw output.
-
-```erb
-<%# app/views/layouts/application.html.erb %>
-<!doctype html>
-<html>
-  <head>
-    <title><%== yield :title %></title>
-    <%= stylesheet_link_tag "app" %>
-  </head>
-  <body>
-    <%= yield %>
-  </body>
-</html>
+```sh
+tail -f log/development.log
 ```
 
-```erb
-<%# app/views/posts/index.html.erb %>
-<% content_for :title do "Posts" end %>
-<%= render partial: "post", collection: @posts %>
-<%= link_to "New post", new_post_path, class: "btn" %>
+## 7. Add comments
+
+Posts need comments. Generate a model + migration:
+
+```sh
+reins generate model Comment post_id:integer body:text
+reins db:migrate
 ```
 
-```erb
-<%# app/views/posts/_post.html.erb %>
-<article><%= post.title %></article>
-```
-
-`Reins::View::Helpers` (mixed into both Views and Controllers): `link_to`, `tag`, `image_tag`, `url_for`, `stylesheet_link_tag`, `javascript_include_tag`, `content_for`/`yield`.
-
-`Reins::View::Forms`: `form_with`, `text_field`, `text_area`, `submit`, `hidden_field`, `label`.
-
-Layouts default to `app/views/layouts/application.html.erb` if it exists. Override per-controller (`layout "marketing"`, optionally with `:only`/`:except`) or per-call (`render :show, layout: "admin"` / `layout: false`).
-
-## Models
+Wire up the association in `app/models/post.rb`:
 
 ```ruby
-class Post < Reins::Model::Base
-  belongs_to :author
-  has_many   :comments
-  has_one    :cover_image
+class Post < ApplicationRecord
+  has_many :comments, foreign_key: "post_id"
 
   validates :title, presence: true, length: { in: 1..100 }
-  validates :slug,  format: /\A[a-z0-9-]+\z/, uniqueness: true
-
-  before_save :generate_slug
+  validates :body,  presence: true
 end
 ```
 
-Class-level interface:
+And in `app/models/comment.rb`:
 
 ```ruby
-Post.all                                  # → Relation (lazy)
-Post.where(status: "published").order(:created_at).limit(10)
-Post.where("created_at > ?", a_time)
-Post.find(1)            # raises Reins::Model::RecordNotFound
-Post.find_by(slug: "x") # nil on miss
-Post.create!(title: "x")
-Post.transaction { ... }
-Post.count
-Post.pluck(:title)
+class Comment < ApplicationRecord
+  belongs_to :post
+
+  validates :body, presence: true
+end
 ```
 
-Instance interface:
+Now in `app/views/posts/show.html.erb` you can render the comments:
+
+```erb
+<h1><%= @record.title %></h1>
+<p><%= @record.body %></p>
+
+<h2>Comments</h2>
+<% @record.comments.each do |comment| %>
+  <article>
+    <p><%= comment.body %></p>
+  </article>
+<% end %>
+```
+
+`@record.comments` returns a `Reins::Model::Relation`, so you can chain: `@record.comments.order(created_at: :desc).limit(5)`.
+
+To let users post comments, add a route in `config/routes.rb`:
 
 ```ruby
-post = Post.new(title: "x")
-post.valid?
-post.errors.full_messages       # ["Title can't be blank", ...]
-post.save                       # false on validation failure
-post.save!                      # raises Reins::Model::RecordInvalid
-post.update(title: "y")
-post.destroy
-post.persisted?                 # / post.new_record?
+Reins.application.route do
+  root "welcome#index"
+  resources :posts
+
+  post "/posts/:post_id/comments", "comments#create", as: :post_comments
+end
 ```
 
-Auto-timestamps: when `created_at` and/or `updated_at` columns exist, they're populated automatically.
-
-All SQL is parameterized. `Post.where("title = '#{user_input}'")` is wrong — pass the bind: `Post.where("title = ?", user_input)`.
-
-## Migrations
+Generate a `CommentsController`:
 
 ```sh
-reins generate migration CreatePosts
-# writes db/migrate/<timestamp>_create_posts.rb
+reins generate controller Comments create
 ```
 
-```ruby
-class CreatePosts < Reins::Migration
-  def change
-    create_table :posts do |t|
-      t.string  :title
-      t.text    :body
-      t.references :author
-      t.timestamps
-    end
+And edit `app/controllers/comments_controller.rb`:
 
-    add_index :posts, :title
+```ruby
+class CommentsController < ApplicationController
+  def create
+    post = Post.find(params[:post_id])
+    comment = Comment.new(body: params[:body], post_id: post.id)
+    if comment.save
+      redirect_to post_path(post.id)
+    else
+      render plain: "Comment invalid: #{comment.errors.full_messages.join(', ')}",
+             status: :unprocessable_entity
+    end
   end
 end
 ```
 
+Add a comment form to `app/views/posts/show.html.erb`:
+
+```erb
+<h2>Add a comment</h2>
+<form action="<%= post_comments_path(post_id: @record.id) %>" method="post">
+  <%= text_field :body %>
+  <%= submit "Post comment" %>
+</form>
+```
+
+Visit a post — write a comment — submit. It appears.
+
+## 8. Test the model
+
+Open `spec/models/post_spec.rb` (the generator wrote a stub) and add some real specs:
+
+```ruby
+require "spec_helper"
+
+RSpec.describe Post, type: :model do
+  it "requires a title" do
+    expect(Post.new(title: nil, body: "x")).not_to be_valid
+  end
+
+  it "saves a valid post" do
+    post = Post.new(title: "Hello", body: "World")
+    expect(post.save).to be(true)
+    expect(Post.count).to eq(1)
+  end
+end
+```
+
+The `type: :model` metadata wraps each example in a database transaction that rolls back at the end — so tests don't leak state. Run them:
+
 ```sh
-reins db:create
-reins db:migrate         # apply pending
-reins db:rollback        # undo the last one
-reins db:rollback 3      # undo the last three
-reins db:schema:dump     # snapshot to db/schema.rb
-reins db:drop
+reins test
 ```
 
-Use `change` for reversible migrations (Reins inverts `create_table`, `add_column`, `add_index`). For everything else, define explicit `up` and `down`.
+Or directly:
 
-`change_column` isn't supported in SQLite — write `up`/`down` with a table-rebuild.
-
-## Configuration
-
-`config/database.yml`:
-
-```yaml
-development:
-  database: db/development.sqlite3
-test:
-  database: db/test.sqlite3
-production:
-  database: db/production.sqlite3
+```sh
+bundle exec rspec
 ```
 
-`REINS_ENV` selects the section (defaults to `development`). The CLI's `db:*` commands and your app should call `Reins::DatabaseConfig.load!` before any DB work.
+## 9. Test the controller
+
+```ruby
+# spec/controllers/posts_controller_spec.rb
+require "spec_helper"
+
+RSpec.describe PostsController, type: :controller do
+  let(:app) { Rack::Builder.parse_file("config.ru") }
+
+  it "GET /posts returns 200" do
+    get "/posts"
+    expect(last_response).to have_http_status(:ok)
+  end
+
+  it "POST /posts with valid params redirects to the new post" do
+    post "/posts", post: { title: "Hi", body: "There" }
+    expect(last_response).to redirect_to("/posts/1")
+  end
+end
+```
+
+The `type: :controller` metadata includes `Rack::Test::Methods` and the custom matchers (`have_http_status`, `redirect_to`).
+
+## 10. Deploy notes
+
+For production:
+
+```sh
+REINS_ENV=production reins db:create
+REINS_ENV=production reins db:migrate
+REINS_ENV=production reins server
+```
+
+`config/environments/production.rb` already sets `eager_load = true` (so the autoloader requires every file at boot — no per-request `Module#autoload`) and `log_level = :info`. Add or remove middleware in that file.
+
+## What you've used
+
+You've now exercised every layer of Reins:
+
+- **Routing** — `root`, `resources`, named verb routes
+- **Controllers** — filters, render, redirect, params, flash
+- **Views** — layouts, partials, helpers, auto-escape
+- **Models** — validations, associations, the chainable `Relation`
+- **Migrations** — scaffolded, `db:migrate`, `db:rollback`
+- **Generators** — `new`, `generate scaffold`, `generate model`, `generate controller`
+- **Environments / autoloading** — Zeitwerk-backed, `Reins.env`, `Reins.config`
+- **Testing** — `type: :model`, `type: :controller`, custom matchers
+
+To go deeper, read the source — `lib/reins/` is intentionally small (one file per concern) and the specs in `spec/reins/` double as runnable examples.
 
 ## Common errors
 
@@ -287,11 +376,11 @@ production:
 - **`Reins::Model::RecordInvalid`** — `save!`/`create!` failed validation. The exception carries the record.
 - **`Reins::IrreversibleMigration`** — `change` used an op that can't be auto-inverted. Add an explicit `down`.
 
-## Where to look next
+## Where to go next
 
-- `README.md` — milestone roadmap and links
-- `lib/reins/` — the framework source. Each module is small; the public API is what's documented above.
-- `spec/reins/` — RSpec specs that double as runnable examples.
+- [README.md](README.md) — top-level overview and CLI reference
+- [CHANGELOG.md](CHANGELOG.md) — what landed in each milestone
+- The framework source: `lib/reins/` is small enough to read end-to-end in an afternoon.
 
 ## License
 

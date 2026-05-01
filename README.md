@@ -1,8 +1,8 @@
 # Reins
 
-A Rack-based Ruby web framework. Reins is a learning exercise: rebuild Rails from scratch, one feature at a time.
+A Rack-based Ruby web framework with the surface of Rails.
 
-> **Status:** pre-1.0. The proof-of-concept request lifecycle works. Rails-core features (resourceful routing, validations, associations, migrations, generators, middleware) are landing milestone by milestone toward 1.0. See [Roadmap](#roadmap).
+Routing, controllers, views, an ORM, migrations, generators, middleware, environments, autoloading, and a small RSpec test framework — built one milestone at a time as a learning exercise.
 
 ## Install
 
@@ -17,37 +17,39 @@ gem "reins-web"
 bundle install
 ```
 
-## A minimal app
+Reins requires **Ruby 3.3+**.
 
-```ruby
-# config.ru
-require "reins"
-
-class GreetController < Reins::Controller
-  def index
-    response("Hello, world!")
-  end
-end
-
-app = Reins::Application.new
-app.route do
-  match "", "greet#index"
-end
-run app
-```
+## A new app in 30 seconds
 
 ```sh
-bundle exec reins server   # boots Puma on http://localhost:8000
+reins new blog
+cd blog
+bin/setup
+reins generate scaffold Post title:string body:text
+reins db:migrate
+reins server
 ```
+
+Open `http://localhost:8000/posts` and you have working CRUD.
+
+The full walkthrough — including models, validations, and associations — lives in [GUIDE.md](GUIDE.md).
 
 ## CLI
 
 ```
-reins new <name>     # scaffold a project (work-in-progress; full generators land in M6)
-reins server         # run the app under Puma on port 8000
+reins new <name>                           # scaffold a runnable project
+reins server                               # boot Puma on port 8000
+reins routes                               # print the route table
+reins console                              # IRB with the app loaded
+reins generate controller Posts index show
+reins generate model Post title:string body:text
+reins generate scaffold Post title:string body:text
+reins generate migration AddPublishedAtToPosts published_at:datetime
+reins db:create / db:drop / db:migrate / db:rollback / db:schema:dump
+reins test                                 # runs `bundle exec rspec`
 ```
 
-## Development
+## Development on Reins itself
 
 ```sh
 bundle install
@@ -56,22 +58,12 @@ bundle exec rubocop      # lint
 bundle exec rake build   # build the gem
 ```
 
-The agent harness for this repository (CLAUDE.md, `.claude/`) is scaffolded with [sellier](https://github.com/tacoda/sellier).
+The agent harness for this repository (CLAUDE.md, `.claude/`) was scaffolded with [sellier](https://github.com/tacoda/sellier).
 
-## Roadmap
+## Documentation
 
-| Milestone | Theme |
-|---|---|
-| M0 | Tidying — RSpec, harness, bug fixes |
-| M1 | Routing v2 — HTTP verbs, resources, named routes |
-| M2 | Controllers v2 — filters, redirects, strong params, JSON |
-| M3 | Views v2 — layouts, partials, helpers, auto-escape |
-| M4 | Model v2 — validations, associations, query interface |
-| M5 | Migrations and database tooling |
-| M6 | Generators and application skeleton |
-| M7 | Middleware, environments, Zeitwerk-style autoloading |
-| M8 | Testing framework for Reins apps |
-| M9 | 1.0 release |
+- [GUIDE.md](GUIDE.md) — Getting Started: build a blog from scratch
+- [CHANGELOG.md](CHANGELOG.md) — release history
 
 ## Resources
 
@@ -80,4 +72,4 @@ The agent harness for this repository (CLAUDE.md, `.claude/`) is scaffolded with
 
 ## License
 
-MIT.
+MIT — see [LICENSE](LICENSE).
