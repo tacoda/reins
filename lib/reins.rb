@@ -71,6 +71,14 @@ module Reins
     Application.instances.last
   end
 
+  # Non-raising counterpart to `Reins.application` — returns nil when no
+  # Application has been constructed yet. Model/View use this to consult
+  # the wired adapter graph without crashing in framework-internal specs
+  # that never spin up an Application.
+  def self.current_application
+    Application.instances.last
+  end
+
   class Application
     @instances = []
 

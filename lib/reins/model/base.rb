@@ -22,21 +22,28 @@ module Reins
         attr_writer :table_name, :repository, :schema_inspector, :schema_migrator
 
         def repository
-          @repository || Reins::Adapters::Driven::Sqlite::Repository.new(Reins::Database.connection)
+          @repository || application_adapter(:repository) ||
+            Reins::Adapters::Driven::Sqlite::Repository.new(Reins::Database.connection)
         end
 
         def schema_inspector
-          @schema_inspector || Reins::Adapters::Driven::Sqlite::SchemaInspector.new(Reins::Database.connection)
+          @schema_inspector || application_adapter(:schema_inspector) ||
+            Reins::Adapters::Driven::Sqlite::SchemaInspector.new(Reins::Database.connection)
         end
 
         def schema_migrator
-          @schema_migrator || Reins::Adapters::Driven::Sqlite::SchemaMigrator.new(Reins::Database.connection)
+          @schema_migrator || application_adapter(:schema_migrator) ||
+            Reins::Adapters::Driven::Sqlite::SchemaMigrator.new(Reins::Database.connection)
         end
 
         def reset_adapters!
           @repository = nil
           @schema_inspector = nil
           @schema_migrator = nil
+        end
+
+        def application_adapter(key)
+          Reins.current_application&.adapters&.[](key)
         end
 
         def table_name

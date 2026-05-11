@@ -151,6 +151,8 @@ RSpec.describe Reins::Cli do
     around do |example|
       Dir.mktmpdir do |tmp|
         Dir.chdir(tmp) do
+          Reins::Database.reset!
+          Reins::Application.instances.clear
           FileUtils.mkdir_p("config")
           FileUtils.mkdir_p("db/migrate")
           File.write("config/database.yml", <<~YAML)
@@ -162,6 +164,7 @@ RSpec.describe Reins::Cli do
           example.run
         ensure
           Reins::Database.reset!
+          Reins::Application.instances.clear
         end
       end
     end

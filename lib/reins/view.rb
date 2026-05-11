@@ -17,8 +17,10 @@ module Reins
     attr_accessor :template_store, :template_engine
 
     def initialize(template_store: nil, template_engine: nil)
-      @template_store = template_store || Reins::Adapters::Driven::Filesystem::TemplateStore.new
-      @template_engine = template_engine || Reins::Adapters::Driven::Erubis::TemplateEngine.new
+      @template_store = template_store || application_adapter(:template_store) ||
+                        Reins::Adapters::Driven::Filesystem::TemplateStore.new
+      @template_engine = template_engine || application_adapter(:template_engine) ||
+                         Reins::Adapters::Driven::Erubis::TemplateEngine.new
     end
 
     # rubocop:disable Naming/AccessorMethodName
@@ -68,6 +70,10 @@ module Reins
     end
 
     private
+
+    def application_adapter(key)
+      Reins.current_application&.adapters&.[](key)
+    end
 
     def parse_render_args(args, kwargs)
       if kwargs[:partial] && kwargs[:collection]
