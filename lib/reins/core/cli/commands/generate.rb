@@ -31,6 +31,7 @@ module Reins
             when "scaffold"   then run_scaffold(name, fields)
             when "port"       then generate_port(name, options)
             when "adapter"    then generate_adapter(name, options)
+            when "test"       then generate_test(name)
             else
               raise "unknown generator: #{type}"
             end
@@ -80,6 +81,22 @@ module Reins
                 port_module_name: port_module_name,
                 port_require: port_require,
                 direction: direction,
+                scope: scope
+              ).blueprint
+            )
+          end
+
+          def generate_test(port_name)
+            raise "generate test requires a port NAME" if port_name.nil? || port_name.empty?
+
+            scope = detect_scope
+            port_module, port_module_name, port_require = resolve_port(port_name, scope)
+
+            writer.write(
+              Reins::Core::Generators::TestGenerator.new(
+                port_module: port_module,
+                port_module_name: port_module_name,
+                port_require: port_require,
                 scope: scope
               ).blueprint
             )
