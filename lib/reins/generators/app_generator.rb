@@ -1,14 +1,18 @@
 require "reins/core/generators/blueprint"
 require "reins/core/generators/blueprint_writer"
 require "reins/adapters/driven/filesystem/real"
+require "reins/profile"
 
 module Reins
   module Generators
     class AppGenerator
       EXECUTABLES = %w[bin/setup bin/console bin/reins].freeze
+      ALWAYS_DEV_GEMS = %w[rspec rerun].freeze
 
-      def initialize(name)
+      def initialize(name, profile: :standard)
         @name = name
+        @profile_name = profile
+        @profile = Reins::Profile.fetch(profile)
         @target = File.expand_path(name)
       end
 
@@ -71,12 +75,12 @@ module Reins
       end
 
       def gemfile
+        runtime_gems = @profile[:gems].reject { |g| %w[rspec].include?(g) }
+        gem_lines = runtime_gems.map { |g| %(gem "#{g}") }.join("\n")
         <<~RUBY
           source "https://rubygems.org"
 
-          gem "reins-web"
-          gem "puma"
-          gem "rackup"
+          #{gem_lines}
 
           group :development do
             gem "rerun"

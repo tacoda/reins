@@ -37,8 +37,11 @@ module Reins
           end
 
           desc "new NAME", "Create a new Reins project at NAME"
+          method_option :slim, type: :boolean, default: false,
+                               desc: "Slim app: only reins-web + rackup pinned; every adapter slot left nil"
           def new(name)
-            self.class.invoker.invoke(:new, name)
+            profile = options[:slim] ? :slim : :standard
+            self.class.invoker.invoke(:new, name, profile: profile)
             puts "Created #{name}/"
             puts "Now run: cd #{name} && bin/setup"
           end
