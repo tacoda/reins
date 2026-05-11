@@ -36,9 +36,11 @@ Security review is required when a change touches: authentication, authorization
 
 Reins is a web framework — its security posture is what its users inherit. Treat every public method as a documented attack surface.
 
-- **SQL injection (current debt).** `Reins::Model::SQLite` interpolates values into SQL via `to_sql` in `lib/reins/sqlite_model.rb`. M4 replaces this with parameterized statements end-to-end. Until then, do not add new code paths that interpolate user input into SQL — extend the parameterized path instead.
-- **HTML escaping.** `Reins::View#h` is the canonical escape helper; M3 will make ERB `<%= %>` auto-escape and add an explicit raw-output opt-in. Treat any direct `String#+` into a template as suspect.
-- **Untrusted input.** Request params come from `Rack::Request#params`. Validate at the controller boundary; never feed raw `params` into model attributes (M4 strong-params resolves this for app authors).
-- **Error pages.** The catch-all in `Reins::Application#call` reads `public/500.html` as a static file. Do not leak backtraces to clients in production — dev-only exception page lands in M7.
-- **Autoloading.** `const_missing` in `lib/reins/dependencies.rb` derives a file path from a constant name. Never feed an untrusted string into `Object.const_get` or the loader (M7 replaces this with a Zeitwerk-style scoped loader).
-- **Secrets.** No secrets in source. The framework itself takes none today; when M5 introduces `config/database.yml` and M7 introduces environments, ENV-only.
+- **SQL is adapter-only.** All SQL string construction lives inside `lib/reins/adapters/driven/sqlite/**`. The core model layer (`Reins::Model::Base`, `Reins::Model::Relation`) builds parameterized `Query` values and hands them to the `Repository` port. New persistence code that needs SQL belongs in a Sqlite adapter, parameterized end-to-end — the core never sees a SQL string.
+- **HTML escaping.** `Reins::View#h` is the canonical escape helper, and ERB `<%= %>` auto-escapes by default. `<%== %>` is the raw-output opt-in. Treat any direct `String#+` into a template as suspect.
+- **Untrusted input.** Request params come from a `Reins::Core::Http::Request` value (the Rack adapter does the translation). Validate at the controller boundary via `Reins::Parameters#require` / `#permit`; never feed raw params into model attributes.
+- **Error pages.** Static error pages (`public/{404,422,500}.html`) are read by the Rack driving adapter, not the core. The core returns a `Reins::Core::Http::Response` with a status code; the adapter chooses what body to serve. Do not leak backtraces to clients in production.
+- **Autoloading.** The Zeitwerk autoloader (`Reins::Autoloader`) derives a constant name from a file path, not the other way around. Never feed an untrusted string into `Object.const_get` or any loader API.
+- **Filesystem access from the core.** The core never touches the filesystem directly. All read/write goes through `Reins::Ports::Driven::FileSystem`. If you find yourself wanting to call `File.read` from a core file, you're holding it wrong — inject the FS port instead.
+- **Subprocess execution.** The core never calls `Kernel#system` or backticks. Shell-outs (e.g. `reins test`) go through `Reins::Ports::Driven::ProcessRunner`. Pass argv arrays — never a single shell-interpolated string.
+- **Secrets.** No secrets in source. `Reins::Ports::Driven::EnvReader` is the only path to process environment; the core reads through it in the config layer and never directly.

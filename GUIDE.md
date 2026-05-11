@@ -364,7 +364,124 @@ You've now exercised every layer of Reins:
 - **Environments / autoloading** — Zeitwerk-backed, `Reins.env`, `Reins.config`
 - **Testing** — `type: :model`, `type: :controller`, custom matchers
 
-To go deeper, read the source — `lib/reins/` is intentionally small (one file per concern) and the specs in `spec/reins/` double as runnable examples.
+To go deeper, read the source — `lib/reins/` is laid out as a hexagon (see below) and the specs in `spec/reins/` double as runnable examples.
+
+## Architecture
+
+Reins 2.0 is internally a **Cockburn-strict hexagon**: pure core, explicit ports, swappable adapters. You don't have to think about this to use the framework — `Reins::Controller`, `Reins::Model::Base`, and `route { resources :foo }` work exactly like you'd expect. The architecture matters when you want to test in isolation, swap out an adapter (in-memory database for tests, a different template engine, a fake clock), or add your own port for a domain capability.
+
+### Why hexagonal?
+
+Alistair Cockburn named the pattern in 2005 to describe a single, recurring problem: applications get strangled by their I/O. The HTTP framework, the database, the template engine, the queue — each ends up touching every layer of the codebase, so a change to "use a different database" becomes a change everywhere. Hexagonal flips this: the **application** is one thing, and every piece of I/O is an **adapter** the application can swap. Driving adapters (the things that initiate calls into the app — HTTP, CLI, a message queue) live on one side. Driven adapters (the things the app initiates calls *to* — the database, the file system, a third-party API) live on the other. Between the two: the **ports**, which are the application's interface contracts.
+
+The "strict" in *Cockburn-strict* means three rules are non-negotiable:
+
+1. The core has no knowledge of the outside world — no infrastructure libraries imported, no `Rack`/`SQLite3`/`Puma` constants referenced.
+2. Dependencies point inward. Adapters depend on ports; ports depend on nothing; the core depends on the ports it consumes.
+3. Anything crossing a port is a plain value object, not an infrastructure type.
+
+The payoff: the entire core can be tested without booting Rack, opening a database, or touching disk. Swapping SQLite for Postgres becomes "write a new adapter against the existing Repository port." Adding a new capability (say, payment processing) becomes "define a port, write the adapter."
+
+```
+              +-------------------+
+   driving    |    application    |   driven
+  adapters →  |       core        | →  adapters
+              +-------------------+
+```
+
+- **Core** (`lib/reins/core/**`) — pure domain. Knows nothing about Rack, SQLite, Erubis, Puma, Thor, or the filesystem. The boundary is enforced by a spec (`spec/reins/core_boundary_spec.rb`); the core can't even `require` those libraries.
+- **Ports** (`lib/reins/ports/{driving,driven}/**`) — Ruby modules with a frozen `CONTRACT` hash listing the methods adapters must implement. Driving ports (`HttpApp`, `CommandInvoker`) are how the outside world talks to the core. Driven ports (`Repository`, `SchemaInspector`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`, `Autoloader`) are how the core reaches the outside.
+- **Adapters** (`lib/reins/adapters/{driving,driven}/**`) — concrete implementations. `Adapters::Driving::Rack::App` is the Rack-facing entry point; `Adapters::Driven::Sqlite::Repository` is the default persistence adapter; `Adapters::Driven::Memory::Repository` is the in-memory one used by tests.
+
+### Profiles
+
+`Reins::Application` picks a **profile** at boot — a named bundle of default adapters:
+
+| Profile | Repository | Server | Template | Clock | EnvReader |
+|---|---|---|---|---|---|
+| `:standard` (default) | SQLite | Puma | Erubis + Filesystem | System | System |
+| `:test` | Memory | (none) | Erubis + Filesystem | Fixed | Memory |
+| `:slim` | nil | nil | nil | nil | nil |
+
+`reins new myapp` uses `:standard`; `reins new myapp --slim` uses `:slim` so every adapter slot is visible (and nil) in your `config/application.rb` — you fill them in yourself.
+
+### Adding your own port and adapter
+
+App authors can extend the hexagon. Say you're integrating Stripe:
+
+```sh
+reins generate port payment_gateway          # → app/ports/payment_gateway.rb
+reins generate adapter stripe --port=payment_gateway
+                                              # → app/adapters/stripe.rb
+```
+
+The port file declares the contract:
+
+```ruby
+module PaymentGateway
+  CONTRACT = {
+    charge: 3,           # (amount, currency, source_id)
+    refund: 1            # (charge_id)
+  }.freeze
+end
+```
+
+The adapter `include`s the port and implements each method. A test adapter is the same pattern with an in-memory store. Wire it at the composition root in `config/application.rb`:
+
+```ruby
+class Blog::Application < Reins::Application
+  profile :standard
+
+  adapters do |a|
+    a.payment_gateway = MyApp::Adapters::Stripe.new(api_key: ENV.fetch("STRIPE_KEY"))
+  end
+end
+```
+
+The framework's own ports ship as presets — useful when you want to swap one out wholesale or learn the pattern:
+
+```sh
+reins generate port --rack          # framework's HTTP driving port + Rack adapter
+reins generate port --sqlite        # Repository + SchemaInspector + SchemaMigrator + SQLite adapters
+reins generate port --puma          # Server port + Puma adapter
+reins generate port --memory        # in-memory test adapters for repository, file_system, etc.
+reins generate port --list          # print every preset
+```
+
+The contract behind each preset is the same idea: a port module with a `CONTRACT` hash, one or more adapters that `include` it and define every method. The generators write the scaffold; you fill in the body.
+
+### Testing your adapter
+
+Every adapter spec asserts the port contract:
+
+```ruby
+it "responds to every method on the PaymentGateway port contract" do
+  PaymentGateway::CONTRACT.each_key do |name|
+    expect(adapter).to respond_to(name), "missing #{name}"
+  end
+end
+```
+
+That's the contract test. Beyond that, write the behavior specs you'd write for any class — feed input, check output.
+
+### Autoloading and dependency injection
+
+These are sometimes confused. They solve different problems and Reins uses both, at different layers:
+
+- **Zeitwerk** (autoloading) answers *where does this constant's file live?* Used inside your app's `app/` tree so you don't have to `require` files. Convention-over-configuration.
+- **Dependency injection** (Reins::Application's composition root) answers *which implementation does this port get?* Used to swap adapters at boot — production uses SQLite, tests use an in-memory adapter, your staging environment might use a third.
+
+The autoloader itself lives behind a port (`Reins::Ports::Driven::Autoloader`) so the core stays pure of Zeitwerk. The default adapter wraps Zeitwerk; a noop adapter is available for tests that don't want the autoloader running.
+
+### Further reading
+
+If you've read this far and want to go deeper:
+
+- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/) — Alistair Cockburn's original write-up. The canonical reference. Short.
+- [Hexagonal Architecture: three principles and an implementation example](https://octo.com/insights/hexagonal-architecture-three-principles-and-an-implementation-example) — a clearer, longer treatment of the strict variant.
+- [Ports & Adapters Architecture, Tom Stuart](https://blog.thecodewhisperer.com/permalink/ports-adapters-and-the-functional-core-imperative-shell) — connects hexagonal to functional core / imperative shell.
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and [Onion Architecture](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) — Cockburn's hexagon predates both. The shapes differ; the rule (inward-pointing dependencies, infrastructure at the edges) is the same.
+- [Hanami](https://hanamirb.org/) — a Ruby framework that takes a hexagonal-adjacent shape (providers, slices) further than Reins. Worth reading alongside Reins to see two interpretations of the same idea.
 
 ## Common errors
 
