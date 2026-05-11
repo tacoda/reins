@@ -30,6 +30,8 @@ require "reins/model/base"
 require "reins/controller"
 require "reins/generators"
 require "reins/view"
+require "reins/profile"
+require "reins/configurator"
 
 module Reins
   def self.framework_root
@@ -76,9 +78,11 @@ module Reins
       attr_reader :instances
     end
 
-    attr_reader :routes
+    attr_reader :routes, :profile, :adapters
 
-    def initialize
+    def initialize(profile: :standard, adapters: {})
+      @profile = profile
+      @adapters = build_adapters(profile, adapters)
       Reins::Application.instances << self
     end
 
@@ -111,6 +115,13 @@ module Reins
     end
 
     private
+
+    def build_adapters(profile_name, overrides)
+      map = {}
+      Reins::Configurator.from_profile(profile_name, into: map)
+      Reins::Configurator.new(map).apply(overrides) unless overrides.empty?
+      map
+    end
 
     def build_rack_app
       app = method(:dispatch_request)
