@@ -1,9 +1,10 @@
-require "erubis"
 require "cgi"
 require "reins/errors"
 require "reins/routes/url_helpers"
 require "reins/view/helpers"
 require "reins/view/forms"
+require "reins/adapters/driven/filesystem/template_store"
+require "reins/adapters/driven/erubis/template_engine"
 
 module Reins
   class View
@@ -12,7 +13,13 @@ module Reins
     include Forms
 
     DEFAULT_LAYOUT = "application".freeze
-    VIEWS_ROOT = "app/views".freeze
+
+    attr_accessor :template_store, :template_engine
+
+    def initialize(template_store: nil, template_engine: nil)
+      @template_store = template_store || Reins::Adapters::Driven::Filesystem::TemplateStore.new
+      @template_engine = template_engine || Reins::Adapters::Driven::Erubis::TemplateEngine.new
+    end
 
     # rubocop:disable Naming/AccessorMethodName
     def set_vars(instance_vars)
@@ -23,10 +30,10 @@ module Reins
     # rubocop:enable Naming/AccessorMethodName
 
     def evaluate(template, locals = {}, &)
-      eruby = Erubis::EscapedEruby.new(template)
+      compiled = @template_engine.compile(template)
       bind = binding
       locals.each { |k, v| bind.local_variable_set(k, v) }
-      eval(eruby.src, bind) # rubocop:disable Security/Eval
+      eval(compiled, bind) # rubocop:disable Security/Eval
     end
 
     def render_template(path, locals: {}, layout: :default)
@@ -92,18 +99,13 @@ module Reins
     end
 
     def default_layout_if_present
-      File.exist?(template_filename("layouts/#{DEFAULT_LAYOUT}")) ? DEFAULT_LAYOUT : nil
+      @template_store.exist?("layouts/#{DEFAULT_LAYOUT}") ? DEFAULT_LAYOUT : nil
     end
 
     def read_template(path)
-      filename = template_filename(path)
-      raise Reins::MissingTemplate, "missing template: #{filename}" unless File.exist?(filename)
+      raise Reins::MissingTemplate, "missing template: #{path}" unless @template_store.exist?(path)
 
-      File.read(filename)
-    end
-
-    def template_filename(path)
-      File.join(VIEWS_ROOT, "#{path}.html.erb")
+      @template_store.read(path)
     end
   end
 end
