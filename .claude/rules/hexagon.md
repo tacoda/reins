@@ -163,6 +163,16 @@ app = Blog::Application.new(
 - Unit-test the core against in-memory adapters (`Memory::Repository`, `Memory::FileSystem`). The core never sees disk or SQLite in a unit spec.
 - Unit-test each adapter against its port: every method named in `CONTRACT` must be defined.
 - Integration-test through the driving adapter (`Adapters::Driving::Rack::App`) for HTTP behavior; through `Filesystem::Real` for generators on disk.
+- Test doubles for arbitrary ports come from `reins generate test PORT_NAME` — emits a `<Port>Double` class (records `#calls`, configurable return values via `returns:`) plus a use-case spec template that wires the double into `Application.new(profile: :test)` through the labeled `app.adapter(:port_key)` accessor.
+
+## Traceability and failure modes
+
+The boundary is enforceable at runtime too — not just at boot.
+
+- `Reins::Application#adapter(key)` — fetch a wired adapter by its conventional key. Raises `Reins::AdapterMissing` with a labeled message naming the profile and listing currently-wired keys when nothing is configured. Prefer this over `app.adapters[:key]` (which returns nil silently).
+- `Reins::Application#validate_adapters!` — for each driven port, asserts the wired adapter responds to every method in the port's `CONTRACT`. Called automatically from `Application.new(validate: true)` (the default); raises `Reins::ContractViolation` on a partially-built adapter at *boot*, not at first use. Pass `validate: false` for specs that intentionally wire something incomplete.
+- `Reins::Application#describe_adapters` — returns a multi-line dump of the profile and every wired adapter. Useful for `bin/console`, debug printing, and CI diagnostics.
+- `Reins::Port#adapter_key` — derives the conventional adapter slot name from the port's const name (`Reins::Ports::Driven::SchemaInspector.adapter_key == :schema_inspector`). The validation walk uses this to map a port to its slot.
 
 ## What NOT to do
 

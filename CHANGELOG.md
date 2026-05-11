@@ -1,5 +1,47 @@
 # Changelog
 
+## 2.0.1 — unreleased
+
+A DX pass on the 2.0 hexagon: the explicit-port DSL now earns its keep by
+surfacing missing-adapter and broken-contract failures at boot rather than
+at first use, with labeled error messages that name the port. Adds a test
+generator for scaffolding spies and use-case specs.
+
+### Traceability
+
+- `Reins::Application#adapter(key)` — labeled accessor for the wired
+  adapter graph. Raises `Reins::AdapterMissing` with a message naming the
+  selected profile and listing the currently-wired keys when no adapter is
+  configured. Prefer this over `app.adapters[:key]` (which silently returns
+  nil).
+- `Reins::Application#validate_adapters!` — walks `Reins::Port.driven`;
+  for each port with a wired adapter, asserts the adapter responds to
+  every method in the port's `CONTRACT`. Called by default from
+  `Application.new`; opt out with `validate: false`. Raises
+  `Reins::ContractViolation` on a partially-built adapter — at boot, not
+  at first use.
+- `Reins::Application#describe_adapters` — multi-line dump of the
+  profile and every wired adapter. Useful for `bin/console` and CI logs.
+- `Reins::Port#adapter_key` — derives the conventional adapter slot name
+  from the port's const name (`SchemaInspector` → `:schema_inspector`).
+  The validation walk uses this to map a port to its slot.
+
+### Test generator
+
+- `reins generate test PORT_NAME` — scaffolds a `<Port>Double` class
+  (under `spec/doubles/` in app context, `spec/reins/doubles/` in lib
+  context) plus a use-case spec template under `spec/use_cases/`. The
+  double includes the port module, records every call on its `#calls`
+  attribute, and accepts configurable return values via the
+  `returns:` constructor keyword — doubles as both spy and stub.
+
+### Errors added
+
+- `Reins::AdapterMissing < Reins::Error`
+- `Reins::ContractViolation < Reins::Error`
+
+---
+
 ## 2.0.0 — 2026-05-11
 
 Reins 2.0 is an architectural release: every Rails-shaped feature from 1.x is preserved, but the framework is reorganized internally as a **Cockburn-strict hexagon** — pure core, explicit ports, swappable adapters. App authors who only use the public API (`Reins::Controller`, `Reins::Model::Base`, `route { resources :foo }`, the CLI) see no breaking changes. App authors and contributors who reach into the framework will find a new, smaller, more testable internal surface.
