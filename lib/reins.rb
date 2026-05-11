@@ -3,6 +3,9 @@
 require "rack"
 require "reins/cli"
 require "reins/version"
+require "reins/ports"
+require "reins/core"
+require "reins/adapters"
 require "reins/array"
 require "reins/util"
 require "reins/env"
@@ -27,6 +30,8 @@ require "reins/model/base"
 require "reins/controller"
 require "reins/generators"
 require "reins/view"
+require "reins/profile"
+require "reins/configurator"
 
 module Reins
   def self.framework_root
@@ -66,6 +71,14 @@ module Reins
     Application.instances.last
   end
 
+  # Non-raising counterpart to `Reins.application` — returns nil when no
+  # Application has been constructed yet. Model/View use this to consult
+  # the wired adapter graph without crashing in framework-internal specs
+  # that never spin up an Application.
+  def self.current_application
+    Application.instances.last
+  end
+
   class Application
     @instances = []
 
@@ -73,10 +86,58 @@ module Reins
       attr_reader :instances
     end
 
-    attr_reader :routes
+    attr_reader :routes, :profile, :adapters
 
-    def initialize
+    def initialize(profile: :standard, adapters: {}, validate: true)
+      @profile = profile
+      @adapters = build_adapters(profile, adapters)
+      validate_adapters! if validate
       Reins::Application.instances << self
+    end
+
+    # Lookup an adapter by key. Raises Reins::AdapterMissing with a labeled
+    # message if no adapter is wired for that key — much more useful at
+    # debug time than the nil that #adapters[:key] would return.
+    def adapter(key)
+      @adapters.fetch(key) do
+        wired = @adapters.keys.empty? ? "none" : @adapters.keys.inspect
+        raise Reins::AdapterMissing,
+              "no #{key} adapter configured. " \
+              "Profile #{@profile.inspect} did not wire one, and no override was supplied. " \
+              "Available adapters: #{wired}. " \
+              "Fix: pass `adapters: { #{key}: ... }` to Application.new, or switch profiles."
+      end
+    end
+
+    # Walk every driven port; for each whose adapter_key is wired in this
+    # application, assert the wired instance responds to every method
+    # named in the port's CONTRACT. Surfaces partially-built adapters at
+    # boot rather than at first use.
+    def validate_adapters!
+      Reins::Port.driven.each do |port|
+        instance = @adapters[port.adapter_key]
+        next if instance.nil?
+
+        port::CONTRACT.each_key do |method_name|
+          next if instance.respond_to?(method_name)
+
+          raise Reins::ContractViolation,
+                "Adapter wired for #{port.adapter_key} (#{instance.class}) does not respond to " \
+                "##{method_name} required by #{port}."
+        end
+      end
+      self
+    end
+
+    # Human-readable description of the wired adapter graph. Useful for
+    # bin/console, debug printing on boot, or `reins adapters` introspection.
+    def describe_adapters
+      header = "Profile: #{@profile}"
+      return "#{header}\n  (no adapters wired)" if @adapters.empty?
+
+      lines = [header]
+      @adapters.each { |key, instance| lines << "  #{key}: #{instance.class}" }
+      lines.join("\n")
     end
 
     def route(&)
@@ -108,6 +169,13 @@ module Reins
     end
 
     private
+
+    def build_adapters(profile_name, overrides)
+      map = {}
+      Reins::Configurator.from_profile(profile_name, into: map)
+      Reins::Configurator.new(map).apply(overrides) unless overrides.empty?
+      map
+    end
 
     def build_rack_app
       app = method(:dispatch_request)

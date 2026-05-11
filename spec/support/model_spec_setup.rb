@@ -5,11 +5,15 @@ module ModelSpecSetup
   def setup_test_db
     @tmp_db_dir = Dir.mktmpdir
     Reins::Database.reset!
+    Reins::Model::Base.reset_adapters!
+    Reins::Application.instances.clear
     Reins::Database.path = File.join(@tmp_db_dir, "test.db")
   end
 
   def teardown_test_db
     Reins::Database.reset!
+    Reins::Model::Base.reset_adapters!
+    Reins::Application.instances.clear
     FileUtils.rm_rf(@tmp_db_dir) if @tmp_db_dir
   end
 

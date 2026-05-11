@@ -5,7 +5,13 @@ module Reins
     DEFAULT_PATH = "test.db".freeze
 
     class << self
-      attr_writer :path
+      def path=(value)
+        if @connection && @path != value
+          @connection&.close
+          @connection = nil
+        end
+        @path = value
+      end
 
       def path
         @path ||= DEFAULT_PATH

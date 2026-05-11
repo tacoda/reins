@@ -1,23 +1,30 @@
-require "fileutils"
+require "reins/core/generators/blueprint"
+require "reins/core/generators/blueprint_writer"
+require "reins/adapters/driven/filesystem/real"
+require "reins/profile"
 
 module Reins
   module Generators
     class AppGenerator
-      def initialize(name)
+      EXECUTABLES = %w[bin/setup bin/console bin/reins].freeze
+      ALWAYS_DEV_GEMS = %w[rspec rerun].freeze
+
+      def initialize(name, profile: :standard)
         @name = name
+        @profile_name = profile
+        @profile = Reins::Profile.fetch(profile)
         @target = File.expand_path(name)
       end
 
-      def run
-        FileUtils.mkdir_p(@target)
-        files.each do |path, content|
-          target = File.join(@target, path)
-          FileUtils.mkdir_p(File.dirname(target))
-          File.write(target, content)
-        end
-        FileUtils.chmod("+x", File.join(@target, "bin/setup"))
-        FileUtils.chmod("+x", File.join(@target, "bin/console"))
-        FileUtils.chmod("+x", File.join(@target, "bin/reins"))
+      def blueprint
+        bp = Reins::Core::Generators::Blueprint.new
+        files.each { |path, content| bp.add_file(path, content) }
+        EXECUTABLES.each { |path| bp.add_executable(path) }
+        bp
+      end
+
+      def run(file_system: Reins::Adapters::Driven::Filesystem::Real.new)
+        Reins::Core::Generators::BlueprintWriter.new(file_system).write(blueprint, root: @target)
       end
 
       def app_class_name
@@ -48,6 +55,11 @@ module Reins
           "app/models/application_record.rb" => application_record,
           "app/views/layouts/application.html.erb" => layout_view,
           "app/views/welcome/index.html.erb" => welcome_view,
+          "app/use_cases/.keep" => "",
+          "app/entities/.keep" => "",
+          "app/values/.keep" => "",
+          "app/ports/.keep" => "",
+          "app/adapters/.keep" => "",
           "db/migrate/.keep" => "",
           "public/404.html" => error_page("404"),
           "public/422.html" => error_page("422"),
@@ -68,12 +80,12 @@ module Reins
       end
 
       def gemfile
+        runtime_gems = @profile[:gems].reject { |g| %w[rspec].include?(g) }
+        gem_lines = runtime_gems.map { |g| %(gem "#{g}") }.join("\n")
         <<~RUBY
           source "https://rubygems.org"
 
-          gem "reins-web"
-          gem "puma"
-          gem "rackup"
+          #{gem_lines}
 
           group :development do
             gem "rerun"

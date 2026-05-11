@@ -1,3 +1,5 @@
+require "reins/core/model/query"
+
 module Reins
   module Model
     class Relation
@@ -5,15 +7,11 @@ module Reins
 
       def initialize(model)
         @model = model
-        @wheres = []
-        @orders = []
-        @limit = nil
-        @offset = nil
+        @query = Reins::Core::Model::Query.new(table: @model.table_name)
       end
 
       def initialize_copy(_other)
-        @wheres = @wheres.dup
-        @orders = @orders.dup
+        @query = @query.dup
         @to_a = nil
       end
 
@@ -26,11 +24,11 @@ module Reins
       end
 
       def limit(value)
-        spawn { |r| r.instance_variable_set(:@limit, value) }
+        spawn { |r| r.query.limit = value }
       end
 
       def offset(value)
-        spawn { |r| r.instance_variable_set(:@offset, value) }
+        spawn { |r| r.query.offset = value }
       end
 
       def each(&)
@@ -42,34 +40,32 @@ module Reins
       end
 
       def first
-        spawn { |r| r.instance_variable_set(:@limit, 1) }.to_a.first
+        spawn { |r| r.query.limit = 1 }.to_a.first
       end
 
       def last
-        return to_a.last unless @orders.empty?
+        return to_a.last unless @query.orders.empty?
 
-        spawn { |r| r.instance_variable_set(:@orders, [reverse_order]) }.first
+        spawn { |r| r.send(:replace_orders, [reverse_order]) }.first
       end
 
       def count
-        sql, params = build_sql("SELECT COUNT(*) AS c", apply_clauses: true, suppress_order: true)
-        result = Reins::Database.connection.execute(sql, params)
-        first_value(result)
+        Reins::Model::Base.repository.count(@query)
       end
 
       def pluck(field)
-        sql, params = build_sql("SELECT #{field}", apply_clauses: true)
-        result = Reins::Database.connection.execute(sql, params)
-        result.map { |row| row.is_a?(Hash) ? row[field.to_s] : row[0] }
+        Reins::Model::Base.repository.pluck(@query, field)
       end
 
       protected
 
+      attr_reader :query
+
       def add_where(args)
         if args.size == 1 && args[0].is_a?(Hash)
-          args[0].each { |k, v| @wheres << ["#{k} = ?", [v]] }
+          @query.add_where_hash(args[0])
         else
-          @wheres << [args[0], args[1..]]
+          @query.add_where_fragment(args[0], args[1..])
         end
       end
 
@@ -77,11 +73,16 @@ module Reins
         args.each do |arg|
           case arg
           when Symbol, String
-            @orders << "#{arg} ASC"
+            @query.add_order("#{arg} ASC")
           when Hash
-            arg.each { |k, dir| @orders << "#{k} #{dir.to_s.upcase}" }
+            arg.each { |k, dir| @query.add_order("#{k} #{dir.to_s.upcase}") }
           end
         end
+      end
+
+      def replace_orders(orders)
+        @query.orders.clear
+        orders.each { |o| @query.add_order(o) }
       end
 
       private
@@ -93,24 +94,9 @@ module Reins
       end
 
       def execute_query
-        sql, params = build_sql("SELECT *", apply_clauses: true)
-        rows = Reins::Database.connection.execute(sql, params)
-        rows.map { |row| @model.send(:instantiate_from_row, row_to_hash(row)) }
-      end
-
-      def build_sql(prefix, apply_clauses:, suppress_order: false)
-        sql = "#{prefix} FROM #{@model.table_name}"
-        params = []
-        unless @wheres.empty?
-          sql += " WHERE #{@wheres.map(&:first).join(' AND ')}"
-          params.concat(@wheres.flat_map { |_, p| p })
+        Reins::Model::Base.repository.find_all(@query).map do |row|
+          @model.send(:instantiate_from_row, row_to_hash(row))
         end
-        if apply_clauses
-          sql += " ORDER BY #{@orders.join(', ')}" if !@orders.empty? && !suppress_order
-          sql += " LIMIT #{@limit.to_i}" if @limit
-          sql += " OFFSET #{@offset.to_i}" if @offset
-        end
-        [sql, params]
       end
 
       def reverse_order
@@ -121,14 +107,6 @@ module Reins
         return row if row.is_a?(Hash)
 
         @model.column_names.zip(row).to_h
-      end
-
-      def first_value(result)
-        row = result.first
-        return 0 if row.nil?
-        return row["c"] if row.is_a?(Hash)
-
-        row[0]
       end
     end
   end

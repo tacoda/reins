@@ -1,32 +1,40 @@
-require "zeitwerk"
+require "reins/adapters/driven/zeitwerk/autoloader"
 
 module Reins
+  # Public-API facade for the Autoloader port. Defaults to the Zeitwerk
+  # adapter; tests can swap in Noop::Autoloader (or any other implementation
+  # of Ports::Driven::Autoloader) via Reins::Autoloader.adapter = ...
   module Autoloader
-    @loader = nil
-
     class << self
-      attr_reader :loader
+      def adapter
+        @adapter ||= Reins::Adapters::Driven::Zeitwerk::Autoloader.new(
+          reload_classes: Reins.config.reload_classes
+        )
+      end
+
+      attr_writer :adapter
 
       def setup(paths)
-        return if paths.empty?
-
-        @loader = Zeitwerk::Loader.new
-        paths.each { |p| @loader.push_dir(p) if Dir.exist?(p) }
-        @loader.enable_reloading if Reins.config.reload_classes
-        @loader.setup
+        adapter.setup(paths)
       end
 
       def eager_load!
-        @loader&.eager_load
+        adapter.eager_load!
       end
 
       def reload!
-        @loader&.reload
+        adapter.reload!
       end
 
       def reset!
-        @loader&.unload
-        @loader = nil
+        adapter.reset!
+        @adapter = nil
+      end
+
+      # Internal — used by tests that bypass the public Reins::Autoloader
+      # facade and inspect the underlying loader.
+      def loader
+        adapter.instance_variable_get(:@loader)
       end
     end
   end

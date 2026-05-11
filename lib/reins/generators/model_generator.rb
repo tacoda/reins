@@ -1,4 +1,6 @@
-require "fileutils"
+require "reins/core/generators/blueprint"
+require "reins/core/generators/blueprint_writer"
+require "reins/adapters/driven/filesystem/real"
 
 module Reins
   module Generators
@@ -6,12 +8,6 @@ module Reins
       def initialize(name, fields = [])
         @name = name
         @fields = fields.map { |f| f.split(":", 2) }
-      end
-
-      def run
-        write_model
-        write_migration
-        write_spec
       end
 
       def model_class_name
@@ -26,19 +22,27 @@ module Reins
         pluralize(model_file_basename)
       end
 
-      private
-
-      def write_model
-        path = "app/models/#{model_file_basename}.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, "class #{model_class_name} < ApplicationRecord\nend\n")
+      def blueprint
+        bp = Reins::Core::Generators::Blueprint.new
+        bp.add_file("app/models/#{model_file_basename}.rb", model_content)
+        bp.add_file(migration_path, migration_content)
+        bp.add_file("spec/models/#{model_file_basename}_spec.rb", spec_content)
+        bp
       end
 
-      def write_migration
+      def run(file_system: Reins::Adapters::Driven::Filesystem::Real.new)
+        Reins::Core::Generators::BlueprintWriter.new(file_system).write(blueprint)
+      end
+
+      private
+
+      def model_content
+        "class #{model_class_name} < ApplicationRecord\nend\n"
+      end
+
+      def migration_path
         timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S")
-        path = "db/migrate/#{timestamp}_create_#{table_name}.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, migration_content)
+        "db/migrate/#{timestamp}_create_#{table_name}.rb"
       end
 
       def migration_content
@@ -53,12 +57,6 @@ module Reins
             end
           end
         RUBY
-      end
-
-      def write_spec
-        path = "spec/models/#{model_file_basename}_spec.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, spec_content)
       end
 
       def spec_content

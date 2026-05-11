@@ -1,0 +1,183 @@
+## Path Scope
+
+This rule auto-loads when touching:
+- `lib/reins/core/**`
+- `lib/reins/ports/**`
+- `lib/reins/adapters/**`
+- `spec/reins/core/**`, `spec/reins/adapters/**`, `spec/reins/ports/**`
+
+---
+
+# Hexagonal Architecture
+
+Reins is a **Cockburn-strict hexagon**: a pure application core, explicit ports, swappable adapters.
+
+```
+            +-------------------+
+  driving   |    application    |   driven
+ adapters → |       core        | → adapters
+            +-------------------+
+```
+
+The user-facing API (`Reins::Controller`, `Reins::Model::Base`, `route { ... }`) stays Rails-shaped. The hexagon is **internal structure** — app authors don't see it unless they want to plug in their own adapters.
+
+## Layout
+
+```
+lib/reins/
+├── core/                # pure — no rack/sqlite/erubis/puma/thor/fileutils/zeitwerk
+├── ports/
+│   ├── driving/         # HttpApp, CommandInvoker
+│   └── driven/          # Repository, SchemaInspector, TemplateStore, …
+└── adapters/
+    ├── driving/         # rack/, thor/
+    └── driven/          # sqlite/, memory/, filesystem/, erubis/, puma/, system/
+```
+
+## The Three Hard Rules
+
+1. **The core is pure.** No file under `lib/reins/core/**` may `require "rack" | "sqlite3" | "erubis" | "puma" | "thor" | "fileutils" | "zeitwerk"`, or reference those top-level constants. The `core_boundary_spec` enforces this — never weaken it.
+2. **Dependencies point inward.** `core/` never reaches into `adapters/`. `ports/` never reaches into `adapters/` or `core/`. `adapters/` may depend on `ports/` and `core/`. The composition root (`Reins::Application`) is the only place that wires concrete adapters into the core.
+3. **Cross a port with a value.** Anything passing through a port is a Ruby value — a `Request`, `Response`, `Query`, `Template::Source`, `Blueprint::File`. Not a Rack env. Not a `SQLite3::Statement`. The adapter does the translation on each side.
+
+## Adding a new port
+
+A port is a Ruby module under `lib/reins/ports/{driving,driven}/<name>.rb` that **extends `Reins::Port`** and declares its `direction` and `contract`:
+
+```ruby
+require "reins/port"
+
+module Reins
+  module Ports
+    module Driven
+      module Repository
+        extend Reins::Port
+
+        direction :driven
+
+        contract  find_all:    1,
+                  insert:      2,
+                  update:      4,
+                  delete:      3,
+                  count:       1,
+                  pluck:       2,
+                  transaction: 0
+      end
+    end
+  end
+end
+```
+
+The DSL sets `DIRECTION` and `CONTRACT` constants, freezes the module, and registers the port so `Reins::Port.driven` / `.driving` / `.all` find it. Adapter generators read `CONTRACT` to scaffold method stubs and contract specs.
+
+For ports whose contract includes special method names (`[]`, `key?`, `<<`, etc.), pass them via Hash literal:
+
+```ruby
+contract(
+  :[]    => 1,
+  :fetch => -1,
+  :key?  => 1
+)
+```
+
+Prefer the CLI: `reins generate port NAME [--driving|--driven]`. The default is `--driven`.
+
+## Adding a new adapter
+
+An adapter implements a port. It lives under `lib/reins/adapters/{driving,driven}/<tech>/<name>.rb`, `include`s the port module, and defines every method named in the contract. Contract specs (`spec/reins/adapters/.../*_spec.rb`) assert this:
+
+```ruby
+it "responds to every method on the FOO port contract" do
+  Reins::Ports::Driven::Foo::CONTRACT.each_key do |name|
+    expect(adapter).to respond_to(name), "missing #{name}"
+  end
+end
+```
+
+Prefer the CLI: `reins generate adapter NAME --port=PORT`.
+
+## Presets
+
+Common port+adapter pairs ship as named presets. Use them — don't reinvent:
+
+| Flag | Generates |
+|---|---|
+| `--rack` | `Ports::Driving::HttpApp` + `Adapters::Driving::Rack::App` |
+| `--thor` | `Ports::Driving::CommandInvoker` + `Adapters::Driving::Thor::Cli` |
+| `--sqlite` | `Ports::Driven::Repository` (+ `SchemaInspector`, `SchemaMigrator`) + `Adapters::Driven::Sqlite::*` |
+| `--memory` | In-memory `Repository`, `FileSystem`, `SchemaInspector` (test adapters) |
+| `--puma` | `Ports::Driven::Server` + `Adapters::Driven::Puma::Server` |
+| `--filesystem` | `Ports::Driven::FileSystem` + `Adapters::Driven::Filesystem::Real` |
+| `--erubis` | `Ports::Driven::TemplateEngine` + `Adapters::Driven::Erubis::TemplateEngine` |
+| `--clock` | `Ports::Driven::Clock` + `Adapters::Driven::System::Clock` (+ `FixedClock`) |
+| `--env` | `Ports::Driven::EnvReader` + `Adapters::Driven::System::EnvReader` |
+
+`reins generate port --list` prints the registry.
+
+## Profiles and the Configurator
+
+`Reins::Application.new(profile:, adapters:)` selects a named **profile** — a Hash of (gems, adapter-Procs) — and applies optional overrides. Shipped profiles:
+
+- `:standard` (default) — Rack + SQLite + Thor + Puma + Erubis + Filesystem + System + Zeitwerk. Default for `reins new`.
+- `:slim` — empty adapter map. `reins new myapp --slim` uses this; the generated Gemfile pins only `reins-web` and `rackup` and the developer wires every adapter themselves.
+- `:test` — in-memory adapters for everything that has one.
+
+Each profile entry is a Proc (lazy) so adapters can depend on runtime resources (the database connection, for example) without being constructed at registry-load time.
+
+`Reins::Configurator` is the translator from Hash declarations to wired instances. Values in the Hash can be:
+
+- an instance — stored as-is
+- a Class — instantiated with no-arg `.new`
+- a Proc/lambda — called lazily; the result is stored
+
+`Configurator#load(path)` reads a Ruby config file whose last expression is a Hash and applies it. This is how app authors will wire custom adapters in `config/adapters.rb`:
+
+```ruby
+# config/adapters.rb
+{
+  clock:    -> { MyApp::FixedClock.new },
+  repository: PostgresRepository  # a Class — instantiated at boot
+}
+```
+
+```ruby
+# config/application.rb
+class Blog::Application < Reins::Application
+end
+
+app = Blog::Application.new(profile: :standard)
+Reins::Configurator.new(app.adapters).load("config/adapters.rb") if File.exist?("config/adapters.rb")
+```
+
+App-author overrides can also be passed inline:
+
+```ruby
+app = Blog::Application.new(
+  profile: :standard,
+  adapters: { clock: MyFixedClock.new }
+)
+```
+
+## Tests
+
+- Unit-test the core against in-memory adapters (`Memory::Repository`, `Memory::FileSystem`). The core never sees disk or SQLite in a unit spec.
+- Unit-test each adapter against its port: every method named in `CONTRACT` must be defined.
+- Integration-test through the driving adapter (`Adapters::Driving::Rack::App`) for HTTP behavior; through `Filesystem::Real` for generators on disk.
+- Test doubles for arbitrary ports come from `reins generate test PORT_NAME` — emits a `<Port>Double` class (records `#calls`, configurable return values via `returns:`) plus a use-case spec template that wires the double into `Application.new(profile: :test)` through the labeled `app.adapter(:port_key)` accessor.
+
+## Traceability and failure modes
+
+The boundary is enforceable at runtime too — not just at boot.
+
+- `Reins::Application#adapter(key)` — fetch a wired adapter by its conventional key. Raises `Reins::AdapterMissing` with a labeled message naming the profile and listing currently-wired keys when nothing is configured. Prefer this over `app.adapters[:key]` (which returns nil silently).
+- `Reins::Application#validate_adapters!` — for each driven port, asserts the wired adapter responds to every method in the port's `CONTRACT`. Called automatically from `Application.new(validate: true)` (the default); raises `Reins::ContractViolation` on a partially-built adapter at *boot*, not at first use. Pass `validate: false` for specs that intentionally wire something incomplete.
+- `Reins::Application#describe_adapters` — returns a multi-line dump of the profile and every wired adapter. Useful for `bin/console`, debug printing, and CI diagnostics.
+- `Reins::Port#adapter_key` — derives the conventional adapter slot name from the port's const name (`Reins::Ports::Driven::SchemaInspector.adapter_key == :schema_inspector`). The validation walk uses this to map a port to its slot.
+
+## What NOT to do
+
+- Don't add an adapter that bypasses its port. If `Sqlite::Repository` needs a method the `Repository` port doesn't expose, add it to the contract first, audit existing adapters, then implement.
+- Don't smuggle infrastructure into the core via a "convenience" require. The boundary spec will catch it; weakening the boundary spec is a code-review red flag.
+- Don't let `Reins::Controller` or `Reins::Model::Base` reach into a concrete adapter (`Reins::Database.connection`, `SQLite3::*`). They depend on the wired port — that's it.
+- Don't make adapter generators "smart". They scaffold the contract methods raising `NotImplementedError` and let the implementer fill in the body. Cleverness here makes future ports harder to add.
+- Don't hardcode gems in `AppGenerator#gemfile`. The Gemfile is derived from the selected profile's `:gems` list. New adapters that the framework ships need a profile entry with their gem dependency.

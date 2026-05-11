@@ -43,12 +43,11 @@ Tell objects what to do instead of querying their state and deciding for them. E
 
 ## Project-Specific Patterns
 
-Reins is a Rack application that calls into user code. The framework's own conventions:
+Reins is a **Cockburn-strict hexagon** wearing a Rails-shaped surface. See `.claude/rules/hexagon.md` for the architectural rules — the principles below sit on top of that structure.
 
-- **Rack-app composition.** Everything ultimately resolves to a callable that returns `[status, headers, body]`. `Reins::Application#call` delegates to `RouteObject#check_url`, which returns either a `Proc` or a `Controller.action(...)` proc. Add new request-handling capabilities by composing into this chain — do not bypass it.
-- **Routing DSL.** Routes are defined inside `route { match "...", "controller#action" }`. M1 adds verb-scoped DSL (`get`/`post`/...) and resource expansion. Keep `RouteObject` as the single source of truth for URL → callable resolution.
-- **Controller actions are Rack apps.** `Controller.action(act, rp)` returns a proc usable wherever a Rack app is expected. The `dispatch` method is the only place that decides between an explicit `response(...)` and an action's return value — preserve that single decision point when extending controller behavior.
-- **Views are dumb.** `Reins::View` exists to evaluate a template against a set of instance variables. Logic belongs in controllers or helpers, not in the view class.
-- **Autoloading.** `lib/reins/dependencies.rb` overrides `Object.const_missing` to lazy-require by underscored name. M7 replaces this with a Zeitwerk-style loader; until then, every file under `lib/reins/` should be requirable on its own and define exactly one top-level constant.
-- **No global mutable state in lib/reins.** The current `DB = SQLite3::Database.new "test.db"` global is debt — M0 extracts it into `Reins::Database`. New framework code must be configurable, not globally bound.
-- **Deep modules over wide.** Prefer one well-named class with rich behavior over several thin wrappers. The framework gets used through a small surface; keep that surface small even when the implementation grows.
+- **Dependencies point inward.** Adapters depend on ports; ports stand alone; the core depends on nothing infrastructural. The composition root (`Reins::Application`) is the only place concrete adapters get wired into the core. New framework code does not bypass this.
+- **Cross a port with a value.** Anything passing through a driven port is a Ruby value object — a `Query`, `Template::Source`, `Blueprint::File`, `Request`, `Response`. Not a Rack env, not a `SQLite3::Statement`. The adapter does the translation on each side. This is the rule that keeps the core pure.
+- **Deep modules over wide.** Prefer one well-named class with rich behavior over several thin wrappers. Ports themselves are deliberately narrow (a `CONTRACT` of a handful of methods) precisely so the surface stays small as implementations grow.
+- **Rails-shaped public surface.** App authors write `class FooController < Reins::Controller`, `class User < Reins::Model::Base`, `route { resources :users }`. They should rarely need to know the hexagon is there. When they do — to plug in their own port/adapter — the CLI generators make it a 30-second affair.
+- **No global mutable state.** `Reins.config`, `Reins.logger`, `Reins.application` are accessed through a controlled singleton wired at boot. The core never reaches for a global; every dependency is injected at the composition root.
+- **Views are dumb.** `Reins::View` evaluates a template against a set of instance variables. Logic belongs in controllers or helpers, not in the view class. (The template engine lives behind `Ports::Driven::TemplateEngine`; template loading behind `Ports::Driven::TemplateStore`.)

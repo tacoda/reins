@@ -1,4 +1,6 @@
-require "fileutils"
+require "reins/core/generators/blueprint"
+require "reins/core/generators/blueprint_writer"
+require "reins/adapters/driven/filesystem/real"
 
 module Reins
   module Generators
@@ -8,10 +10,18 @@ module Reins
         @actions = actions
       end
 
-      def run
-        write_controller
-        @actions.each { |action| write_view(action) }
-        write_spec
+      def blueprint
+        bp = Reins::Core::Generators::Blueprint.new
+        bp.add_file("app/controllers/#{file_basename}_controller.rb", controller_content)
+        @actions.each do |action|
+          bp.add_file("app/views/#{file_basename}/#{action}.html.erb", "")
+        end
+        bp.add_file("spec/controllers/#{file_basename}_controller_spec.rb", spec_content)
+        bp
+      end
+
+      def run(file_system: Reins::Adapters::Driven::Filesystem::Real.new)
+        Reins::Core::Generators::BlueprintWriter.new(file_system).write(blueprint)
       end
 
       private
@@ -28,12 +38,6 @@ module Reins
         name.split("_").map(&:capitalize).join
       end
 
-      def write_controller
-        path = "app/controllers/#{file_basename}_controller.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, controller_content)
-      end
-
       def controller_content
         methods = @actions.map { |a| "  def #{a}\n  end" }.join("\n\n")
         body = methods.empty? ? "" : "\n#{methods}\n"
@@ -43,16 +47,8 @@ module Reins
         RUBY
       end
 
-      def write_view(action)
-        path = "app/views/#{file_basename}/#{action}.html.erb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, "")
-      end
-
-      def write_spec
-        path = "spec/controllers/#{file_basename}_controller_spec.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, <<~RUBY)
+      def spec_content
+        <<~RUBY
           require "spec_helper"
 
           RSpec.describe #{controller_class}, type: :controller do

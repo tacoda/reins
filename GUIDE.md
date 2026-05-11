@@ -364,7 +364,233 @@ You've now exercised every layer of Reins:
 - **Environments / autoloading** — Zeitwerk-backed, `Reins.env`, `Reins.config`
 - **Testing** — `type: :model`, `type: :controller`, custom matchers
 
-To go deeper, read the source — `lib/reins/` is intentionally small (one file per concern) and the specs in `spec/reins/` double as runnable examples.
+To go deeper, read the source — `lib/reins/` is laid out as a hexagon (see below) and the specs in `spec/reins/` double as runnable examples.
+
+## Architecture
+
+Reins 2.0 is internally a **Cockburn-strict hexagon**: pure core, explicit ports, swappable adapters. You don't have to think about this to use the framework — `Reins::Controller`, `Reins::Model::Base`, and `route { resources :foo }` work exactly like you'd expect. The architecture matters when you want to test in isolation, swap out an adapter (in-memory database for tests, a different template engine, a fake clock), or add your own port for a domain capability.
+
+### Why hexagonal?
+
+Alistair Cockburn named the pattern in 2005 to describe a single, recurring problem: applications get strangled by their I/O. The HTTP framework, the database, the template engine, the queue — each ends up touching every layer of the codebase, so a change to "use a different database" becomes a change everywhere. Hexagonal flips this: the **application** is one thing, and every piece of I/O is an **adapter** the application can swap. Driving adapters (the things that initiate calls into the app — HTTP, CLI, a message queue) live on one side. Driven adapters (the things the app initiates calls *to* — the database, the file system, a third-party API) live on the other. Between the two: the **ports**, which are the application's interface contracts.
+
+The "strict" in *Cockburn-strict* means three rules are non-negotiable:
+
+1. The core has no knowledge of the outside world — no infrastructure libraries imported, no `Rack`/`SQLite3`/`Puma` constants referenced.
+2. Dependencies point inward. Adapters depend on ports; ports depend on nothing; the core depends on the ports it consumes.
+3. Anything crossing a port is a plain value object, not an infrastructure type.
+
+The payoff: the entire core can be tested without booting Rack, opening a database, or touching disk. Swapping SQLite for Postgres becomes "write a new adapter against the existing Repository port." Adding a new capability (say, payment processing) becomes "define a port, write the adapter."
+
+```
+              +-------------------+
+   driving    |    application    |   driven
+  adapters →  |       core        | →  adapters
+              +-------------------+
+```
+
+- **Core** (`lib/reins/core/**`) — pure domain. Knows nothing about Rack, SQLite, Erubis, Puma, Thor, or the filesystem. The boundary is enforced by a spec (`spec/reins/core_boundary_spec.rb`); the core can't even `require` those libraries.
+- **Ports** (`lib/reins/ports/{driving,driven}/**`) — Ruby modules with a frozen `CONTRACT` hash listing the methods adapters must implement. Driving ports (`HttpApp`, `CommandInvoker`) are how the outside world talks to the core. Driven ports (`Repository`, `SchemaInspector`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`, `Autoloader`) are how the core reaches the outside.
+- **Adapters** (`lib/reins/adapters/{driving,driven}/**`) — concrete implementations. `Adapters::Driving::Rack::App` is the Rack-facing entry point; `Adapters::Driven::Sqlite::Repository` is the default persistence adapter; `Adapters::Driven::Memory::Repository` is the in-memory one used by tests.
+
+### Profiles
+
+`Reins::Application` picks a **profile** at boot — a named bundle of default adapters:
+
+| Profile | Repository | Server | Template | Clock | EnvReader |
+|---|---|---|---|---|---|
+| `:standard` (default) | SQLite | Puma | Erubis + Filesystem | System | System |
+| `:test` | Memory | (none) | Erubis + Filesystem | Fixed | Memory |
+| `:slim` | nil | nil | nil | nil | nil |
+
+`reins new myapp` uses `:standard`; `reins new myapp --slim` uses `:slim` so every adapter slot is visible (and nil) in your `config/application.rb` — you fill them in yourself.
+
+### Adding your own port and adapter
+
+App authors can extend the hexagon. Say you're integrating Stripe:
+
+```sh
+reins generate port payment_gateway          # → app/ports/payment_gateway.rb
+reins generate adapter stripe --port=payment_gateway
+                                              # → app/adapters/stripe.rb
+```
+
+The port file declares its direction and contract through a small DSL:
+
+```ruby
+require "reins/port"
+
+module PaymentGateway
+  extend Reins::Port
+
+  direction :driven
+
+  contract  charge: 3,   # (amount, currency, source_id)
+            refund: 1    # (charge_id)
+end
+```
+
+The `extend Reins::Port` line is the visible signal that this module is a port. `direction` and `contract` set up the constants (`DIRECTION`, `CONTRACT`) and register the port in `Reins::Port.all`.
+
+The adapter `include`s the port and implements each method. A test adapter is the same pattern with an in-memory store. Wire it at the composition root in `config/application.rb`:
+
+```ruby
+class Blog::Application < Reins::Application
+  profile :standard
+
+  adapters do |a|
+    a.payment_gateway = MyApp::Adapters::Stripe.new(api_key: ENV.fetch("STRIPE_KEY"))
+  end
+end
+```
+
+The framework's own ports ship as presets — useful when you want to swap one out wholesale or learn the pattern:
+
+```sh
+reins generate port --rack          # framework's HTTP driving port + Rack adapter
+reins generate port --sqlite        # Repository + SchemaInspector + SchemaMigrator + SQLite adapters
+reins generate port --puma          # Server port + Puma adapter
+reins generate port --memory        # in-memory test adapters for repository, file_system, etc.
+reins generate port --list          # print every preset
+```
+
+The contract behind each preset is the same idea: a port module with a `CONTRACT` hash, one or more adapters that `include` it and define every method. The generators write the scaffold; you fill in the body.
+
+### Testing your adapter
+
+Every adapter spec asserts the port contract:
+
+```ruby
+it "responds to every method on the PaymentGateway port contract" do
+  PaymentGateway::CONTRACT.each_key do |name|
+    expect(adapter).to respond_to(name), "missing #{name}"
+  end
+end
+```
+
+That's the contract test. Beyond that, write the behavior specs you'd write for any class — feed input, check output.
+
+### Autoloading and dependency injection
+
+These are sometimes confused. They solve different problems and Reins uses both, at different layers:
+
+- **Zeitwerk** (autoloading) answers *where does this constant's file live?* Used inside your app's `app/` tree so you don't have to `require` files. Convention-over-configuration.
+- **Dependency injection** (Reins::Application's composition root) answers *which implementation does this port get?* Used to swap adapters at boot — production uses SQLite, tests use an in-memory adapter, your staging environment might use a third.
+
+The autoloader itself lives behind a port (`Reins::Ports::Driven::Autoloader`) so the core stays pure of Zeitwerk. The default adapter wraps Zeitwerk; a noop adapter is available for tests that don't want the autoloader running.
+
+## Where domain logic goes
+
+`reins new` lays down five `app/` subdirectories beyond the Rails-shaped trio:
+
+```
+app/
+├── controllers/        # HTTP request handling — thin
+├── models/             # ORM-backed records
+├── views/              # templates
+├── use_cases/          # application service objects
+├── entities/           # pure domain objects (when not the ORM models)
+├── values/             # value objects (Money, Email, …)
+├── ports/              # your own port modules
+└── adapters/           # your own adapter classes
+```
+
+Reins doesn't require you to use the new ones. For a CRUD action you can do everything in the controller and the model, exactly like Rails. The new layers earn their keep when the controller starts coordinating across multiple collaborators or when a piece of domain logic needs a name.
+
+### When to add a use case
+
+A controller action is doing too much when it:
+
+- coordinates two or more collaborators (model + external API, model + email, two models),
+- has branches that read like business rules ("if the user has a paid plan…"),
+- needs setup or teardown that isn't HTTP-shaped.
+
+Pull it into `app/use_cases/`:
+
+```sh
+reins generate use_case CreatePost
+reins generate use_case ChargePayment payment_gateway clock
+```
+
+`reins generate use_case NAME [dep ...]` writes the use case and a spec. The use case is a small class that takes its collaborators via keyword args (defaulting to `Reins.application.adapter(:dep)`) and exposes a `#call` entry point:
+
+```ruby
+class CreatePost
+  def initialize(
+    repository: Reins.application.adapter(:repository),
+    clock:      Reins.application.adapter(:clock)
+  )
+    @repository = repository
+    @clock      = clock
+  end
+
+  def call(attrs)
+    @repository.insert("posts", attrs.merge("created_at" => @clock.now))
+  end
+end
+```
+
+The controller becomes:
+
+```ruby
+class PostsController < ApplicationController
+  def create
+    CreatePost.new.call(params.require(:post).permit(:title, :body, :author_id))
+    redirect_to "/posts"
+  end
+end
+```
+
+The use case is unit-testable in isolation. The generated spec wires in-memory adapters from the `:test` profile, so you can assert on `@repository.calls` and `@clock.now` without booting Rack or opening SQLite:
+
+```ruby
+RSpec.describe CreatePost do
+  let(:repository) { Reins::Adapters::Driven::Memory::Repository.new }
+  let(:clock)      { Reins::Adapters::Driven::Memory::Clock.new(Time.utc(2026, 1, 1)) }
+  let(:use_case)   { described_class.new(repository: repository, clock: clock) }
+
+  it "stamps created_at and inserts" do
+    use_case.call("title" => "Hi")
+    # …
+  end
+end
+```
+
+### Entities and values
+
+`app/entities/` is for pure domain objects when you want them separate from the ORM. A small app might never need this — the model classes are fine entities. A larger one will, once a `User` has rich behavior that doesn't depend on the database.
+
+`app/values/` is for value objects: `Money`, `Email`, `Url`. Built with `Data.define` (Ruby 3.2+) or a small class. Used wherever a primitive (Integer, String) is starting to lose meaning.
+
+Neither directory has a generator — they're cheap enough to hand-write, and the right shape depends on your domain.
+
+### Ports and adapters in app/
+
+`app/ports/` and `app/adapters/` are where you declare your own ports (e.g. `PaymentGateway`) and their adapters (`StripeAdapter`, `BraintreeAdapter`, `StripeFake` for tests). The `reins generate port` and `reins generate adapter` commands (covered above) scaffold these.
+
+Once you have a port + adapter pair, wire it at the composition root in `config/application.rb`:
+
+```ruby
+class Blog::Application < Reins::Application
+end
+
+app = Blog::Application.new(
+  profile: :standard,
+  adapters: { payment_gateway: StripeAdapter.new(api_key: ENV.fetch("STRIPE_KEY")) }
+)
+```
+
+Now `Reins.application.adapter(:payment_gateway)` resolves to your wired Stripe adapter everywhere — including the default constructor args of any use case that takes `payment_gateway:`.
+
+### Further reading
+
+If you've read this far and want to go deeper:
+
+- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/) — Alistair Cockburn's original write-up. The canonical reference. Short.
+- [Hexagonal Architecture: three principles and an implementation example](https://octo.com/insights/hexagonal-architecture-three-principles-and-an-implementation-example) — a clearer, longer treatment of the strict variant.
+- [Ports & Adapters Architecture, Tom Stuart](https://blog.thecodewhisperer.com/permalink/ports-adapters-and-the-functional-core-imperative-shell) — connects hexagonal to functional core / imperative shell.
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and [Onion Architecture](https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/) — Cockburn's hexagon predates both. The shapes differ; the rule (inward-pointing dependencies, infrastructure at the edges) is the same.
+- [Hanami](https://hanamirb.org/) — a Ruby framework that takes a hexagonal-adjacent shape (providers, slices) further than Reins. Worth reading alongside Reins to see two interpretations of the same idea.
 
 ## Common errors
 
