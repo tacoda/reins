@@ -4,6 +4,7 @@ require "reins/adapters/driven/memory/schema_inspector"
 require "reins/adapters/driven/filesystem/real"
 require "reins/adapters/driven/sqlite/repository"
 require "reins/adapters/driven/sqlite/schema_inspector"
+require "reins/adapters/driven/sqlite/schema_migrator"
 
 module Reins
   module Adapters
