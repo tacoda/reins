@@ -10,6 +10,7 @@ require "reins/adapters/driven/sqlite/schema_migrator"
 require "reins/adapters/driven/erubis/template_engine"
 require "reins/adapters/driven/zeitwerk/autoloader"
 require "reins/adapters/driven/noop/autoloader"
+require "reins/adapters/driving/rack/app"
 
 module Reins
   module Adapters
