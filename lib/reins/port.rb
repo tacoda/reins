@@ -29,16 +29,19 @@ module Reins
         @registry << base
       end
 
+      # Registered, *named* ports only. Anonymous modules that extend
+      # Reins::Port (e.g. test fixtures) are filtered out so they don't
+      # pollute introspection done by the application or generators.
       def all
-        @registry.dup
+        @registry.select(&:name)
       end
 
       def driven
-        @registry.select { |p| p.direction == :driven }
+        all.select { |p| p.direction == :driven }
       end
 
       def driving
-        @registry.select { |p| p.direction == :driving }
+        all.select { |p| p.direction == :driving }
       end
 
       def reset!
@@ -48,6 +51,13 @@ module Reins
 
     def port?
       true
+    end
+
+    # Conventional adapter slot name for this port — derived from the const
+    # name. SchemaInspector → :schema_inspector. Used by Application to map
+    # a port to the adapter key in its adapter graph.
+    def adapter_key
+      Reins.to_underscore(name.split("::").last).to_sym
     end
 
     def direction(value = nil)

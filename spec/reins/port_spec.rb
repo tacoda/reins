@@ -85,16 +85,39 @@ RSpec.describe Reins::Port do
     end
   end
 
+  describe "#adapter_key" do
+    it "returns the conventional snake_case Symbol from the port's const name" do
+      expect(Reins::Ports::Driven::Repository.adapter_key).to eq(:repository)
+      expect(Reins::Ports::Driven::SchemaInspector.adapter_key).to eq(:schema_inspector)
+      expect(Reins::Ports::Driving::HttpApp.adapter_key).to eq(:http_app)
+      expect(Reins::Ports::Driving::CommandInvoker.adapter_key).to eq(:command_invoker)
+    end
+  end
+
   describe "registry" do
-    it "lists every extended module in .all" do
-      port = fresh_port
+    def named_port(name)
+      Module.new.tap do |m|
+        m.extend(Reins::Port)
+        Reins.const_set(name, m)
+      end
+    end
+
+    after do
+      %i[PortSpecRegA PortSpecRegB].each do |sym|
+        Reins.send(:remove_const, sym) if Reins.const_defined?(sym, false)
+      end
+    end
+
+    it "lists every named extended module in .all (anonymous modules excluded)" do
+      port = named_port(:PortSpecRegA)
       expect(Reins::Port.all).to include(port)
+      expect(Reins::Port.all).not_to include(fresh_port)
     end
 
     it ".driven and .driving filter by declared direction" do
-      driven_port = fresh_port
+      driven_port = named_port(:PortSpecRegA)
       driven_port.direction :driven
-      driving_port = fresh_port
+      driving_port = named_port(:PortSpecRegB)
       driving_port.direction :driving
 
       expect(Reins::Port.driven).to include(driven_port)

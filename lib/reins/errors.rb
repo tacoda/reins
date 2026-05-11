@@ -5,6 +5,8 @@ module Reins
   class ParameterMissing < Error; end
   class SessionMiddlewareMissing < Error; end
   class IrreversibleMigration < Error; end
+  class AdapterMissing < Error; end
+  class ContractViolation < Error; end
 
   module Model
     class RecordNotFound < Reins::Error; end
