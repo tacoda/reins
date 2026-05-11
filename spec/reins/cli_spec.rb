@@ -231,16 +231,15 @@ RSpec.describe Reins::Cli do
       Object.send(:remove_const, :Myapp) if Object.const_defined?(:Myapp)
     end
 
-    it "test invokes `bundle exec rspec`" do
-      called_args = nil
-      # rubocop:disable RSpec/AnyInstance
-      allow_any_instance_of(Reins::Cli).to receive(:system) do |_, *args|
-        called_args = args
-        true
-      end
-      # rubocop:enable RSpec/AnyInstance
+    it "test invokes `bundle exec rspec` through the ProcessRunner port" do
+      fake_runner = Reins::Adapters::Driven::Memory::ProcessRunner.new
+      Reins::Cli.invoker = Reins::Core::Cli::Invoker.new(process_runner: fake_runner)
+
       Reins::Cli.start(%w[test])
-      expect(called_args.first(3)).to eq(%w[bundle exec rspec])
+
+      expect(fake_runner.calls.first.first(3)).to eq(%w[bundle exec rspec])
+    ensure
+      Reins::Cli.reset_adapters!
     end
 
     it "db:schema:dump writes db/schema.rb" do
