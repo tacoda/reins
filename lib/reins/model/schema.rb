@@ -7,7 +7,7 @@ module Reins
 
       module ClassMethods
         def columns
-          @columns ||= load_columns
+          @columns ||= Reins::Model::Base.schema_inspector.columns(table_name)
         end
 
         def column_names
@@ -26,15 +26,6 @@ module Reins
         end
 
         private
-
-        def load_columns
-          rows = Reins::Database.connection.execute("PRAGMA table_info(#{table_name})")
-          rows.each_with_object({}) do |row, h|
-            name = row.is_a?(Hash) ? row["name"] : row[1]
-            type = row.is_a?(Hash) ? row["type"] : row[2]
-            h[name] = type
-          end
-        end
 
         def truthy?(value)
           [1, "1", true, "true", "t"].include?(value)

@@ -30,7 +30,7 @@ module Reins
         end
 
         def transaction(&)
-          Reins::Database.connection.transaction(&)
+          Reins::Model::Base.repository.transaction(&)
         end
 
         def instantiate_from_row(row)
@@ -63,8 +63,7 @@ module Reins
 
       def destroy
         run_callbacks(:before_destroy) if respond_to?(:run_callbacks)
-        sql = "DELETE FROM #{self.class.table_name} WHERE #{self.class.primary_key} = ?"
-        Reins::Database.connection.execute(sql, [id])
+        Reins::Model::Base.repository.delete(self.class.table_name, self.class.primary_key, id)
         @persisted = false
         run_callbacks(:after_destroy) if respond_to?(:run_callbacks)
         self
@@ -107,23 +106,21 @@ module Reins
 
       def insert_record
         touch_timestamps_for_create
-        cols = @attributes.keys - [self.class.primary_key]
-        values = cols.map { |c| @attributes[c] }
-        placeholders = (["?"] * cols.size).join(", ")
-        sql = "INSERT INTO #{self.class.table_name} (#{cols.join(', ')}) VALUES (#{placeholders})"
-        db = Reins::Database.connection
-        db.execute(sql, values)
-        @attributes[self.class.primary_key] = db.last_insert_row_id
+        attrs_without_pk = @attributes.reject { |k, _| k == self.class.primary_key }
+        @attributes[self.class.primary_key] =
+          Reins::Model::Base.repository.insert(self.class.table_name, attrs_without_pk)
         @persisted = true
       end
 
       def update_record
         touch_timestamps_for_update
-        cols = @attributes.keys - [self.class.primary_key]
-        values = cols.map { |c| @attributes[c] }
-        set_clause = cols.map { |c| "#{c} = ?" }.join(", ")
-        sql = "UPDATE #{self.class.table_name} SET #{set_clause} WHERE #{self.class.primary_key} = ?"
-        Reins::Database.connection.execute(sql, values + [id])
+        attrs_without_pk = @attributes.reject { |k, _| k == self.class.primary_key }
+        Reins::Model::Base.repository.update(
+          self.class.table_name,
+          attrs_without_pk,
+          self.class.primary_key,
+          id
+        )
       end
 
       def touch_timestamps_for_create
