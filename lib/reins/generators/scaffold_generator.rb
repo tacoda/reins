@@ -1,20 +1,30 @@
-require "fileutils"
+require "reins/core/generators/blueprint"
+require "reins/core/generators/blueprint_writer"
+require "reins/adapters/driven/filesystem/real"
 require "reins/generators/model_generator"
 
 module Reins
   module Generators
     class ScaffoldGenerator
-      def initialize(name, fields = [])
+      ROUTES_PATH = "config/routes.rb".freeze
+
+      def initialize(name, fields = [], file_system: Reins::Adapters::Driven::Filesystem::Real.new)
         @name = name
         @fields = fields.map { |f| f.split(":", 2) }
+        @fs = file_system
       end
 
-      def run
-        ModelGenerator.new(@name, @fields.map { |n, t| "#{n}:#{t}" }).run
-        write_controller
-        write_views
-        write_form_partial
-        append_resources_route
+      def blueprint
+        bp = ModelGenerator.new(@name, @fields.map { |n, t| "#{n}:#{t}" }).blueprint
+        bp.add_file("app/controllers/#{table}_controller.rb", controller_content)
+        view_files.each { |path, content| bp.add_file(path, content) }
+        merged_routes = merged_routes_content
+        bp.add_file(ROUTES_PATH, merged_routes) if merged_routes
+        bp
+      end
+
+      def run(file_system: @fs)
+        Reins::Core::Generators::BlueprintWriter.new(file_system).write(blueprint)
       end
 
       private
@@ -29,12 +39,6 @@ module Reins
 
       def controller_class
         "#{table.split('_').map(&:capitalize).join}Controller"
-      end
-
-      def write_controller
-        path = "app/controllers/#{table}_controller.rb"
-        FileUtils.mkdir_p(File.dirname(path))
-        File.write(path, controller_content)
       end
 
       def controller_content
@@ -93,12 +97,14 @@ module Reins
         RUBY
       end
 
-      def write_views
-        FileUtils.mkdir_p("app/views/#{table}")
-        File.write("app/views/#{table}/index.html.erb", index_view)
-        File.write("app/views/#{table}/show.html.erb",  show_view)
-        File.write("app/views/#{table}/new.html.erb",   new_view)
-        File.write("app/views/#{table}/edit.html.erb",  edit_view)
+      def view_files
+        {
+          "app/views/#{table}/index.html.erb" => index_view,
+          "app/views/#{table}/show.html.erb" => show_view,
+          "app/views/#{table}/new.html.erb" => new_view,
+          "app/views/#{table}/edit.html.erb" => edit_view,
+          "app/views/#{table}/_form.html.erb" => form_partial
+        }
       end
 
       def index_view
@@ -128,10 +134,6 @@ module Reins
         "<%= render \"form\", record: @record %>\n"
       end
 
-      def write_form_partial
-        File.write("app/views/#{table}/_form.html.erb", form_partial)
-      end
-
       def form_partial
         field_lines = @fields.map do |name, type|
           input = case type
@@ -149,15 +151,13 @@ module Reins
         ERB
       end
 
-      def append_resources_route
-        path = "config/routes.rb"
-        return unless File.exist?(path)
+      def merged_routes_content
+        return nil unless @fs.exist?(ROUTES_PATH)
 
-        content = File.read(path)
-        return if content.include?("resources :#{table}")
+        content = @fs.read(ROUTES_PATH)
+        return content if content.include?("resources :#{table}")
 
-        new_content = content.sub(/^end\b/m, "  resources :#{table}\nend")
-        File.write(path, new_content)
+        content.sub(/^end\b/m, "  resources :#{table}\nend")
       end
 
       def pluralize(str)

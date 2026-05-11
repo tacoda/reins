@@ -1,23 +1,26 @@
-require "fileutils"
+require "reins/core/generators/blueprint"
+require "reins/core/generators/blueprint_writer"
+require "reins/adapters/driven/filesystem/real"
 
 module Reins
   module Generators
     class AppGenerator
+      EXECUTABLES = %w[bin/setup bin/console bin/reins].freeze
+
       def initialize(name)
         @name = name
         @target = File.expand_path(name)
       end
 
-      def run
-        FileUtils.mkdir_p(@target)
-        files.each do |path, content|
-          target = File.join(@target, path)
-          FileUtils.mkdir_p(File.dirname(target))
-          File.write(target, content)
-        end
-        FileUtils.chmod("+x", File.join(@target, "bin/setup"))
-        FileUtils.chmod("+x", File.join(@target, "bin/console"))
-        FileUtils.chmod("+x", File.join(@target, "bin/reins"))
+      def blueprint
+        bp = Reins::Core::Generators::Blueprint.new
+        files.each { |path, content| bp.add_file(path, content) }
+        EXECUTABLES.each { |path| bp.add_executable(path) }
+        bp
+      end
+
+      def run(file_system: Reins::Adapters::Driven::Filesystem::Real.new)
+        Reins::Core::Generators::BlueprintWriter.new(file_system).write(blueprint, root: @target)
       end
 
       def app_class_name
