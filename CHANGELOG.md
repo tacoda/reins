@@ -4,8 +4,34 @@
 
 A DX pass on the 2.0 hexagon: the explicit-port DSL now earns its keep by
 surfacing missing-adapter and broken-contract failures at boot rather than
-at first use, with labeled error messages that name the port. Adds a test
-generator for scaffolding spies and use-case specs.
+at first use, with labeled error messages that name the port. The
+composition root becomes the authoritative source of truth for which
+adapter the framework's own model/view layer uses. Adds generators for
+test doubles and use cases, and reserves directories under `app/` for
+domain layers app authors can populate as they grow.
+
+### Composition root is now authoritative
+
+The Application's adapter graph is no longer decorative. When an
+Application is constructed (e.g. via `config/application.rb`), the
+framework's own Model and View layers consult its wired adapters instead
+of building their own SQLite/Erubis defaults.
+
+- `Reins.current_application` — non-raising counterpart to
+  `Reins.application`; returns nil when no Application has been
+  constructed. Used by Model/View to consult the wired graph without
+  crashing in framework-internal specs.
+- `Reins::Model::Base.repository` / `.schema_inspector` / `.schema_migrator`
+  now resolve through `Reins.current_application&.adapters` before
+  falling back to the SQLite default. Explicit per-model overrides
+  still win.
+- `Reins::View#initialize` resolves `template_store` and
+  `template_engine` the same way.
+
+Net effect: `Reins::Application.new(profile: :test)` actually does what
+it says — every `Model.create!` now hits `Memory::Repository`, every
+`render` consults the memory template store. Before this, the test
+profile was theater.
 
 ### Traceability
 
@@ -26,7 +52,7 @@ generator for scaffolding spies and use-case specs.
   from the port's const name (`SchemaInspector` → `:schema_inspector`).
   The validation walk uses this to map a port to its slot.
 
-### Test generator
+### Generators
 
 - `reins generate test PORT_NAME` — scaffolds a `<Port>Double` class
   (under `spec/doubles/` in app context, `spec/reins/doubles/` in lib
@@ -34,6 +60,28 @@ generator for scaffolding spies and use-case specs.
   double includes the port module, records every call on its `#calls`
   attribute, and accepts configurable return values via the
   `returns:` constructor keyword — doubles as both spy and stub.
+- `reins generate use_case NAME [dep ...]` — scaffolds an application
+  service object plus its spec. The class takes its collaborators via
+  keyword args (defaulting to `Reins.application.adapter(:dep)`) and
+  exposes a `#call` entry point. The generated spec wires Memory
+  adapters from the `:test` profile.
+
+### App skeleton additions
+
+`reins new myapp` now lays down five additional empty directories under
+`app/`:
+
+- `app/use_cases/` — application service objects.
+- `app/entities/` — pure domain objects, separate from ORM models when
+  the domain warrants it.
+- `app/values/` — value objects (Money, Email, …).
+- `app/ports/` — your own port modules.
+- `app/adapters/` — your own adapter classes.
+
+None of these are mandatory. Reins doesn't dictate where domain logic
+goes — but the directories are there as a starting point. The GUIDE has
+a new "Where domain logic goes" section with the conventions and an
+end-to-end example.
 
 ### Errors added
 

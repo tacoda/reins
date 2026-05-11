@@ -70,6 +70,8 @@ reins generate port NAME [--driving | --driven]   # new port module
 reins generate adapter NAME --port=PORT           # new adapter for a port
 reins generate port --PRESET                      # rack | sqlite | thor | puma | …
 reins generate port --list                        # show every preset
+reins generate test PORT_NAME                     # spy + use-case spec for a port
+reins generate use_case NAME [dep ...]            # application service object
 
 reins generate config [--slim]             # write the default config block
 reins db:create / db:drop / db:migrate / db:rollback / db:schema:dump

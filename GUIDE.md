@@ -479,6 +479,109 @@ These are sometimes confused. They solve different problems and Reins uses both,
 
 The autoloader itself lives behind a port (`Reins::Ports::Driven::Autoloader`) so the core stays pure of Zeitwerk. The default adapter wraps Zeitwerk; a noop adapter is available for tests that don't want the autoloader running.
 
+## Where domain logic goes
+
+`reins new` lays down five `app/` subdirectories beyond the Rails-shaped trio:
+
+```
+app/
+├── controllers/        # HTTP request handling — thin
+├── models/             # ORM-backed records
+├── views/              # templates
+├── use_cases/          # application service objects
+├── entities/           # pure domain objects (when not the ORM models)
+├── values/             # value objects (Money, Email, …)
+├── ports/              # your own port modules
+└── adapters/           # your own adapter classes
+```
+
+Reins doesn't require you to use the new ones. For a CRUD action you can do everything in the controller and the model, exactly like Rails. The new layers earn their keep when the controller starts coordinating across multiple collaborators or when a piece of domain logic needs a name.
+
+### When to add a use case
+
+A controller action is doing too much when it:
+
+- coordinates two or more collaborators (model + external API, model + email, two models),
+- has branches that read like business rules ("if the user has a paid plan…"),
+- needs setup or teardown that isn't HTTP-shaped.
+
+Pull it into `app/use_cases/`:
+
+```sh
+reins generate use_case CreatePost
+reins generate use_case ChargePayment payment_gateway clock
+```
+
+`reins generate use_case NAME [dep ...]` writes the use case and a spec. The use case is a small class that takes its collaborators via keyword args (defaulting to `Reins.application.adapter(:dep)`) and exposes a `#call` entry point:
+
+```ruby
+class CreatePost
+  def initialize(
+    repository: Reins.application.adapter(:repository),
+    clock:      Reins.application.adapter(:clock)
+  )
+    @repository = repository
+    @clock      = clock
+  end
+
+  def call(attrs)
+    @repository.insert("posts", attrs.merge("created_at" => @clock.now))
+  end
+end
+```
+
+The controller becomes:
+
+```ruby
+class PostsController < ApplicationController
+  def create
+    CreatePost.new.call(params.require(:post).permit(:title, :body, :author_id))
+    redirect_to "/posts"
+  end
+end
+```
+
+The use case is unit-testable in isolation. The generated spec wires in-memory adapters from the `:test` profile, so you can assert on `@repository.calls` and `@clock.now` without booting Rack or opening SQLite:
+
+```ruby
+RSpec.describe CreatePost do
+  let(:repository) { Reins::Adapters::Driven::Memory::Repository.new }
+  let(:clock)      { Reins::Adapters::Driven::Memory::Clock.new(Time.utc(2026, 1, 1)) }
+  let(:use_case)   { described_class.new(repository: repository, clock: clock) }
+
+  it "stamps created_at and inserts" do
+    use_case.call("title" => "Hi")
+    # …
+  end
+end
+```
+
+### Entities and values
+
+`app/entities/` is for pure domain objects when you want them separate from the ORM. A small app might never need this — the model classes are fine entities. A larger one will, once a `User` has rich behavior that doesn't depend on the database.
+
+`app/values/` is for value objects: `Money`, `Email`, `Url`. Built with `Data.define` (Ruby 3.2+) or a small class. Used wherever a primitive (Integer, String) is starting to lose meaning.
+
+Neither directory has a generator — they're cheap enough to hand-write, and the right shape depends on your domain.
+
+### Ports and adapters in app/
+
+`app/ports/` and `app/adapters/` are where you declare your own ports (e.g. `PaymentGateway`) and their adapters (`StripeAdapter`, `BraintreeAdapter`, `StripeFake` for tests). The `reins generate port` and `reins generate adapter` commands (covered above) scaffold these.
+
+Once you have a port + adapter pair, wire it at the composition root in `config/application.rb`:
+
+```ruby
+class Blog::Application < Reins::Application
+end
+
+app = Blog::Application.new(
+  profile: :standard,
+  adapters: { payment_gateway: StripeAdapter.new(api_key: ENV.fetch("STRIPE_KEY")) }
+)
+```
+
+Now `Reins.application.adapter(:payment_gateway)` resolves to your wired Stripe adapter everywhere — including the default constructor args of any use case that takes `payment_gateway:`.
+
 ### Further reading
 
 If you've read this far and want to go deeper:
