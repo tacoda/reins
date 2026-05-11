@@ -4,15 +4,6 @@ module Reins
   class Migration
     class NotSupported < Reins::Error; end
 
-    SUPPORTED_TYPES = {
-      string: "VARCHAR(255)",
-      text: "TEXT",
-      integer: "INTEGER",
-      float: "FLOAT",
-      boolean: "BOOLEAN",
-      datetime: "DATETIME"
-    }.freeze
-
     def run_up
       if respond_to?(:up)
         up
@@ -42,51 +33,44 @@ module Reins
 
       td = TableDefinition.new(name)
       block&.call(td)
-      execute(td.to_sql)
-      td.indexes.each { |args| add_index(*args) }
+      schema_migrator.create_table(name, td.columns)
+      td.indexes.each { |args| schema_migrator.add_index(*args) }
     end
 
     def drop_table(name)
       return record_op(:drop_table, name) if @recording_mode
 
-      execute("DROP TABLE #{name}")
+      schema_migrator.drop_table(name)
     end
 
     def add_column(table, name, type, **)
       return record_op(:add_column, table, name) if @recording_mode
 
-      execute("ALTER TABLE #{table} ADD COLUMN #{name} #{sql_type_for(type)}")
+      schema_migrator.add_column(table, name, type)
     end
 
     def remove_column(table, name)
       return record_op(:remove_column, table, name) if @recording_mode
 
-      execute("ALTER TABLE #{table} DROP COLUMN #{name}")
+      schema_migrator.remove_column(table, name)
     end
 
     def add_index(table, columns, unique: false, name: nil)
       return record_op(:add_index, table, columns) if @recording_mode
 
-      cols = Array(columns)
-      index_name = name || "index_#{table}_on_#{cols.join('_')}"
-      execute("CREATE #{'UNIQUE ' if unique}INDEX #{index_name} ON #{table} (#{cols.join(', ')})")
+      schema_migrator.add_index(table, columns, unique: unique, name: name)
     end
 
     def remove_index(table, columns_or_name)
       return record_op(:remove_index, table, columns_or_name) if @recording_mode
 
-      index_name = if columns_or_name.is_a?(String)
-                     columns_or_name
-                   else
-                     "index_#{table}_on_#{Array(columns_or_name).join('_')}"
-                   end
-      execute("DROP INDEX #{index_name}")
+      schema_migrator.remove_index(table, columns_or_name)
     end
 
     def rename_column(table, old_name, new_name)
       return record_op(:rename_column, table, old_name, new_name) if @recording_mode
 
-      execute("ALTER TABLE #{table} RENAME COLUMN #{old_name} TO #{new_name}")
+      schema_migrator.rename_column(table, old_name, new_name)
     end
 
     def change_column(_table, _name, _type, **)
@@ -96,8 +80,8 @@ module Reins
 
     private
 
-    def execute(sql)
-      Reins::Database.connection.execute(sql)
+    def schema_migrator
+      Reins::Model::Base.schema_migrator
     end
 
     def record_op(operation, *args)
@@ -118,27 +102,25 @@ module Reins
       end
     end
 
-    def sql_type_for(type)
-      SUPPORTED_TYPES[type.to_sym] || type.to_s.upcase
-    end
-
     class TableDefinition
-      attr_reader :indexes
+      SHORTHAND_TYPES = %i[string text integer float boolean datetime].freeze
+
+      attr_reader :columns, :indexes
 
       def initialize(name)
         @name = name
-        @columns = ["id INTEGER PRIMARY KEY AUTOINCREMENT"]
+        @columns = []
         @indexes = []
       end
 
-      Reins::Migration::SUPPORTED_TYPES.each_key do |type|
+      SHORTHAND_TYPES.each do |type|
         define_method(type) do |column_name, **|
           column(column_name, type)
         end
       end
 
       def column(column_name, type)
-        @columns << "#{column_name} #{Reins::Migration::SUPPORTED_TYPES[type.to_sym] || type.to_s.upcase}"
+        @columns << { name: column_name, type: type }
       end
 
       def timestamps
@@ -149,10 +131,6 @@ module Reins
       def references(name)
         column("#{name}_id", :integer)
         @indexes << [@name, "#{name}_id"]
-      end
-
-      def to_sql
-        "CREATE TABLE #{@name} (#{@columns.join(', ')})"
       end
     end
   end
