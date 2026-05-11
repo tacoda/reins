@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 — unreleased
+## 2.0.0 — 2026-05-11
 
 Reins 2.0 is an architectural release: every Rails-shaped feature from 1.x is preserved, but the framework is reorganized internally as a **Cockburn-strict hexagon** — pure core, explicit ports, swappable adapters. App authors who only use the public API (`Reins::Controller`, `Reins::Model::Base`, `route { resources :foo }`, the CLI) see no breaking changes. App authors and contributors who reach into the framework will find a new, smaller, more testable internal surface.
 
@@ -8,22 +8,27 @@ Reins 2.0 is an architectural release: every Rails-shaped feature from 1.x is pr
 
 - **Pure core** under `lib/reins/core/**`. Forbidden from requiring or referencing `rack`, `sqlite3`, `erubis`, `puma`, `thor`, `fileutils`, or `zeitwerk`. Enforced by `spec/reins/core_boundary_spec.rb`.
 - **Driving ports** under `lib/reins/ports/driving/**`: `HttpApp`, `CommandInvoker`.
-- **Driven ports** under `lib/reins/ports/driven/**`: `Repository`, `SchemaInspector`, `SchemaMigrator`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`. Each port declares its direction and method signatures through a small DSL (`extend Reins::Port; direction :driven; contract …`) and is registered in `Reins::Port.all`.
-- **Adapters** under `lib/reins/adapters/{driving,driven}/**`: `Rack`, `Thor`, `Sqlite`, `Memory`, `Filesystem`, `Erubis`, `Puma`, `System`. Each adapter `include`s its port module and implements every method on the contract.
+- **Driven ports** under `lib/reins/ports/driven/**`: `Repository`, `SchemaInspector`, `SchemaMigrator`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`, `Autoloader`. Each port declares its direction and method signatures through a small DSL (`extend Reins::Port; direction :driven; contract …`) and is registered in `Reins::Port.all`.
+- **Adapters** under `lib/reins/adapters/{driving,driven}/**`: `Rack` (driving), `Thor` (driving), `Sqlite`, `Memory`, `Filesystem`, `Erubis`, `Puma`, `System`, `Zeitwerk`, `Noop`. Each adapter `include`s its port module and implements every method on the contract.
 
 ### CLI
 
+The CLI itself is now structured as a driving port. `Reins::Core::Cli::Commands::*` are pure command classes; `Reins::Core::Cli::Invoker` implements the `CommandInvoker` port; `Reins::Adapters::Driving::Thor::Cli` is the Thor-flavored driving adapter that parses argv. `Reins::Cli` is an alias kept for backward compatibility.
+
+New CLI commands and flags:
+
 - `reins generate port NAME [--driving | --driven]` — scaffold a new port. Defaults to `--driven`.
-- `reins generate adapter NAME --port=PORT` — scaffold an adapter for a port. Reads the port's `CONTRACT` to seed method stubs and a contract spec.
+- `reins generate adapter NAME --port=PORT [--driving]` — scaffold an adapter implementing a port. Reads the port's `CONTRACT` to seed method stubs and a contract spec.
 - `reins generate port --PRESET` — scaffold a known port+adapter pair: `--rack`, `--thor`, `--sqlite`, `--memory`, `--puma`, `--filesystem`, `--erubis`, `--clock`, `--env`.
 - `reins generate port --list` — print the preset registry.
-- `reins generate config [--slim]` — emit the default adapter-configuration block, or a slim placeholder version.
-- `reins new myapp --slim` — scaffold an app where every adapter slot is an explicit nil placeholder, so the developer sees what's configurable without guessing.
+- `reins new myapp --slim` — scaffold an app where every adapter slot is left for the developer to wire. The generated Gemfile pins only `reins-web` and `rackup`; the default `reins new` Gemfile is derived from the `:standard` profile and pins `puma`, `sqlite3`, `erubis`, `zeitwerk`, and `rackup` automatically.
 
 ### Composition root
 
-- `Reins::Application.new` picks a default **profile** — a named bundle of adapter defaults. `:standard` (Rack + SQLite + Thor + Puma + Erubis + Filesystem + System) is the default; `:test` uses in-memory adapters; `:slim` leaves every slot nil.
-- `Reins::Application.adapters { |a| a.repository = … }` overrides individual adapters at the composition root.
+- `Reins::Application.new(profile:, adapters:)` selects a named profile and applies optional per-adapter overrides. Default profile is `:standard`; `:test` uses in-memory adapters; `:slim` wires nothing. `Reins::Profile.fetch(name)` returns the profile's gem list and adapter map.
+- `Reins::Configurator` translates a Hash of declarations (instances / Classes / Procs) into a wired adapter map. `Configurator#load(path)` reads a Ruby config file whose last expression is a Hash and applies it — the basis for an app-author-friendly `config/adapters.rb`.
+- `Reins::Application#adapters` exposes the wired graph at runtime.
+- `Reins::Database.path=` resets the cached SQLite connection when the path changes, so swapping environments mid-process picks up the new database file cleanly.
 
 ### Behavior preserved
 
@@ -33,7 +38,7 @@ Everything that worked in 1.x continues to work in 2.0. No public API has been r
 
 If you only use the public API: no changes required.
 
-If you reach into the framework internals (e.g. `Reins::Database.connection` for raw queries, custom middleware injection at the application level): see the migration notes in [GUIDE.md](GUIDE.md#architecture). The short version is that direct access has been replaced by an injected port — you either continue using the high-level API (which is unchanged) or take the port as a constructor argument.
+If you reach into the framework internals (e.g. `Reins::Database.connection` for raw queries, or custom middleware injection at the application level): the high-level API still works, but you can now take the relevant port as a constructor argument. See the architecture section of [GUIDE.md](GUIDE.md#architecture) for the contributor view and the end-to-end PaymentGateway example.
 
 ---
 

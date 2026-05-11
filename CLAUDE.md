@@ -17,28 +17,34 @@ A Rack-based Ruby web framework with the surface of Rails — internally structu
 ```
 lib/reins/
 ├── core/                       # pure domain — no rack/sqlite/erubis/puma/thor/fileutils/zeitwerk
-│   ├── generators/             # Blueprint, BlueprintWriter
-│   ├── http/                   # Request, Response, Router, Pipeline (Phase 5)
-│   ├── view/                   # Renderer, Helpers, Forms (Phase 4)
-│   ├── model/                  # Base, Query, Relation, Validations, Callbacks (Phase 2)
-│   ├── migration/              # Recorder, Operation (Phase 3)
-│   └── cli/                    # Commands (Phase 6)
+│   ├── generators/             # Blueprint, BlueprintWriter, PortGenerator,
+│   │                           # AdapterGenerator, PortPresets
+│   ├── http/                   # Request, Response value objects
+│   ├── model/                  # Query value object (Relation/Persistence
+│   │                           # live in lib/reins/model/ and route through
+│   │                           # the Repository port)
+│   └── cli/                    # Commands::*, Invoker
 ├── ports/
 │   ├── driving/                # HttpApp, CommandInvoker
 │   └── driven/                 # Repository, SchemaInspector, SchemaMigrator,
 │                               # TemplateStore, TemplateEngine, FileSystem,
-│                               # ProcessRunner, Server, EnvReader, Clock
+│                               # ProcessRunner, Server, EnvReader, Clock,
+│                               # Autoloader
 ├── adapters/
 │   ├── driving/
-│   │   ├── rack/               # Rack::App, request/response translators (Phase 5)
-│   │   └── thor/               # Thor::Cli (Phase 6)
+│   │   ├── rack/               # Rack::App + env↔Request, Response↔tuple translators
+│   │   └── thor/               # Thor::Cli — thin shim into Core::Cli::Invoker
 │   └── driven/
-│       ├── sqlite/             # Repository, SchemaInspector, SchemaMigrator (Phase 2-3)
-│       ├── memory/             # In-memory test adapters
-│       ├── filesystem/         # Real (disk-backed FileSystem)
-│       ├── erubis/             # TemplateEngine (Phase 4)
-│       ├── puma/               # Server (Phase 6)
-│       └── system/             # Clock, EnvReader, ProcessRunner (Phase 6)
+│       ├── sqlite/             # Repository, SchemaInspector, SchemaMigrator
+│       ├── memory/             # In-memory test adapters for every port that has them
+│       ├── filesystem/         # Real (disk-backed FileSystem), TemplateStore
+│       ├── erubis/             # TemplateEngine
+│       ├── puma/               # Server
+│       ├── system/             # Clock, EnvReader, ProcessRunner
+│       ├── zeitwerk/           # Autoloader
+│       └── noop/               # Autoloader (test fake)
+├── profile.rb                  # named bundles (gems + adapters): :standard, :slim, :test
+├── configurator.rb             # translates Hash declarations into wired instances
 └── reins.rb                    # composition root: Reins::Application wires the graph
 
 spec/reins/                     # mirrors lib/ layout

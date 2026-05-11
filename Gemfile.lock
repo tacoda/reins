@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    reins-web (1.0.0)
+    reins-web (2.0.0)
       erubis
       irb
       listen

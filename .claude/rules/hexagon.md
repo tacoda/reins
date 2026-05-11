@@ -114,20 +114,48 @@ Common port+adapter pairs ship as named presets. Use them — don't reinvent:
 
 `reins generate port --list` prints the registry.
 
-## Profiles
+## Profiles and the Configurator
 
-`Reins::Application.new` selects a **profile** — a named bundle of adapter defaults. `:standard` is the default (Rack + SQLite + Thor + Puma + Erubis + Filesystem + System). `:slim` wires nothing, leaving every adapter slot explicitly nil so the developer sees what's configurable.
+`Reins::Application.new(profile:, adapters:)` selects a named **profile** — a Hash of (gems, adapter-Procs) — and applies optional overrides. Shipped profiles:
 
-App authors override at the composition root:
+- `:standard` (default) — Rack + SQLite + Thor + Puma + Erubis + Filesystem + System + Zeitwerk. Default for `reins new`.
+- `:slim` — empty adapter map. `reins new myapp --slim` uses this; the generated Gemfile pins only `reins-web` and `rackup` and the developer wires every adapter themselves.
+- `:test` — in-memory adapters for everything that has one.
+
+Each profile entry is a Proc (lazy) so adapters can depend on runtime resources (the database connection, for example) without being constructed at registry-load time.
+
+`Reins::Configurator` is the translator from Hash declarations to wired instances. Values in the Hash can be:
+
+- an instance — stored as-is
+- a Class — instantiated with no-arg `.new`
+- a Proc/lambda — called lazily; the result is stored
+
+`Configurator#load(path)` reads a Ruby config file whose last expression is a Hash and applies it. This is how app authors will wire custom adapters in `config/adapters.rb`:
 
 ```ruby
-class Blog::Application < Reins::Application
-  profile :standard
+# config/adapters.rb
+{
+  clock:    -> { MyApp::FixedClock.new },
+  repository: PostgresRepository  # a Class — instantiated at boot
+}
+```
 
-  adapters do |a|
-    a.clock = MyFixedClock.new   # for testing, or any custom adapter
-  end
+```ruby
+# config/application.rb
+class Blog::Application < Reins::Application
 end
+
+app = Blog::Application.new(profile: :standard)
+Reins::Configurator.new(app.adapters).load("config/adapters.rb") if File.exist?("config/adapters.rb")
+```
+
+App-author overrides can also be passed inline:
+
+```ruby
+app = Blog::Application.new(
+  profile: :standard,
+  adapters: { clock: MyFixedClock.new }
+)
 ```
 
 ## Tests
@@ -142,3 +170,4 @@ end
 - Don't smuggle infrastructure into the core via a "convenience" require. The boundary spec will catch it; weakening the boundary spec is a code-review red flag.
 - Don't let `Reins::Controller` or `Reins::Model::Base` reach into a concrete adapter (`Reins::Database.connection`, `SQLite3::*`). They depend on the wired port — that's it.
 - Don't make adapter generators "smart". They scaffold the contract methods raising `NotImplementedError` and let the implementer fill in the body. Cleverness here makes future ports harder to add.
+- Don't hardcode gems in `AppGenerator#gemfile`. The Gemfile is derived from the selected profile's `:gems` list. New adapters that the framework ships need a profile entry with their gem dependency.
