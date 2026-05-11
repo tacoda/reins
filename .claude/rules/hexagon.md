@@ -42,7 +42,43 @@ lib/reins/
 
 ## Adding a new port
 
-A port is a Ruby module under `lib/reins/ports/{driving,driven}/<name>.rb` exposing one constant — a frozen `CONTRACT = { method_name: arity, … }` hash. The contract is the type signature. Adapter generators read it to scaffold method stubs and contract specs.
+A port is a Ruby module under `lib/reins/ports/{driving,driven}/<name>.rb` that **extends `Reins::Port`** and declares its `direction` and `contract`:
+
+```ruby
+require "reins/port"
+
+module Reins
+  module Ports
+    module Driven
+      module Repository
+        extend Reins::Port
+
+        direction :driven
+
+        contract  find_all:    1,
+                  insert:      2,
+                  update:      4,
+                  delete:      3,
+                  count:       1,
+                  pluck:       2,
+                  transaction: 0
+      end
+    end
+  end
+end
+```
+
+The DSL sets `DIRECTION` and `CONTRACT` constants, freezes the module, and registers the port so `Reins::Port.driven` / `.driving` / `.all` find it. Adapter generators read `CONTRACT` to scaffold method stubs and contract specs.
+
+For ports whose contract includes special method names (`[]`, `key?`, `<<`, etc.), pass them via Hash literal:
+
+```ruby
+contract(
+  :[]    => 1,
+  :fetch => -1,
+  :key?  => 1
+)
+```
 
 Prefer the CLI: `reins generate port NAME [--driving|--driven]`. The default is `--driven`.
 

@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driven
@@ -5,10 +7,12 @@ module Reins
       # "layouts/application") to a Reins::Core::View::Template::Source value.
       # The core renderer never touches the filesystem.
       module TemplateStore
-        CONTRACT = {
-          read: 1,
-          exist?: 1
-        }.freeze
+        extend Reins::Port
+
+        direction :driven
+
+        contract  read: 1,
+                  exist?: 1
       end
     end
   end

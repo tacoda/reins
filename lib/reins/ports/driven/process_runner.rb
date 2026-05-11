@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driven
@@ -5,9 +7,11 @@ module Reins
       # backticks directly — `reins test` and similar shell-outs go through
       # this port.
       module ProcessRunner
-        CONTRACT = {
-          system: -1
-        }.freeze
+        extend Reins::Port
+
+        direction :driven
+
+        contract system: -1
       end
     end
   end

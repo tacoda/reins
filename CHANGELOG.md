@@ -8,7 +8,7 @@ Reins 2.0 is an architectural release: every Rails-shaped feature from 1.x is pr
 
 - **Pure core** under `lib/reins/core/**`. Forbidden from requiring or referencing `rack`, `sqlite3`, `erubis`, `puma`, `thor`, `fileutils`, or `zeitwerk`. Enforced by `spec/reins/core_boundary_spec.rb`.
 - **Driving ports** under `lib/reins/ports/driving/**`: `HttpApp`, `CommandInvoker`.
-- **Driven ports** under `lib/reins/ports/driven/**`: `Repository`, `SchemaInspector`, `SchemaMigrator`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`. Each port exposes a frozen `CONTRACT` hash listing the methods adapters must implement.
+- **Driven ports** under `lib/reins/ports/driven/**`: `Repository`, `SchemaInspector`, `SchemaMigrator`, `TemplateStore`, `TemplateEngine`, `FileSystem`, `ProcessRunner`, `Server`, `EnvReader`, `Clock`. Each port declares its direction and method signatures through a small DSL (`extend Reins::Port; direction :driven; contract …`) and is registered in `Reins::Port.all`.
 - **Adapters** under `lib/reins/adapters/{driving,driven}/**`: `Rack`, `Thor`, `Sqlite`, `Memory`, `Filesystem`, `Erubis`, `Puma`, `System`. Each adapter `include`s its port module and implements every method on the contract.
 
 ### CLI

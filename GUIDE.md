@@ -415,16 +415,22 @@ reins generate adapter stripe --port=payment_gateway
                                               # → app/adapters/stripe.rb
 ```
 
-The port file declares the contract:
+The port file declares its direction and contract through a small DSL:
 
 ```ruby
+require "reins/port"
+
 module PaymentGateway
-  CONTRACT = {
-    charge: 3,           # (amount, currency, source_id)
-    refund: 1            # (charge_id)
-  }.freeze
+  extend Reins::Port
+
+  direction :driven
+
+  contract  charge: 3,   # (amount, currency, source_id)
+            refund: 1    # (charge_id)
 end
 ```
+
+The `extend Reins::Port` line is the visible signal that this module is a port. `direction` and `contract` set up the constants (`DIRECTION`, `CONTRACT`) and register the port in `Reins::Port.all`.
 
 The adapter `include`s the port and implements each method. A test adapter is the same pattern with an in-memory store. Wire it at the composition root in `config/application.rb`:
 

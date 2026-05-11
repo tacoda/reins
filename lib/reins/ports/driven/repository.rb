@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driven
@@ -9,15 +11,17 @@ module Reins
       # Default adapter: Reins::Adapters::Driven::Sqlite::Repository.
       # Test adapter:    Reins::Adapters::Driven::Memory::Repository.
       module Repository
-        CONTRACT = {
-          find_all: 1,
-          insert: 2,
-          update: 4,
-          delete: 3,
-          count: 1,
-          pluck: 2,
-          transaction: 0
-        }.freeze
+        extend Reins::Port
+
+        direction :driven
+
+        contract  find_all: 1,
+                  insert: 2,
+                  update: 4,
+                  delete: 3,
+                  count: 1,
+                  pluck: 2,
+                  transaction: 0
       end
     end
   end

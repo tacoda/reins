@@ -1,3 +1,4 @@
+require "reins/port"
 require "reins/ports/driving/http_app"
 require "reins/ports/driving/command_invoker"
 

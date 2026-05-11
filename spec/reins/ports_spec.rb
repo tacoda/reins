@@ -55,4 +55,30 @@ RSpec.describe "ports catalog" do
       end
     end
   end
+
+  describe "Reins::Port registry" do
+    it "every driving port is registered as a driving port" do
+      DRIVING_PORTS.each do |port|
+        mod = Reins::Ports::Driving.const_get(port)
+        expect(Reins::Port.driving).to include(mod)
+        expect(mod::DIRECTION).to eq(:driving)
+      end
+    end
+
+    it "every driven port is registered as a driven port" do
+      DRIVEN_PORTS.each do |port|
+        mod = Reins::Ports::Driven.const_get(port)
+        expect(Reins::Port.driven).to include(mod)
+        expect(mod::DIRECTION).to eq(:driven)
+      end
+    end
+
+    it "every port responds to #port?" do
+      ports = DRIVING_PORTS.map { |p| Reins::Ports::Driving.const_get(p) } +
+              DRIVEN_PORTS.map  { |p| Reins::Ports::Driven.const_get(p) }
+      ports.each do |port|
+        expect(port.port?).to be(true), "#{port} does not respond to #port?"
+      end
+    end
+  end
 end

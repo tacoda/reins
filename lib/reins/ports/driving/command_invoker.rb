@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driving
@@ -7,9 +9,11 @@ module Reins
       # Implemented by the core CLI dispatcher. Driven by adapters such as
       # Reins::Adapters::Driving::Thor::Cli.
       module CommandInvoker
-        CONTRACT = {
-          invoke: -1
-        }.freeze
+        extend Reins::Port
+
+        direction :driving
+
+        contract invoke: -1
       end
     end
   end

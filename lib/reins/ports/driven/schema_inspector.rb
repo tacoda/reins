@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driven
@@ -5,10 +7,12 @@ module Reins
       # the table list. Used by Reins::Model::Schema to discover the shape of
       # a model's backing store, and by Reins::Schema for db:schema:dump.
       module SchemaInspector
-        CONTRACT = {
-          columns: 1,
-          tables: 0
-        }.freeze
+        extend Reins::Port
+
+        direction :driven
+
+        contract  columns: 1,
+                  tables: 0
       end
     end
   end

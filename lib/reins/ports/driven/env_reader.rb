@@ -1,3 +1,5 @@
+require "reins/port"
+
 module Reins
   module Ports
     module Driven
@@ -5,11 +7,15 @@ module Reins
       # ENV directly; configuration is the one layer that reads through this
       # port and feeds resolved values into the rest of the core.
       module EnvReader
-        CONTRACT = {
+        extend Reins::Port
+
+        direction :driven
+
+        contract(
           :[] => 1,
           :fetch => -1,
           :key? => 1
-        }.freeze
+        )
       end
     end
   end
