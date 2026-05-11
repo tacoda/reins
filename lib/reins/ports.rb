@@ -12,6 +12,7 @@ require "reins/ports/driven/process_runner"
 require "reins/ports/driven/server"
 require "reins/ports/driven/env_reader"
 require "reins/ports/driven/clock"
+require "reins/ports/driven/autoloader"
 
 module Reins
   module Ports

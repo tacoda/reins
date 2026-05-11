@@ -12,6 +12,7 @@ DRIVEN_PORTS = %w[
   Server
   EnvReader
   Clock
+  Autoloader
 ].freeze
 
 RSpec.describe "ports catalog" do
