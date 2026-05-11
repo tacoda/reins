@@ -32,6 +32,7 @@ module Reins
             when "port"       then generate_port(name, options)
             when "adapter"    then generate_adapter(name, options)
             when "test"       then generate_test(name)
+            when "use_case"   then generate_use_case(name, fields)
             else
               raise "unknown generator: #{type}"
             end
@@ -83,6 +84,14 @@ module Reins
                 direction: direction,
                 scope: scope
               ).blueprint
+            )
+          end
+
+          def generate_use_case(name, deps)
+            raise "generate use_case requires a NAME" if name.nil? || name.empty?
+
+            writer.write(
+              Reins::Core::Generators::UseCaseGenerator.new(name, deps).blueprint
             )
           end
 
