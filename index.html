@@ -1,243 +1,1129 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Reins</title>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
-            referrerpolicy="no-referrer"
-        />
-        <script>
-            require("@tailwindcss/forms");
-        </script>
-    </head>
-    <body>
-        <div class="bg-gray-900">
-            <!-- Header -->
-            <header class="absolute inset-x-0 top-0 z-50">
-                <nav
-                    class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
-                    aria-label="Global"
-                >
-                    <div class="flex lg:flex-1">
-                        <a href="/reins/" class="-m-1.5 p-1.5 text-xl"> 🏇 </a>
-                    </div>
-                    <div class="flex lg:flex-1 justify-end">
-                        <a
-                            href="https://github.com/tacoda/reins"
-                            class="text-gray-400 hover:text-gray-300 flex items-center gap-2"
-                        >
-                            <span class="sr-only">GitHub</span>
-                            <svg
-                                class="w-6 h-6"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                        </a>
-                    </div>
-                </nav>
-            </header>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reins — a Rack-based Ruby web framework</title>
+<meta name="description" content="Reins is a Rack-based Ruby web framework with the surface of Rails and a Cockburn-strict hexagonal architecture inside. Routing, controllers, views, an ORM, migrations, generators, and an RSpec test framework, with every piece of infrastructure behind a swappable adapter.">
+<link rel="canonical" href="https://www.tacoda.dev/reins/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.tacoda.dev/reins/">
+<meta property="og:title" content="Reins — a Rack-based Ruby web framework">
+<meta property="og:description" content="A Rails-shaped surface over a Cockburn-strict hexagon. Install the reins-web gem, scaffold a resource, and read the whole getting-started guide on one page.">
+<meta property="og:image" content="https://www.tacoda.dev/reins/racing-horses.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Reins — a Rack-based Ruby web framework">
+<meta name="twitter:description" content="A Rails-shaped surface over a Cockburn-strict hexagon. Install the reins-web gem, scaffold a resource, and read the whole getting-started guide on one page.">
+<meta name="twitter:image" content="https://www.tacoda.dev/reins/racing-horses.jpg">
+<meta name="theme-color" content="#0a0616">
+<meta name="voice-register" content="informational">
+<meta name="voice-english" content="ste">
+<meta name="voice-first-person" content="exempt: reference page and walkthrough; every command, default, and threshold on it comes from the framework, not from me">
+<style>
+  :root {
+    --space:      #0a0616;
+    --space-2:    #120a24;
+    --panel:      #17102e;
+    --panel-2:    #1e1440;
+    --sunken:     #0f0a20;
 
-            <main class="relative isolate">
-                <!-- Background -->
-                <div
-                    class="absolute inset-x-0 top-4 -z-10 flex transform-gpu justify-center overflow-hidden blur-3xl"
-                    aria-hidden="true"
-                >
-                    <div
-                        class="aspect-[1108/632] w-[69.25rem] flex-none bg-gradient-to-r from-[#80caff] to-[#4f46e5] opacity-25"
-                        style="
-                            clip-path: polygon(
-                                73.6% 51.7%,
-                                91.7% 11.8%,
-                                100% 46.4%,
-                                97.4% 82.2%,
-                                92.5% 84.9%,
-                                75.7% 64%,
-                                55.3% 47.5%,
-                                46.5% 49.4%,
-                                45% 62.9%,
-                                50.3% 87.2%,
-                                21.3% 64.1%,
-                                0.1% 100%,
-                                5.4% 51.1%,
-                                21.4% 63.9%,
-                                58.9% 0.2%,
-                                73.6% 51.7%
-                            );
-                        "
-                    ></div>
-                </div>
+    --fg:         #ece9f7;
+    --muted:      #a99ccc;
+    --faint:      #6f639a;
 
-                <!-- Header section -->
-                <div class="px-6 pt-14 lg:px-8">
-                    <div class="mx-auto max-w-2xl pt-24 text-center sm:pt-40">
-                        <h1
-                            class="text-5xl font-semibold tracking-tight text-white sm:text-7xl"
-                        >
-                            Start galloping with Reins!
-                        </h1>
-                        <p
-                            class="mt-8 text-pretty text-lg font-medium text-gray-400 sm:text-xl/8"
-                        >
-                            Rein in the awesome power of Ruby to build fast web
-                            applications.
-                        </p>
-                    </div>
-                </div>
+    --magenta:    #c026d3;
+    --violet:     #8b5cf6;
+    --cyan:       #22d3ee;
+    --teal:       #2dd4bf;
+    --pink:       #f472b6;
 
-                <!-- Image section -->
-                <div class="mt-32 sm:mt-40 xl:mx-auto xl:max-w-7xl xl:px-8">
-                    <img
-                        src="/reins/racing-horses.jpg"
-                        alt=""
-                        class="aspect-[9/4] w-full object-cover xl:rounded-3xl"
-                    />
-                </div>
+    --ok:         #4ade80;
+    --warn:       #fbbf24;
+    --bad:        #fb7185;
 
-                <!-- Quickstart section -->
-                <div
-                    class="flex flex-col mt-48 items-center justify-center min-h-screen bg-gray-100 px-4"
-                >
-                    <div class="mx-auto text-center mb-16">
-                        <h1
-                            class="text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl"
-                        >
-                            Quickstart
-                        </h1>
-                    </div>
-                    <div
-                        class="max-w-md w-full bg-gray-800 text-white rounded-lg shadow-lg p-6"
-                    >
-                        <pre
-                            class="bg-gray-900 text-gray-300 rounded-lg p-4 overflow-auto"
-                        >
-<code class="block text-sm">gem install reins-web</code>
-<code class="block text-sm">reins new blog</code>
-<code class="block text-sm">cd blog</code>
-<code class="block text-sm">bin/setup</code>
-<code class="block text-sm">reins server</code></pre>
-                    </div>
-                    <p class="mt-8 text-gray-700">
-                        <a
-                            href="/reins/guide.html"
-                            class="text-indigo-600 hover:text-indigo-500 font-semibold"
-                        >
-                            Read the full guide &rarr;
-                        </a>
-                    </p>
-                </div>
+    --line:       rgba(167,139,250,.22);
+    --line-glow:  rgba(192,38,211,.45);
 
-                <!-- Features section -->
-                <div
-                    class="mx-auto mt-24 pb-24 max-w-7xl px-6 sm:mt-40 lg:px-8"
-                >
-                    <div class="mx-auto max-w-2xl lg:mx-0">
-                        <h2
-                            class="text-pretty text-4xl font-semibold tracking-tight text-white sm:text-5xl"
-                        >
-                            Core Features
-                        </h2>
-                        <p class="mt-6 text-lg/8 text-gray-300">
-                            Features built to put you in control.
-                        </p>
-                    </div>
-                    <dl
-                        class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base/7 text-gray-300 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-16"
-                    >
-                        <div class="relative pl-9">
-                            <dt class="font-semibold text-white">
-                                <svg
-                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    aria-hidden="true"
-                                    data-slot="icon"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M9.664 1.319a.75.75 0 0 1 .672 0 41.059 41.059 0 0 1 8.198 5.424.75.75 0 0 1-.254 1.285 31.372 31.372 0 0 0-7.86 3.83.75.75 0 0 1-.84 0 31.508 31.508 0 0 0-2.08-1.287V9.394c0-.244.116-.463.302-.592a35.504 35.504 0 0 1 3.305-2.033.75.75 0 0 0-.714-1.319 37 37 0 0 0-3.446 2.12A2.216 2.216 0 0 0 6 9.393v.38a31.293 31.293 0 0 0-4.28-1.746.75.75 0 0 1-.254-1.285 41.059 41.059 0 0 1 8.198-5.424ZM6 11.459a29.848 29.848 0 0 0-2.455-1.158 41.029 41.029 0 0 0-.39 3.114.75.75 0 0 0 .419.74c.528.256 1.046.53 1.554.82-.21.324-.455.63-.739.914a.75.75 0 1 0 1.06 1.06c.37-.369.69-.77.96-1.193a26.61 26.61 0 0 1 3.095 2.348.75.75 0 0 0 .992 0 26.547 26.547 0 0 1 5.93-3.95.75.75 0 0 0 .42-.739 41.053 41.053 0 0 0-.39-3.114 29.925 29.925 0 0 0-5.199 2.801 2.25 2.25 0 0 1-2.514 0c-.41-.275-.826-.541-1.25-.797a6.985 6.985 0 0 1-1.084 3.45 26.503 26.503 0 0 0-1.281-.78A5.487 5.487 0 0 0 6 12v-.54Z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                Rack-based
-                            </dt>
-                            <dd class="inline">
-                                Established on the community standard of
-                                rack-based frameworks.
-                            </dd>
-                        </div>
-                        <div class="relative pl-9">
-                            <dt class="font-semibold text-white">
-                                <svg
-                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    aria-hidden="true"
-                                    data-slot="icon"
-                                >
-                                    <path
-                                        d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633L6.95 5.684ZM13.949 13.684a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632l-.183-.551Z"
-                                    />
-                                </svg>
-                                Convention over Configuration
-                            </dt>
-                            <dd class="inline">
-                                Models, Controllers, and Views automatically
-                                load.
-                            </dd>
-                        </div>
-                        <div class="relative pl-9">
-                            <dt class="font-semibold text-white">
-                                <svg
-                                    class="absolute left-1 top-1 w-5 h-5 text-indigo-500"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    aria-hidden="true"
-                                    data-slot="icon"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M4.606 12.97a.75.75 0 0 1-.134 1.051 2.494 2.494 0 0 0-.93 2.437 2.494 2.494 0 0 0 2.437-.93.75.75 0 1 1 1.186.918 3.995 3.995 0 0 1-4.482 1.332.75.75 0 0 1-.461-.461 3.994 3.994 0 0 1 1.332-4.482.75.75 0 0 1 1.052.134Z"
-                                        clip-rule="evenodd"
-                                    />
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M5.752 12A13.07 13.07 0 0 0 8 14.248v4.002c0 .414.336.75.75.75a5 5 0 0 0 4.797-6.414 12.984 12.984 0 0 0 5.45-10.848.75.75 0 0 0-.735-.735 12.984 12.984 0 0 0-10.849 5.45A5 5 0 0 0 1 11.25c.001.414.337.75.751.75h4.002ZM13 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                Built-in ORM
-                            </dt>
-                            <dd class="inline">Easy access to the database.</dd>
-                        </div>
-                        <!-- <svg class="absolute left-1 top-1 size-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M9.664 1.319a.75.75 0 0 1 .672 0 41.059 41.059 0 0 1 8.198 5.424.75.75 0 0 1-.254 1.285 31.372 31.372 0 0 0-7.86 3.83.75.75 0 0 1-.84 0 31.508 31.508 0 0 0-2.08-1.287V9.394c0-.244.116-.463.302-.592a35.504 35.504 0 0 1 3.305-2.033.75.75 0 0 0-.714-1.319 37 37 0 0 0-3.446 2.12A2.216 2.216 0 0 0 6 9.393v.38a31.293 31.293 0 0 0-4.28-1.746.75.75 0 0 1-.254-1.285 41.059 41.059 0 0 1 8.198-5.424ZM6 11.459a29.848 29.848 0 0 0-2.455-1.158 41.029 41.029 0 0 0-.39 3.114.75.75 0 0 0 .419.74c.528.256 1.046.53 1.554.82-.21.324-.455.63-.739.914a.75.75 0 1 0 1.06 1.06c.37-.369.69-.77.96-1.193a26.61 26.61 0 0 1 3.095 2.348.75.75 0 0 0 .992 0 26.547 26.547 0 0 1 5.93-3.95.75.75 0 0 0 .42-.739 41.053 41.053 0 0 0-.39-3.114 29.925 29.925 0 0 0-5.199 2.801 2.25 2.25 0 0 1-2.514 0c-.41-.275-.826-.541-1.25-.797a6.985 6.985 0 0 1-1.084 3.45 26.503 26.503 0 0 0-1.281-.78A5.487 5.487 0 0 0 6 12v-.54Z" clip-rule="evenodd" />
-              </svg>
+    --radius:     16px;
+    --radius-sm:  10px;
+    --radius-pill: 9999px;
 
-              <svg class="absolute left-1 top-1 size-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path fill-rule="evenodd" d="M11 2a1 1 0 1 0-2 0v6.5a.5.5 0 0 1-1 0V3a1 1 0 1 0-2 0v5.5a.5.5 0 0 1-1 0V5a1 1 0 1 0-2 0v7a7 7 0 1 0 14 0V8a1 1 0 1 0-2 0v3.5a.5.5 0 0 1-1 0V3a1 1 0 1 0-2 0v5.5a.5.5 0 0 1-1 0V2Z" clip-rule="evenodd" />
-              </svg>
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
 
-              <svg class="absolute left-1 top-1 size-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.326a.78.78 0 0 1-.358-.442 3 3 0 0 1 4.308-3.516 6.484 6.484 0 0 0-1.905 3.959c-.023.222-.014.442.025.654a4.97 4.97 0 0 1-2.07-.655ZM16.44 15.98a4.97 4.97 0 0 0 2.07-.654.78.78 0 0 0 .357-.442 3 3 0 0 0-4.308-3.517 6.484 6.484 0 0 1 1.907 3.96 2.32 2.32 0 0 1-.026.654ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.304 16.19a.844.844 0 0 1-.277-.71 5 5 0 0 1 9.947 0 .843.843 0 0 1-.277.71A6.975 6.975 0 0 1 10 18a6.974 6.974 0 0 1-4.696-1.81Z" />
-              </svg>
+  *, *::before, *::after { box-sizing: border-box; }
 
-              <svg class="absolute left-1 top-1 size-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                <path d="M10 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 2ZM10 15a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 10 15ZM10 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM15.657 5.404a.75.75 0 1 0-1.06-1.06l-1.061 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM6.464 14.596a.75.75 0 1 0-1.06-1.06l-1.06 1.06a.75.75 0 0 0 1.06 1.06l1.06-1.06ZM18 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 18 10ZM5 10a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 5 10ZM14.596 15.657a.75.75 0 0 0 1.06-1.06l-1.06-1.061a.75.75 0 1 0-1.06 1.06l1.06 1.06ZM5.404 6.464a.75.75 0 0 0 1.06-1.06l-1.06-1.06a.75.75 0 1 0-1.061 1.06l1.06 1.06Z" />
-              </svg> -->
-                    </dl>
-                </div>
-            </main>
-        </div>
-    </body>
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--space);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ---------- 2. Nebula backdrop ---------- */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .55;
+  }
+  .blob-a { top: -14vh; left: -10vw; width: 52vw; height: 52vw; background: radial-gradient(circle, rgba(192,38,211,.55), transparent 70%); }
+  .blob-b { top: 28vh; right: -16vw; width: 48vw; height: 48vw; background: radial-gradient(circle, rgba(34,211,238,.34), transparent 70%); }
+  .blob-c { bottom: -22vh; left: 22vw; width: 46vw; height: 46vw; background: radial-gradient(circle, rgba(139,92,246,.40), transparent 70%); }
+  .stars { position: absolute; inset: 0; }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: .5;
+    animation: twinkle 5.5s ease-in-out infinite;
+  }
+  .star.c { background: var(--cyan); width: 3px; height: 3px; }
+  @keyframes twinkle { 0%, 100% { opacity: .18; } 50% { opacity: .8; } }
+
+  /* ---------- shell ---------- */
+  .shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr) 300px;
+    gap: 20px;
+    max-width: 1560px;
+    margin: 0 auto;
+    padding: 20px;
+    align-items: start;
+  }
+
+  /* ---------- 1. Glow border ---------- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow:
+      0 0 0 1px rgba(192,38,211,.18),
+      0 0 28px -6px rgba(192,38,211,.35),
+      0 18px 48px -24px rgba(0,0,0,.9);
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 18px 14px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px 16px;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 36px; height: 36px;
+    border-radius: var(--radius-sm);
+    font-size: 19px;
+    background: linear-gradient(135deg, #7c3aed, var(--magenta));
+    box-shadow: 0 8px 24px -8px rgba(192,38,211,.7);
+  }
+  .brand-name { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  .brand-ver { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+
+  .sidebar h2 {
+    margin: 16px 8px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .sidebar a:hover { background: var(--panel-2); }
+  .sidebar a .idx { margin-left: auto; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .sidebar a svg { flex: 0 0 auto; color: var(--muted); }
+  .sidebar a:hover svg { color: var(--cyan); }
+
+  .side-promo {
+    margin: 18px 4px 4px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background:
+      radial-gradient(120% 120% at 0% 0%, rgba(192,38,211,.24), transparent 60%),
+      var(--panel-2);
+    box-shadow: inset 0 0 24px -8px rgba(192,38,211,.45);
+  }
+  .side-promo p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+
+  /* ---------- content ---------- */
+  .content { min-width: 0; display: grid; gap: 20px; }
+
+  .page-head { padding: 22px 24px; }
+  .crumb { margin: 0; font-size: 27px; font-weight: 600; letter-spacing: -.02em; }
+  .crumb .owner { color: var(--muted); font-weight: 500; }
+  .crumb .sep { color: var(--faint); font-weight: 400; }
+  .pill {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: rgba(139,92,246,.16);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    vertical-align: 5px;
+  }
+  .lede { margin: 12px 0 0; max-width: 68ch; color: var(--fg); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+  .tags li {
+    padding: 3px 11px;
+    border-radius: var(--radius-pill);
+    background: var(--panel-2);
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  /* banner */
+  .banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 22px;
+    border: 1px solid var(--line-glow);
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, rgba(192,38,211,.36), rgba(139,92,246,.30) 52%, rgba(34,211,238,.26));
+    box-shadow: 0 0 34px -8px rgba(192,38,211,.45), 0 18px 48px -24px rgba(0,0,0,.9);
+  }
+  .medallion {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 46px; height: 46px;
+    border-radius: var(--radius-pill);
+    background: rgba(10,6,22,.55);
+    border: 1px solid var(--line);
+    font-size: 22px;
+  }
+  .banner-body { flex: 1 1 260px; min-width: 0; }
+  .banner-body h2 { margin: 0; font-size: 17px; font-weight: 600; }
+  .banner-body p { margin: 4px 0 0; font-size: 14px; color: #ded7f4; }
+
+  /* toolbar */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .ctl {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    background: var(--sunken);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .ctl:hover { background: var(--panel-2); }
+  .ctl .count { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .ctl svg { color: var(--muted); }
+  .ctl:hover svg { color: var(--cyan); }
+  .spacer { flex: 1 1 auto; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 17px;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, #7c3aed, var(--magenta));
+    box-shadow: 0 8px 24px -8px rgba(192,38,211,.7);
+    color: #fff;
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .btn:hover { filter: brightness(1.1); }
+
+  /* sections */
+  section.panel { padding: 24px; scroll-margin-top: 20px; }
+  section.panel > :first-child { margin-top: 0; }
+  section.panel > :last-child { margin-bottom: 0; }
+
+  h2, h3, h4 { letter-spacing: -.015em; line-height: 1.3; }
+  section.panel > h2 { margin: 0 0 4px; font-size: 22px; font-weight: 600; }
+  .sub { margin: 0 0 18px; color: var(--muted); font-size: 14.5px; }
+  h3 { margin: 30px 0 8px; font-size: 17px; font-weight: 600; }
+  h4 { margin: 22px 0 6px; font-size: 15px; font-weight: 600; }
+  p { margin: 0 0 14px; max-width: 74ch; }
+  ul, ol { max-width: 74ch; padding-left: 22px; }
+  li { margin: 4px 0; }
+
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  p a, li a, dd a { text-decoration: underline; text-decoration-color: rgba(34,211,238,.45); text-underline-offset: 2px; }
+
+  code {
+    font-family: var(--mono);
+    font-size: .88em;
+    padding: .12em .38em;
+    border-radius: 6px;
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    color: #f3d9fb;
+  }
+  pre {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--sunken);
+    overflow-x: auto;
+    box-shadow: inset 0 0 22px -10px rgba(192,38,211,.45);
+  }
+  pre code {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #e4dcf6;
+    font-size: 13.2px;
+    line-height: 1.62;
+    white-space: pre;
+  }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(228px, 1fr)); margin: 0 0 4px; padding: 0; list-style: none; }
+  .card {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--panel-2);
+  }
+  .card h3, .card h4 { margin: 0 0 6px; font-size: 15px; }
+  .card p { margin: 0; font-size: 14px; color: var(--muted); }
+
+  .scroller { overflow-x: auto; margin: 0 0 16px; }
+  table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 14px; }
+  caption { text-align: left; padding-bottom: 8px; font-size: 13px; color: var(--muted); }
+  th, td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  tbody tr:hover { background: var(--panel-2); }
+
+  dl { margin: 0 0 14px; }
+  dt { margin-top: 12px; font-family: var(--mono); font-size: 13.5px; color: var(--pink); }
+  dd { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
+
+  figure { margin: 20px 0 0; }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
+  }
+  figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
+
+  /* ---------- rail ---------- */
+  .rail { display: grid; gap: 20px; min-width: 0; }
+  .rail > section { padding: 18px; }
+  .rail h2 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+  .meta { list-style: none; margin: 0; padding: 0; }
+  .meta li { display: flex; align-items: flex-start; gap: 9px; padding: 5px 0; font-size: 14px; color: var(--fg); }
+  .meta li svg { flex: 0 0 auto; margin-top: 3px; color: var(--muted); }
+  .meta li span { color: var(--muted); }
+  .rail .tags { margin-top: 12px; }
+
+  /* footer */
+  .page-foot { padding: 18px 24px; font-size: 13.5px; color: var(--muted); }
+  .page-foot p { margin: 0; max-width: none; }
+
+  /* skip link + focus */
+  .skip {
+    position: absolute;
+    left: 12px; top: -60px;
+    z-index: 20;
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--fg);
+  }
+  .skip:focus { top: 12px; }
+
+  :focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1180px) {
+    .shell { grid-template-columns: 240px minmax(0, 1fr); }
+    .rail { grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  }
+  @media (max-width: 820px) {
+    .shell { grid-template-columns: minmax(0, 1fr); padding: 14px; gap: 14px; }
+    .sidebar { position: static; max-height: none; }
+    .crumb { font-size: 23px; }
+    section.panel { padding: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .star { animation: none; opacity: .4; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#overview">Skip to content</a>
+
+<div class="backdrop" aria-hidden="true">
+  <div class="blob blob-a"></div>
+  <div class="blob blob-b"></div>
+  <div class="blob blob-c"></div>
+  <div class="stars">
+    <span class="star" style="top:9%;left:18%;animation-delay:0s"></span>
+    <span class="star c" style="top:16%;left:63%;animation-delay:.7s"></span>
+    <span class="star" style="top:27%;left:41%;animation-delay:1.4s"></span>
+    <span class="star" style="top:38%;left:83%;animation-delay:2.1s"></span>
+    <span class="star c" style="top:52%;left:11%;animation-delay:.4s"></span>
+    <span class="star" style="top:61%;left:72%;animation-delay:2.8s"></span>
+    <span class="star" style="top:74%;left:33%;animation-delay:1.1s"></span>
+    <span class="star c" style="top:86%;left:57%;animation-delay:3.3s"></span>
+    <span class="star" style="top:93%;left:88%;animation-delay:1.8s"></span>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- ============ sidebar ============ -->
+  <aside class="sidebar panel" aria-label="Page sections">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">&#127943;</span>
+      <span class="brand-name">Reins<b class="brand-ver">v2.0.1 &middot; reins-web</b></span>
+    </div>
+
+    <nav id="sectionnav" aria-label="On this page">
+      <h2>The framework</h2>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#quickstart">Quickstart</a></li>
+        <li><a href="#features">Core features</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#cli">CLI reference</a></li>
+      </ul>
+
+      <h2>Getting started guide</h2>
+      <ul>
+        <li><a href="#guide">Build a blog</a></li>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#create-app">Create the application<span class="idx">1</span></a></li>
+        <li><a href="#say-hello">Say hello<span class="idx">2</span></a></li>
+        <li><a href="#generate-post">Generate a Post<span class="idx">3</span></a></li>
+        <li><a href="#validations">Add validations<span class="idx">4</span></a></li>
+        <li><a href="#index-view">Customize the index<span class="idx">5</span></a></li>
+        <li><a href="#logger">Use Reins.logger<span class="idx">6</span></a></li>
+        <li><a href="#comments">Add comments<span class="idx">7</span></a></li>
+        <li><a href="#test-model">Test the model<span class="idx">8</span></a></li>
+        <li><a href="#test-controller">Test the controller<span class="idx">9</span></a></li>
+        <li><a href="#deploy">Deploy notes<span class="idx">10</span></a></li>
+        <li><a href="#recap">What you used</a></li>
+        <li><a href="#errors">Common errors</a></li>
+      </ul>
+
+      <h2>Elsewhere</h2>
+      <ul>
+        <li><a href="#next">Where to go next</a></li>
+      </ul>
+    </nav>
+
+    <div class="side-promo">
+      <p>The gem goes by <code>reins-web</code>, because another gem already holds the name <code>reins</code>.</p>
+      <a class="btn" href="https://rubygems.org/gems/reins-web">View on RubyGems</a>
+    </div>
+  </aside>
+
+  <!-- ============ content ============ -->
+  <main class="content" id="main">
+
+    <header class="page-head panel">
+      <h1 class="crumb"><span class="owner">tacoda</span> <span class="sep">/</span> reins<span class="pill">MIT</span></h1>
+      <p class="lede">A Rack-based Ruby web framework with the surface of Rails, built around a Cockburn-strict hexagonal architecture internally. Routing, controllers, views, an ORM, migrations, generators, middleware, environments, autoloading, and an RSpec test framework ship in the box. Every piece of infrastructure sits behind a swappable adapter, so app authors get a Rails-shaped surface and contributors get a clean port seam.</p>
+      <ul class="tags">
+        <li>ruby</li>
+        <li>rack</li>
+        <li>web-framework</li>
+        <li>hexagonal-architecture</li>
+        <li>ports-and-adapters</li>
+        <li>orm</li>
+        <li>rspec</li>
+      </ul>
+    </header>
+
+    <div class="banner">
+      <span class="medallion" aria-hidden="true">&#9889;</span>
+      <div class="banner-body">
+        <h2>Start galloping with Reins</h2>
+        <p>Rein in the power of Ruby. One gem, one command, a running app on port 8000.</p>
+      </div>
+      <a class="btn" href="#quickstart">Read the quickstart</a>
+    </div>
+
+    <div class="toolbar">
+      <span class="ctl">Ruby <span class="count">3.3+</span></span>
+      <span class="ctl">Version <span class="count">2.0.1</span></span>
+      <span class="ctl">License <span class="count">MIT</span></span>
+      <span class="spacer"></span>
+      <a class="ctl" href="https://github.com/tacoda/reins">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 4.5-1.4 4.5-5a4 4 0 0 0-1.1-2.8 3.7 3.7 0 0 0-.1-2.8s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.6 0C5.3 3.6 4.2 3.9 4.2 3.9a3.7 3.7 0 0 0-.1 2.8A4 4 0 0 0 3 9.5c0 3.6 1.7 4.7 4.5 5-.6.6-.6 1.2-.5 2V20"/></svg>
+        GitHub
+      </a>
+      <a class="ctl" href="https://rubygems.org/gems/reins-web">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/></svg>
+        RubyGems
+      </a>
+      <a class="btn" href="#guide">Getting started guide</a>
+    </div>
+
+    <!-- ---------- overview ---------- -->
+    <section class="panel" id="overview" aria-labelledby="overview-h">
+      <h2 id="overview-h">Overview</h2>
+      <p class="sub">A Rails-shaped surface over a strict hexagon.</p>
+
+      <p>Reins gives app authors the surface they already know. <code>Reins::Controller</code>, <code>Reins::Model::Base</code>, and <code>route { resources :foo }</code> behave the way the names suggest. Underneath, the framework is a Cockburn-strict hexagon: a pure core, explicit ports, and swappable adapters.</p>
+      <p>You do not have to think about the hexagon to build an app. That architecture starts to matter when you want to test a layer in isolation. You feel it again when you swap an adapter, or when you add a port for a domain capability of your own.</p>
+
+      <figure>
+        <img src="racing-horses.jpg" alt="Racehorses at full gallop, seen from the side." width="5184" height="3456" loading="lazy" decoding="async">
+        <figcaption>Reins: hold the power, steer the direction.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ---------- install ---------- -->
+    <section class="panel" id="install" aria-labelledby="install-h">
+      <h2 id="install-h">Install</h2>
+      <p class="sub">Reins requires Ruby 3.3 or newer.</p>
+
+      <p>On RubyGems the framework goes by <code>reins-web</code>, because another gem already holds the name <code>reins</code>. Add it to your <code>Gemfile</code>:</p>
+      <pre><code># Gemfile
+gem "reins-web"</code></pre>
+      <pre><code>bundle install</code></pre>
+      <p>To get the <code>reins</code> command on its own, install the gem directly:</p>
+      <pre><code>gem install reins-web</code></pre>
+    </section>
+
+    <!-- ---------- quickstart ---------- -->
+    <section class="panel" id="quickstart" aria-labelledby="quickstart-h">
+      <h2 id="quickstart-h">Quickstart</h2>
+      <p class="sub">A new app in 30 seconds.</p>
+
+      <pre><code>reins new blog
+cd blog
+bin/setup
+reins generate scaffold Post title:string body:text
+reins db:migrate
+reins server</code></pre>
+      <p>Open <code>http://localhost:8000/posts</code> and you have working CRUD.</p>
+
+      <h3>The slim profile</h3>
+      <p>Pass <code>--slim</code> when you want every adapter slot left as an explicit placeholder. Use that profile if you plan to wire your own adapters from scratch.</p>
+      <pre><code>reins new blog --slim</code></pre>
+      <p>The full walkthrough is further down this page. Start at <a href="#guide">build a blog with Reins</a>.</p>
+    </section>
+
+    <!-- ---------- features ---------- -->
+    <section class="panel" id="features" aria-labelledby="features-h">
+      <h2 id="features-h">Core features</h2>
+      <p class="sub">Features built to put you in control.</p>
+
+      <ul class="grid">
+        <li class="card">
+          <h3>Rack-based</h3>
+          <p>Built on Rack, the community standard interface between Ruby web servers and frameworks.</p>
+        </li>
+        <li class="card">
+          <h3>Convention over configuration</h3>
+          <p>Models, controllers, and views load automatically. The autoloader is Zeitwerk, behind an Autoloader port.</p>
+        </li>
+        <li class="card">
+          <h3>Built-in ORM</h3>
+          <p>Validations, associations, and a chainable <code>Relation</code> with <code>where</code>, <code>order</code>, and <code>limit</code>.</p>
+        </li>
+        <li class="card">
+          <h3>Generators</h3>
+          <p><code>reins generate</code> writes models, controllers, scaffolds, migrations, ports, adapters, and use cases.</p>
+        </li>
+        <li class="card">
+          <h3>Migrations</h3>
+          <p><code>db:create</code>, <code>db:migrate</code>, <code>db:rollback</code>, and <code>db:schema:dump</code> ship with the CLI.</p>
+        </li>
+        <li class="card">
+          <h3>RSpec test framework</h3>
+          <p><code>type: :model</code> wraps each example in a transaction. <code>type: :controller</code> brings in Rack::Test and custom matchers.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ---------- architecture ---------- -->
+    <section class="panel" id="architecture" aria-labelledby="architecture-h">
+      <h2 id="architecture-h">Architecture</h2>
+      <p class="sub">A pure core, explicit ports, swappable adapters.</p>
+
+      <pre><code>              +-------------------+
+   driving    |    application    |   driven
+  adapters -&gt; |       core        | -&gt;  adapters
+              +-------------------+</code></pre>
+
+      <h3>Why hexagonal</h3>
+      <p>Alistair Cockburn named the pattern in 2005 to describe one recurring problem: applications get strangled by their I/O. The HTTP framework, the database, the template engine, and the queue each end up touching every layer. So a change to "use a different database" becomes a change everywhere.</p>
+      <p>Hexagonal flips that relationship. The application is one thing, and every piece of I/O is an adapter the application can swap. Driving adapters call into the app: HTTP, a CLI, a message queue. Driven adapters are what the app calls out to: the database, the file system, a third-party API. Between the two sit the ports, which are the application's interface contracts.</p>
+
+      <h3>What "Cockburn-strict" means</h3>
+      <p>Three rules are non-negotiable:</p>
+      <ol>
+        <li>The core has no knowledge of the outside world. It imports no infrastructure library, and it names no <code>Rack</code>, <code>SQLite3</code>, or <code>Puma</code> constant.</li>
+        <li>Dependencies point inward. Adapters depend on ports, ports depend on nothing, and the core depends on the ports it consumes.</li>
+        <li>Anything crossing a port is a plain value object, not an infrastructure type.</li>
+      </ol>
+      <p>The payoff is testability. The entire core runs without booting Rack, opening a database, or touching disk. Swapping SQLite for Postgres becomes "write a new adapter against the existing Repository port." Adding a capability becomes "define a port, write the adapter."</p>
+
+      <h3>The three layers</h3>
+      <ul>
+        <li><strong>Core</strong> (<code>lib/reins/core/**</code>) is pure domain. It knows nothing about Rack, SQLite, Erubis, Puma, Thor, or the filesystem. A spec enforces the boundary (<code>spec/reins/core_boundary_spec.rb</code>), so the core cannot even <code>require</code> those libraries.</li>
+        <li><strong>Ports</strong> (<code>lib/reins/ports/{driving,driven}/**</code>) are Ruby modules with a frozen <code>CONTRACT</code> hash. That hash lists the methods every adapter must implement.</li>
+        <li><strong>Adapters</strong> (<code>lib/reins/adapters/{driving,driven}/**</code>) are the concrete implementations. <code>Adapters::Driving::Rack::App</code> is the Rack-facing entry point. <code>Adapters::Driven::Sqlite::Repository</code> is the default persistence adapter, and <code>Adapters::Driven::Memory::Repository</code> is the in-memory one used by tests.</li>
+      </ul>
+
+      <h4>The ports that ship</h4>
+      <p>Two driving ports carry the outside world into the core:</p>
+      <ul>
+        <li><code>HttpApp</code></li>
+        <li><code>CommandInvoker</code></li>
+      </ul>
+      <p>Eleven driven ports carry the core back out:</p>
+      <ul>
+        <li><code>Repository</code>, <code>SchemaInspector</code>, <code>SchemaMigrator</code></li>
+        <li><code>TemplateStore</code>, <code>TemplateEngine</code></li>
+        <li><code>FileSystem</code>, <code>ProcessRunner</code>, <code>Server</code></li>
+        <li><code>EnvReader</code>, <code>Clock</code>, <code>Autoloader</code></li>
+      </ul>
+
+      <h3>Profiles</h3>
+      <p><code>Reins::Application</code> picks a profile at boot. A profile is a named bundle of default adapters.</p>
+      <div class="scroller">
+        <table>
+          <caption>Default adapter per port, by profile.</caption>
+          <thead>
+            <tr><th scope="col">Profile</th><th scope="col">Repository</th><th scope="col">Server</th><th scope="col">Template</th><th scope="col">Clock</th><th scope="col">EnvReader</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row"><code>:standard</code> (default)</th><td>SQLite</td><td>Puma</td><td>Erubis + Filesystem</td><td>System</td><td>System</td></tr>
+            <tr><th scope="row"><code>:test</code></th><td>Memory</td><td>&mdash;</td><td>Erubis + Filesystem</td><td>Fixed</td><td>Memory</td></tr>
+            <tr><th scope="row"><code>:slim</code></th><td>nil</td><td>nil</td><td>nil</td><td>nil</td><td>nil</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>reins new myapp</code> uses <code>:standard</code>. <code>reins new myapp --slim</code> uses <code>:slim</code>, so every adapter slot is visible and nil in your <code>config/application.rb</code>. You fill them in yourself.</p>
+
+      <h3>Add your own port and adapter</h3>
+      <p>App authors can extend the hexagon. To integrate a payment provider, generate the port and an adapter for it:</p>
+      <pre><code>reins generate port payment_gateway
+reins generate adapter stripe --port=payment_gateway</code></pre>
+      <p>The port file declares its direction and contract through a small DSL:</p>
+      <pre><code>require "reins/port"
+
+module PaymentGateway
+  extend Reins::Port
+
+  direction :driven
+
+  contract  charge: 3,   # (amount, currency, source_id)
+            refund: 1    # (charge_id)
+end</code></pre>
+      <p>The <code>extend Reins::Port</code> line is the visible signal that this module is a port. <code>direction</code> and <code>contract</code> set up the <code>DIRECTION</code> and <code>CONTRACT</code> constants, then register the port in <code>Reins::Port.all</code>.</p>
+      <p>The adapter <code>include</code>s the port and implements every method. A test adapter follows the same pattern with an in-memory store. Wire the adapter at the composition root, in <code>config/application.rb</code>:</p>
+      <pre><code>class Blog::Application &lt; Reins::Application
+  profile :standard
+
+  adapters do |a|
+    a.payment_gateway = MyApp::Adapters::Stripe.new(api_key: ENV.fetch("STRIPE_KEY"))
+  end
+end</code></pre>
+
+      <h4>Port presets</h4>
+      <p>The framework's own ports ship as presets. Reach for one when you want to swap a port wholesale, or when you want to read the pattern.</p>
+      <pre><code>reins generate port --rack     # HTTP driving port + Rack adapter
+reins generate port --sqlite   # Repository + SchemaInspector + SchemaMigrator
+reins generate port --puma     # Server port + Puma adapter
+reins generate port --memory   # in-memory test adapters
+reins generate port --list     # print every preset</code></pre>
+
+      <h4>Test your adapter</h4>
+      <p>Every adapter spec asserts the port contract:</p>
+      <pre><code>it "responds to every method on the PaymentGateway port contract" do
+  PaymentGateway::CONTRACT.each_key do |name|
+    expect(adapter).to respond_to(name), "missing #{name}"
+  end
+end</code></pre>
+      <p>That is the contract test. Beyond it, write the behavior specs you would write for any class: feed input, check output.</p>
+    </section>
+
+    <!-- ---------- cli ---------- -->
+    <section class="panel" id="cli" aria-labelledby="cli-h">
+      <h2 id="cli-h">CLI reference</h2>
+      <p class="sub">Every command the <code>reins</code> executable ships with.</p>
+
+      <pre><code>reins new &lt;name&gt; [--slim]                  # scaffold a runnable project
+reins server                               # boot Puma on port 8000
+reins routes                               # print the route table
+reins console                              # IRB with the app loaded
+
+reins generate controller Posts index show
+reins generate model Post title:string body:text
+reins generate scaffold Post title:string body:text
+reins generate migration AddPublishedAtToPosts published_at:datetime
+
+reins generate port NAME [--driving | --driven]   # new port module
+reins generate adapter NAME --port=PORT           # new adapter for a port
+reins generate port --PRESET                      # rack | sqlite | thor | puma | ...
+reins generate port --list                        # show every preset
+reins generate test PORT_NAME                     # spy + use-case spec for a port
+reins generate use_case NAME [dep ...]            # application service object
+
+reins generate config [--slim]             # write the default config block
+reins db:create / db:drop / db:migrate / db:rollback / db:schema:dump
+reins test                                 # runs `bundle exec rspec`</code></pre>
+    </section>
+
+    <!-- ================= GUIDE ================= -->
+    <section class="panel" id="guide" aria-labelledby="guide-h">
+      <h2 id="guide-h">Build a blog with Reins</h2>
+      <p class="sub">A getting-started guide that exercises every layer.</p>
+
+      <p>This guide builds a small blog from scratch. By the end you will have created posts, listed them, validated them, and added comments. If you have used Rails, the shape will feel familiar, and each step flags the differences as they come up.</p>
+      <p>Each step is short. Run the commands in order, because later steps depend on files that earlier steps write.</p>
+
+      <h3 id="prerequisites">Prerequisites</h3>
+      <ul>
+        <li>Ruby 3.3 or newer. Check with <code>ruby -v</code>.</li>
+        <li>Bundler. Run <code>gem install bundler</code> if you need it.</li>
+        <li>The <code>reins</code> CLI, which arrives with the <code>reins-web</code> gem.</li>
+      </ul>
+      <pre><code>gem install reins-web
+reins -h</code></pre>
+
+      <h3 id="create-app">1. Create the application</h3>
+      <pre><code>reins new blog
+cd blog
+bin/setup</code></pre>
+      <p><code>reins new</code> writes the project skeleton. <code>bin/setup</code> then runs <code>bundle install</code> and creates the development database. Here is the tree it produces:</p>
+      <pre><code>blog/
+├── Gemfile              # reins-web, puma, sqlite3, erubis, zeitwerk, rackup, plus rspec and rerun
+├── config.ru            # Rack entry point
+├── bin/{reins,setup,console}
+├── config/
+│   ├── application.rb   # Blog::Application &lt; Reins::Application
+│   ├── routes.rb        # Reins.application.route do ... end
+│   ├── database.yml     # one section per env
+│   └── environments/{development,test,production}.rb
+├── app/
+│   ├── controllers/{application_controller,welcome_controller}.rb
+│   ├── models/application_record.rb
+│   └── views/
+│       ├── layouts/application.html.erb
+│       └── welcome/index.html.erb
+├── db/migrate/
+├── public/{404,422,500}.html
+└── spec/spec_helper.rb</code></pre>
+      <p>Boot it:</p>
+      <pre><code>reins server</code></pre>
+      <p>Visit <code>http://localhost:8000</code>. You will see "It works!", served from <code>app/views/welcome/index.html.erb</code>.</p>
+
+      <h3 id="say-hello">2. Say hello</h3>
+      <p><code>WelcomeController#index</code> renders the welcome page. Open <code>app/views/welcome/index.html.erb</code> and edit it:</p>
+      <pre><code>&lt;h1&gt;Welcome to my blog&lt;/h1&gt;
+&lt;p&gt;Built with &lt;a href="https://rubygems.org/gems/reins-web"&gt;Reins&lt;/a&gt;.&lt;/p&gt;</code></pre>
+      <p>To see the change, stop the server with <code>Ctrl-C</code> and run <code>reins server</code> again. For automatic reloading during development, boot the server through rerun instead:</p>
+      <pre><code>bundle exec rerun reins server</code></pre>
+      <p><code>reins routes</code> prints the route table:</p>
+      <div class="scroller">
+      <pre><code>Prefix  Verb  URI Pattern  Controller#Action
+root    GET   /            welcome#index</code></pre>
+      </div>
+
+      <h3 id="generate-post">3. Generate a Post resource</h3>
+      <p>A blog needs posts. Generate the scaffold:</p>
+      <pre><code>reins generate scaffold Post title:string body:text</code></pre>
+      <p>That command creates:</p>
+      <ul>
+        <li><code>app/models/post.rb</code>, holding <code>class Post &lt; ApplicationRecord</code></li>
+        <li><code>db/migrate/&lt;timestamp&gt;_create_posts.rb</code>, the table definition</li>
+        <li><code>app/controllers/posts_controller.rb</code>, with full CRUD: index, show, new, create, edit, update, destroy</li>
+        <li><code>app/views/posts/{index,show,new,edit}.html.erb</code> plus <code>_form.html.erb</code></li>
+        <li><code>spec/models/post_spec.rb</code>, a spec stub</li>
+        <li>A <code>resources :posts</code> line appended to <code>config/routes.rb</code></li>
+      </ul>
+      <p>Apply the migration:</p>
+      <pre><code>reins db:migrate</code></pre>
+      <p>Boot the server again and visit <code>http://localhost:8000/posts</code>. You can create, list, edit, and delete posts. <code>reins routes</code> now includes the seven RESTful actions:</p>
+      <div class="scroller">
+      <pre><code>Prefix     Verb    URI Pattern      Controller#Action
+root       GET     /                welcome#index
+posts      GET     /posts           posts#index
+new_post   GET     /posts/new       posts#new
+           POST    /posts           posts#create
+post       GET     /posts/:id       posts#show
+edit_post  GET     /posts/:id/edit  posts#edit
+           PUT     /posts/:id       posts#update
+           PATCH   /posts/:id       posts#update
+           DELETE  /posts/:id       posts#destroy</code></pre>
+      </div>
+      <p>The named-route helpers are available in views and controllers: <code>posts_path</code>, <code>post_path(id)</code>, <code>new_post_path</code>, and <code>edit_post_path(id)</code>.</p>
+
+      <h3 id="validations">4. Add validations</h3>
+      <p>Open <code>app/models/post.rb</code>:</p>
+      <pre><code>class Post &lt; ApplicationRecord
+  validates :title, presence: true, length: { in: 1..100 }
+  validates :body, presence: true
+end</code></pre>
+      <p>Visit <code>/posts/new</code> and submit an empty form. The scaffold renders the form again, but it does not show the errors yet. Edit <code>app/views/posts/_form.html.erb</code> to display them:</p>
+      <pre><code>&lt;%= form_with(url: "/posts", method: record.persisted? ? :put : :post) %&gt;
+  &lt;% if record.errors.full_messages.any? %&gt;
+    &lt;ul class="errors"&gt;
+      &lt;% record.errors.full_messages.each do |msg| %&gt;
+        &lt;li&gt;&lt;%== msg %&gt;&lt;/li&gt;
+      &lt;% end %&gt;
+    &lt;/ul&gt;
+  &lt;% end %&gt;
+  &lt;div&gt;
+    &lt;%= label :title %&gt;&lt;br&gt;
+    &lt;%= text_field :title, value: record.title %&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;%= label :body %&gt;&lt;br&gt;
+    &lt;%= text_area :body, value: record.body %&gt;
+  &lt;/div&gt;
+  &lt;div&gt;&lt;%= submit %&gt;&lt;/div&gt;
+&lt;/form&gt;</code></pre>
+      <p>Invalid submissions now show their errors inline. The scaffold's <code>create</code> action already returns 422 on validation failure, so this edit only changes what the user sees.</p>
+
+      <h3 id="index-view">5. Customize the index view</h3>
+      <p>Open <code>app/views/posts/index.html.erb</code>. The scaffold writes a bare table, so replace it with something more useful:</p>
+      <pre><code>&lt;h1&gt;All posts&lt;/h1&gt;
+&lt;p&gt;&lt;%= link_to "New post", new_post_path, class: "btn" %&gt;&lt;/p&gt;
+
+&lt;% @records.each do |post| %&gt;
+  &lt;article&gt;
+    &lt;h2&gt;&lt;%= link_to post.title, post_path(post.id) %&gt;&lt;/h2&gt;
+    &lt;p&gt;&lt;%= post.body %&gt;&lt;/p&gt;
+  &lt;/article&gt;
+&lt;% end %&gt;</code></pre>
+      <p><code>link_to</code>, <code>new_post_path</code>, and <code>post_path</code> are all built-in helpers.</p>
+
+      <h3 id="logger">6. Use Reins.logger</h3>
+      <p>The framework writes to <code>log/&lt;env&gt;.log</code> at the configured level. Add a log line to the <code>create</code> action in <code>app/controllers/posts_controller.rb</code>:</p>
+      <pre><code>def create
+  @record = Post.new(record_params)
+  if @record.save
+    Reins.logger.info("Created post #{@record.id} - #{@record.title.inspect}")
+    redirect_to "/posts/#{@record.id}"
+  else
+    render :new, status: :unprocessable_entity
+  end
+end</code></pre>
+      <p>Tail the log:</p>
+      <pre><code>tail -f log/development.log</code></pre>
+
+      <h3 id="comments">7. Add comments</h3>
+      <p>Posts need comments. Generate a model and its migration:</p>
+      <pre><code>reins generate model Comment post_id:integer body:text
+reins db:migrate</code></pre>
+      <p>Wire up the association in <code>app/models/post.rb</code>:</p>
+      <pre><code>class Post &lt; ApplicationRecord
+  has_many :comments, foreign_key: "post_id"
+
+  validates :title, presence: true, length: { in: 1..100 }
+  validates :body, presence: true
+end</code></pre>
+      <p>And in <code>app/models/comment.rb</code>:</p>
+      <pre><code>class Comment &lt; ApplicationRecord
+  belongs_to :post
+
+  validates :body, presence: true
+end</code></pre>
+      <p>Now render the comments in <code>app/views/posts/show.html.erb</code>:</p>
+      <pre><code>&lt;h1&gt;&lt;%= @record.title %&gt;&lt;/h1&gt;
+&lt;p&gt;&lt;%= @record.body %&gt;&lt;/p&gt;
+
+&lt;h2&gt;Comments&lt;/h2&gt;
+&lt;% @record.comments.each do |comment| %&gt;
+  &lt;article&gt;
+    &lt;p&gt;&lt;%= comment.body %&gt;&lt;/p&gt;
+  &lt;/article&gt;
+&lt;% end %&gt;</code></pre>
+      <p><code>@record.comments</code> returns a <code>Reins::Model::Relation</code>, so you can chain calls on it: <code>@record.comments.order(created_at: :desc).limit(5)</code>.</p>
+      <p>To let readers post comments, add a route in <code>config/routes.rb</code>:</p>
+      <pre><code>Reins.application.route do
+  root "welcome#index"
+  resources :posts
+  post "/posts/:post_id/comments", "comments#create", as: :post_comments
+end</code></pre>
+      <p>Generate a <code>CommentsController</code>:</p>
+      <pre><code>reins generate controller Comments create</code></pre>
+      <p>Then edit <code>app/controllers/comments_controller.rb</code>:</p>
+      <pre><code>class CommentsController &lt; ApplicationController
+  def create
+    post = Post.find(params[:post_id])
+    comment = Comment.new(body: params[:body], post_id: post.id)
+
+    if comment.save
+      redirect_to post_path(post.id)
+    else
+      render plain: "Comment invalid: #{comment.errors.full_messages.join(', ')}",
+             status: :unprocessable_entity
+    end
+  end
+end</code></pre>
+      <p>Add a comment form to <code>app/views/posts/show.html.erb</code>:</p>
+      <pre><code>&lt;h2&gt;Add a comment&lt;/h2&gt;
+&lt;form action="&lt;%= post_comments_path(post_id: @record.id) %&gt;" method="post"&gt;
+  &lt;%= text_field :body %&gt;
+  &lt;%= submit "Post comment" %&gt;
+&lt;/form&gt;</code></pre>
+      <p>Visit a post, write a comment, and submit it. The comment appears.</p>
+
+      <h3 id="test-model">8. Test the model</h3>
+      <p>The model generator wrote a stub at <code>spec/models/post_spec.rb</code>. Open it and add real specs:</p>
+      <pre><code>require "spec_helper"
+
+RSpec.describe Post, type: :model do
+  it "requires a title" do
+    expect(Post.new(title: nil, body: "x")).not_to be_valid
+  end
+
+  it "saves a valid post" do
+    post = Post.new(title: "Hello", body: "World")
+    expect(post.save).to be(true)
+    expect(Post.count).to eq(1)
+  end
+end</code></pre>
+      <p>The <code>type: :model</code> metadata wraps each example in a database transaction, and that transaction rolls back at the end. So tests do not leak state into each other. Run them:</p>
+      <pre><code>reins test</code></pre>
+      <p>Or run RSpec directly:</p>
+      <pre><code>bundle exec rspec</code></pre>
+
+      <h3 id="test-controller">9. Test the controller</h3>
+      <pre><code># spec/controllers/posts_controller_spec.rb
+require "spec_helper"
+
+RSpec.describe PostsController, type: :controller do
+  let(:app) { Rack::Builder.parse_file("config.ru") }
+
+  it "GET /posts returns 200" do
+    get "/posts"
+    expect(last_response).to have_http_status(:ok)
+  end
+
+  it "POST /posts with valid params redirects to the new post" do
+    post "/posts", post: { title: "Hi", body: "There" }
+    expect(last_response).to redirect_to("/posts/1")
+  end
+end</code></pre>
+      <p>The <code>type: :controller</code> metadata includes <code>Rack::Test::Methods</code> and the custom matchers, <code>have_http_status</code> and <code>redirect_to</code>.</p>
+
+      <h3 id="deploy">10. Deploy notes</h3>
+      <p>For production, set <code>REINS_ENV</code> on each command:</p>
+      <pre><code>REINS_ENV=production reins db:create
+REINS_ENV=production reins db:migrate
+REINS_ENV=production reins server</code></pre>
+      <p><code>config/environments/production.rb</code> already sets <code>eager_load = true</code>, so the autoloader requires every file at boot and no per-request <code>Module#autoload</code> happens. That file also sets <code>log_level = :info</code>. Add or remove middleware in the same file.</p>
+
+      <h3 id="recap">What you used</h3>
+      <p>Those ten steps exercise every layer of Reins:</p>
+      <ul>
+        <li><strong>Routing:</strong> <code>root</code>, <code>resources</code>, and named verb routes</li>
+        <li><strong>Controllers:</strong> filters, <code>render</code>, <code>redirect_to</code>, <code>params</code>, <code>flash</code></li>
+        <li><strong>Views:</strong> layouts, partials, helpers, auto-escape</li>
+        <li><strong>Models:</strong> validations, associations, the chainable <code>Relation</code></li>
+        <li><strong>Migrations:</strong> scaffolded, then <code>db:migrate</code> and <code>db:rollback</code></li>
+        <li><strong>Generators:</strong> <code>new</code>, <code>generate scaffold</code>, <code>generate model</code>, <code>generate controller</code></li>
+        <li><strong>Environments and autoloading:</strong> Zeitwerk-backed, <code>Reins.env</code>, <code>Reins.config</code></li>
+        <li><strong>Testing:</strong> <code>type: :model</code>, <code>type: :controller</code>, custom matchers</li>
+      </ul>
+      <p>To go deeper, read the source. <code>lib/reins/</code> is intentionally small, one file per concern, and the specs in <code>spec/reins/</code> double as runnable examples.</p>
+
+      <h3 id="errors">Common errors</h3>
+      <dl>
+        <dt>Reins::DoubleResponse</dt>
+        <dd>Your action called <code>render</code>, <code>redirect_to</code>, or <code>head</code> twice.</dd>
+
+        <dt>Reins::MissingTemplate</dt>
+        <dd>Auto-render could not find the template. Check <code>app/views/&lt;controller&gt;/&lt;action&gt;.html.erb</code>.</dd>
+
+        <dt>Reins::ParameterMissing</dt>
+        <dd><code>params.require(...)</code> got a nil or empty value.</dd>
+
+        <dt>Reins::SessionMiddlewareMissing</dt>
+        <dd>You used <code>session</code> or <code>flash</code> without mounting <code>Rack::Session::Cookie</code>.</dd>
+
+        <dt>Reins::AdapterMissing</dt>
+        <dd>A port has no adapter wired at the composition root. Set the slot in <code>config/application.rb</code>.</dd>
+
+        <dt>Reins::ContractViolation</dt>
+        <dd>An adapter does not implement every method in its port's <code>CONTRACT</code>.</dd>
+
+        <dt>Reins::Model::RecordNotFound</dt>
+        <dd><code>Model.find(id)</code> could not find a row. Use <code>find_by</code> for the nil-on-miss form.</dd>
+
+        <dt>Reins::Model::RecordInvalid</dt>
+        <dd><code>save!</code> or <code>create!</code> failed validation. The exception carries the record.</dd>
+
+        <dt>Reins::IrreversibleMigration</dt>
+        <dd><code>change</code> used an operation that cannot be auto-inverted. Add an explicit <code>down</code>.</dd>
+      </dl>
+    </section>
+
+    <!-- ---------- next ---------- -->
+    <section class="panel" id="next" aria-labelledby="next-h">
+      <h2 id="next-h">Where to go next</h2>
+      <p class="sub">Keep digging.</p>
+
+      <ul class="grid">
+        <li class="card">
+          <h3><a href="https://github.com/tacoda/reins/blob/main/README.md">README.md</a></h3>
+          <p>Top-level overview and the CLI reference.</p>
+        </li>
+        <li class="card">
+          <h3><a href="https://github.com/tacoda/reins/blob/main/GUIDE.md">GUIDE.md</a></h3>
+          <p>The same walkthrough, plus the contributor view of the architecture.</p>
+        </li>
+        <li class="card">
+          <h3><a href="https://github.com/tacoda/reins/blob/main/CHANGELOG.md">CHANGELOG.md</a></h3>
+          <p>What landed in each milestone.</p>
+        </li>
+        <li class="card">
+          <h3><a href="https://github.com/tacoda/reins">Source</a></h3>
+          <p><code>lib/reins/</code> is small enough to read end to end in an afternoon.</p>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="page-foot panel">
+      <p>Reins carries the MIT license. <a href="https://www.tacoda.dev">Ian Johnson</a> writes and maintains it.</p>
+    </footer>
+  </main>
+
+  <!-- ============ rail ============ -->
+  <aside class="rail" aria-label="Project details">
+    <section class="panel" aria-labelledby="about-h">
+      <h2 id="about-h">About</h2>
+      <ul class="meta">
+        <li>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12l3 6-9 12L3 9z"/></svg>
+          <span>Gem</span>&nbsp;<code>reins-web</code>
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M2 12h20"/></svg>
+          <span>Version</span>&nbsp;2.0.1
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span>Requires</span>&nbsp;Ruby 3.3+
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          <span>License</span>&nbsp;MIT
+        </li>
+        <li>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21 4 16.5v-9z"/></svg>
+          <span>Default port</span>&nbsp;8000
+        </li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="ports-h">
+      <h2 id="ports-h">The ports</h2>
+      <p class="sub" style="margin:0 0 10px">Two driving, eleven driven.</p>
+      <ul class="tags">
+        <li>HttpApp</li>
+        <li>CommandInvoker</li>
+        <li>Repository</li>
+        <li>SchemaInspector</li>
+        <li>SchemaMigrator</li>
+        <li>TemplateStore</li>
+        <li>TemplateEngine</li>
+        <li>FileSystem</li>
+        <li>ProcessRunner</li>
+        <li>Server</li>
+        <li>EnvReader</li>
+        <li>Clock</li>
+        <li>Autoloader</li>
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="links-h">
+      <h2 id="links-h">Links</h2>
+      <ul class="meta">
+        <li><a href="https://github.com/tacoda/reins">Source on GitHub</a></li>
+        <li><a href="https://rubygems.org/gems/reins-web">reins-web on RubyGems</a></li>
+        <li><a href="https://github.com/rack/rack/blob/main/SPEC.rdoc">Rack SPEC</a></li>
+        <li><a href="https://alistair.cockburn.us/hexagonal-architecture/">Hexagonal architecture, Alistair Cockburn</a></li>
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<script>
+  // In-page navigation without touching the URL. Without JS, the plain
+  // anchors still jump to their targets and every section stays visible.
+  document.getElementById('sectionnav').addEventListener('click', function (event) {
+    var link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    var target = document.getElementById(link.getAttribute('href').slice(1));
+    if (!target) return;
+    event.preventDefault();
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+  });
+</script>
+</body>
 </html>
