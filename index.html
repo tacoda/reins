@@ -10,39 +10,49 @@
 <meta property="og:url" content="https://www.tacoda.dev/reins/">
 <meta property="og:title" content="Reins — a Rack-based Ruby web framework">
 <meta property="og:description" content="A Rails-shaped surface over a Cockburn-strict hexagon. Install the reins-web gem, scaffold a resource, and read the whole getting-started guide on one page.">
-<meta property="og:image" content="https://www.tacoda.dev/reins/racing-horses.jpg">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Reins — a Rack-based Ruby web framework">
 <meta name="twitter:description" content="A Rails-shaped surface over a Cockburn-strict hexagon. Install the reins-web gem, scaffold a resource, and read the whole getting-started guide on one page.">
-<meta name="twitter:image" content="https://www.tacoda.dev/reins/racing-horses.jpg">
-<meta name="theme-color" content="#0a0616">
+<meta name="theme-color" content="#0f0509">
 <meta name="voice-register" content="informational">
 <meta name="voice-english" content="ste">
 <meta name="voice-first-person" content="exempt: reference page and walkthrough; every command, default, and threshold on it comes from the framework, not from me">
 <style>
   :root {
-    --space:      #0a0616;
-    --space-2:    #120a24;
-    --panel:      #17102e;
-    --panel-2:    #1e1440;
-    --sunken:     #0f0a20;
+    --space:      #0f0509;   /* page background */
+    --space-2:    #1a0810;   /* nebula wash overlay */
+    --panel:      #221019;   /* card fill */
+    --panel-2:    #2e1522;   /* raised row / hover */
+    --sunken:     #150710;
 
-    --fg:         #ece9f7;
-    --muted:      #a99ccc;
-    --faint:      #6f639a;
+    --fg:         #f7eaee;
+    --muted:      #d0a3b0;
+    --faint:      #b07d8c;
 
-    --magenta:    #c026d3;
-    --violet:     #8b5cf6;
-    --cyan:       #22d3ee;
+    /* warm end of the ramp: red, not purple */
+    --crimson:    #e11d48;   /* primary accent */
+    --crimson-dp: #9f1239;   /* deep end, so white text clears AA on the button */
+    --ember:      #f97316;   /* gradient partner */
+    --cyan:       #22d3ee;   /* cool counterpoint */
     --teal:       #2dd4bf;
-    --pink:       #f472b6;
+    --pink:       #fb7185;
 
     --ok:         #4ade80;
     --warn:       #fbbf24;
     --bad:        #fb7185;
 
-    --line:       rgba(167,139,250,.22);
-    --line-glow:  rgba(192,38,211,.45);
+    --line:       rgba(244,63,94,.24);
+    --line-glow:  rgba(225,29,72,.45);
+
+    /* code tokens, all >=4.5:1 on --sunken */
+    --c-plain:    #efdfe4;
+    --c-comment:  #c99aa7;
+    --c-kw:       #ff7a95;
+    --c-str:      #5eead4;
+    --c-num:      #fdba74;
+    --c-const:    #67e8f9;
+    --c-sym:      #f9a8c4;
+    --c-punct:    #b07d8c;
 
     --radius:     16px;
     --radius-sm:  10px;
@@ -80,9 +90,9 @@
     filter: blur(90px);
     opacity: .55;
   }
-  .blob-a { top: -14vh; left: -10vw; width: 52vw; height: 52vw; background: radial-gradient(circle, rgba(192,38,211,.55), transparent 70%); }
+  .blob-a { top: -14vh; left: -10vw; width: 52vw; height: 52vw; background: radial-gradient(circle, rgba(225,29,72,.55), transparent 70%); }
   .blob-b { top: 28vh; right: -16vw; width: 48vw; height: 48vw; background: radial-gradient(circle, rgba(34,211,238,.34), transparent 70%); }
-  .blob-c { bottom: -22vh; left: 22vw; width: 46vw; height: 46vw; background: radial-gradient(circle, rgba(139,92,246,.40), transparent 70%); }
+  .blob-c { bottom: -22vh; left: 22vw; width: 46vw; height: 46vw; background: radial-gradient(circle, rgba(249,115,22,.34), transparent 70%); }
   .stars { position: absolute; inset: 0; }
   .star {
     position: absolute;
@@ -114,8 +124,8 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow:
-      0 0 0 1px rgba(192,38,211,.18),
-      0 0 28px -6px rgba(192,38,211,.35),
+      0 0 0 1px rgba(225,29,72,.18),
+      0 0 28px -6px rgba(225,29,72,.35),
       0 18px 48px -24px rgba(0,0,0,.9);
   }
 
@@ -139,8 +149,8 @@
     width: 36px; height: 36px;
     border-radius: var(--radius-sm);
     font-size: 19px;
-    background: linear-gradient(135deg, #7c3aed, var(--magenta));
-    box-shadow: 0 8px 24px -8px rgba(192,38,211,.7);
+    background: linear-gradient(135deg, var(--crimson-dp), var(--crimson));
+    box-shadow: 0 8px 24px -8px rgba(225,29,72,.7);
   }
   .brand-name { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
   .brand-ver { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
@@ -176,9 +186,9 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     background:
-      radial-gradient(120% 120% at 0% 0%, rgba(192,38,211,.24), transparent 60%),
+      radial-gradient(120% 120% at 0% 0%, rgba(225,29,72,.24), transparent 60%),
       var(--panel-2);
-    box-shadow: inset 0 0 24px -8px rgba(192,38,211,.45);
+    box-shadow: inset 0 0 24px -8px rgba(225,29,72,.45);
   }
   .side-promo p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
 
@@ -201,7 +211,7 @@
     padding: 2px 11px;
     border: 1px solid var(--line);
     border-radius: var(--radius-pill);
-    background: rgba(139,92,246,.16);
+    background: rgba(225,29,72,.18);
     font-size: 12px;
     font-weight: 500;
     color: var(--muted);
@@ -226,8 +236,8 @@
     padding: 20px 22px;
     border: 1px solid var(--line-glow);
     border-radius: var(--radius);
-    background: linear-gradient(135deg, rgba(192,38,211,.36), rgba(139,92,246,.30) 52%, rgba(34,211,238,.26));
-    box-shadow: 0 0 34px -8px rgba(192,38,211,.45), 0 18px 48px -24px rgba(0,0,0,.9);
+    background: linear-gradient(135deg, rgba(225,29,72,.36), rgba(249,115,22,.30) 52%, rgba(34,211,238,.26));
+    box-shadow: 0 0 34px -8px rgba(225,29,72,.45), 0 18px 48px -24px rgba(0,0,0,.9);
   }
   .medallion {
     display: grid;
@@ -235,13 +245,13 @@
     flex: 0 0 auto;
     width: 46px; height: 46px;
     border-radius: var(--radius-pill);
-    background: rgba(10,6,22,.55);
+    background: rgba(15,5,9,.55);
     border: 1px solid var(--line);
     font-size: 22px;
   }
   .banner-body { flex: 1 1 260px; min-width: 0; }
   .banner-body h2 { margin: 0; font-size: 17px; font-weight: 600; }
-  .banner-body p { margin: 4px 0 0; font-size: 14px; color: #ded7f4; }
+  .banner-body p { margin: 4px 0 0; font-size: 14px; color: #f6dfe6; }
 
   /* toolbar */
   .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
@@ -270,8 +280,8 @@
     padding: 8px 17px;
     border: 0;
     border-radius: var(--radius-pill);
-    background: linear-gradient(135deg, #7c3aed, var(--magenta));
-    box-shadow: 0 8px 24px -8px rgba(192,38,211,.7);
+    background: linear-gradient(135deg, var(--crimson-dp), var(--crimson));
+    box-shadow: 0 8px 24px -8px rgba(225,29,72,.7);
     color: #fff;
     font: inherit;
     font-size: 13.5px;
@@ -305,7 +315,7 @@
     border-radius: 6px;
     background: var(--sunken);
     border: 1px solid var(--line);
-    color: #f3d9fb;
+    color: var(--c-sym);
   }
   pre {
     margin: 0 0 16px;
@@ -314,14 +324,14 @@
     border-radius: var(--radius-sm);
     background: var(--sunken);
     overflow-x: auto;
-    box-shadow: inset 0 0 22px -10px rgba(192,38,211,.45);
+    box-shadow: inset 0 0 22px -10px rgba(225,29,72,.45);
   }
   pre code {
     display: block;
     padding: 0;
     border: 0;
     background: none;
-    color: #e4dcf6;
+    color: var(--c-plain);
     font-size: 13.2px;
     line-height: 1.62;
     white-space: pre;
@@ -348,16 +358,53 @@
   dt { margin-top: 12px; font-family: var(--mono); font-size: 13.5px; color: var(--pink); }
   dd { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
 
-  figure { margin: 20px 0 0; }
-  figure img {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-width: 100%;
-    border-radius: var(--radius-sm);
+  /* diagram figures: inlined, pre-rendered SVG. No runtime library. */
+  .diagram { margin: 0 0 18px; }
+  .diagram .diagram-scroll {
+    overflow-x: auto;
+    padding: 16px 12px;
     border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--sunken);
+    box-shadow: inset 0 0 22px -10px rgba(225,29,72,.45);
   }
-  figcaption { margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .diagram svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    color: var(--fg);
+  }
+  figcaption { margin-top: 10px; font-size: 13.5px; color: var(--muted); max-width: 74ch; }
+
+  /* mermaid flowchart, themed off the page tokens */
+  .mmd { font-family: var(--sans); }
+  .mmd text { fill: var(--fg); font-size: 15px; }
+  .mmd .cluster-label text { fill: var(--muted); font-size: 13px; }
+  .mmd rect.cl { fill: var(--space-2); stroke: var(--faint); stroke-dasharray: 4 4; rx: 12; }
+  .mmd rect.basic { rx: 8; stroke-width: 1.3px; }
+  .mmd .adp rect.basic  { fill: var(--panel);   stroke: var(--faint); }
+  .mmd .port rect.basic { fill: var(--sunken);  stroke: var(--cyan); }
+  .mmd .core rect.basic { fill: var(--panel-2); stroke: var(--crimson); stroke-width: 1.7px; }
+  .mmd .flowchart-link { fill: none; stroke: var(--muted); stroke-width: 1.4px; }
+  .mmd marker path { fill: var(--muted); stroke: none; }
+
+  /* ---------- syntax highlighting ----------
+     Pre-tokenized at authoring time. No runtime highlighter, no JavaScript.
+     Every color below clears 4.5:1 on --sunken. */
+  .t-com  { color: var(--c-comment); font-style: italic; }
+  .t-kw   { color: var(--c-kw); }
+  .t-str  { color: var(--c-str); }
+  .t-num  { color: var(--c-num); }
+  .t-const{ color: var(--c-const); }
+  .t-sym  { color: var(--c-sym); }
+  .t-punc { color: var(--c-punct); }
+  .t-tag  { color: var(--c-kw); }
+  .t-attr { color: var(--c-const); }
+  .t-erb  { color: var(--c-sym); }
+  /* a shell prompt and program output are not code, so they stay quiet */
+  .t-prompt { color: var(--c-punct); user-select: none; }
+  .t-out    { color: var(--muted); }
 
   /* ---------- rail ---------- */
   .rail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; min-width: 0; }
@@ -537,11 +584,6 @@
 
       <p>Reins gives app authors the surface they already know. <code>Reins::Controller</code>, <code>Reins::Model::Base</code>, and <code>route { resources :foo }</code> behave the way the names suggest. Underneath, the framework is a Cockburn-strict hexagon: a pure core, explicit ports, and swappable adapters.</p>
       <p>You do not have to think about the hexagon to build an app. That architecture starts to matter when you want to test a layer in isolation. You feel it again when you swap an adapter, or when you add a port for a domain capability of your own.</p>
-
-      <figure>
-        <img src="racing-horses.jpg" alt="Racehorses at full gallop, seen from the side." width="5184" height="3456" loading="lazy" decoding="async">
-        <figcaption>Reins: hold the power, steer the direction.</figcaption>
-      </figure>
     </section>
 
     <!-- ---------- install ---------- -->
@@ -550,11 +592,11 @@
       <p class="sub">Reins requires Ruby 3.3 or newer.</p>
 
       <p>On RubyGems the framework goes by <code>reins-web</code>, because another gem already holds the name <code>reins</code>. Add it to your <code>Gemfile</code>:</p>
-      <pre><code># Gemfile
-gem "reins-web"</code></pre>
-      <pre><code>bundle install</code></pre>
+      <pre><code class="lang-ruby"><span class="t-com"># Gemfile</span>
+gem <span class="t-str">"reins-web"</span></code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">bundle</span> install</code></pre>
       <p>To get the <code>reins</code> command on its own, install the gem directly:</p>
-      <pre><code>gem install reins-web</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">gem</span> install reins-web</code></pre>
     </section>
 
     <!-- ---------- quickstart ---------- -->
@@ -562,17 +604,17 @@ gem "reins-web"</code></pre>
       <h2 id="quickstart-h">Quickstart</h2>
       <p class="sub">A new app in 30 seconds.</p>
 
-      <pre><code>reins new blog
-cd blog
-bin/setup
-reins generate scaffold Post title:string body:text
-reins db:migrate
-reins server</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> new blog
+<span class="t-kw">cd</span> blog
+<span class="t-kw">bin/setup</span>
+<span class="t-kw">reins</span> generate scaffold Post title:string body:text
+<span class="t-kw">reins</span> db:migrate
+<span class="t-kw">reins</span> server</code></pre>
       <p>Open <code>http://localhost:8000/posts</code> and you have working CRUD.</p>
 
       <h3>The slim profile</h3>
       <p>Pass <code>--slim</code> when you want every adapter slot left as an explicit placeholder. Use that profile if you plan to wire your own adapters from scratch.</p>
-      <pre><code>reins new blog --slim</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> new blog <span class="t-const">--slim</span></code></pre>
       <p>The full walkthrough is further down this page. Start at <a href="#guide">build a blog with Reins</a>.</p>
     </section>
 
@@ -614,10 +656,59 @@ reins server</code></pre>
       <h2 id="architecture-h">Architecture</h2>
       <p class="sub">A pure core, explicit ports, swappable adapters.</p>
 
-      <pre><code>              +-------------------+
-   driving    |    application    |   driven
-  adapters -&gt; |       core        | -&gt;  adapters
-              +-------------------+</code></pre>
+      <!-- The mermaid source for the diagram below sits in the inert
+           <script type="text/x-mermaid"> block that follows. It cannot sit in an
+           HTML comment, because a mermaid arrow is two hyphens and a right angle
+           bracket, and that sequence closes an HTML comment early. The block is
+           data, not code. Nothing executes it, and nothing renders it.
+
+           Re-render with:
+           npx -y @mermaid-js/mermaid-cli -i hexagon.mmd -o hexagon.svg -c config.json -b transparent
+           config.json sets look:classic and flowchart.htmlLabels:false, which keeps
+           the output small and emits real text nodes instead of foreignObject. -->
+      <script type="text/x-mermaid" id="hexagon-src">
+flowchart LR
+  subgraph DRIVING["driving adapters"]
+    direction TB
+    RACK["Rack"]
+    THOR["Thor"]
+  end
+  subgraph HEX["application core"]
+    direction TB
+    PIN1["HttpApp"]
+    PIN2["CommandInvoker"]
+    CORE["pure Ruby"]
+    POUT1["Repository"]
+    POUT2["TemplateEngine"]
+    POUT3["Server"]
+  end
+  subgraph DRIVEN["driven adapters"]
+    direction TB
+    SQLITE["SQLite"]
+    ERUBIS["Erubis"]
+    PUMA["Puma"]
+  end
+  RACK --> PIN1
+  THOR --> PIN2
+  PIN1 --> CORE
+  PIN2 --> CORE
+  CORE --> POUT1
+  CORE --> POUT2
+  CORE --> POUT3
+  POUT1 --> SQLITE
+  POUT2 --> ERUBIS
+  POUT3 --> PUMA
+  classDef port fill:#150710,stroke:#22d3ee,stroke-width:1.3px,color:#f7eaee;
+  classDef core fill:#2e1522,stroke:#e11d48,stroke-width:1.6px,color:#f7eaee;
+  classDef adp  fill:#221019,stroke:#b07d8c,stroke-width:1.3px,color:#f7eaee;
+  class PIN1,PIN2,POUT1,POUT2,POUT3 port;
+  class CORE core;
+  class RACK,THOR,SQLITE,ERUBIS,PUMA adp;
+      </script>
+      <figure class="diagram">
+        <div class="diagram-scroll"><svg id="rx" class="mmd" viewBox="0 0 1020 282" role="img" aria-labelledby="rx-t rx-d" xmlns="http://www.w3.org/2000/svg"><title id="rx-t">The Reins hexagon</title><desc id="rx-d">Rack and Thor are driving adapters. They call the HttpApp and CommandInvoker ports, which reach the pure Ruby core. The core calls out through the Repository, TemplateEngine and Server ports to the SQLite, Erubis and Puma driven adapters.</desc><g><marker id="rx_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"/></marker><g class="root"><g class="clusters"><g class="cluster"><rect class="cl" x="862.6875" y="8" width="148.859375" height="266"/><g class="cluster-label" transform="translate(883.7421875, 8)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>driven</tspan><tspan> adapters</tspan></tspan></text></g></g></g><g class="cluster"><rect class="cl" x="199.6875" y="8" width="608" height="266"/><g class="cluster-label" transform="translate(449.0234375, 8)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>application</tspan><tspan> core</tspan></tspan></text></g></g></g><g class="cluster"><rect class="cl" x="8" y="49" width="136.6875" height="184"/><g class="cluster-label" transform="translate(20.796875, 49)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>driving</tspan><tspan> adapters</tspan></tspan></text></g></g></g></g><g class="edgePaths"><path d="M117.188,100L121.771,100C126.354,100,135.521,100,144.688,100C153.854,100,163.021,100,172.188,100C181.354,100,190.521,100,204.219,100C217.917,100,236.146,100,245.26,100L254.375,100" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M116.336,182L121.061,182C125.786,182,135.237,182,144.546,182C153.854,182,163.021,182,172.188,182C181.354,182,190.521,182,199.021,182C207.521,182,215.354,182,219.271,182L223.188,182" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M363.906,100L373.688,100C383.469,100,403.031,100,419.231,103.047C435.431,106.095,448.269,112.19,454.688,115.237L461.107,118.284" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M395.094,182L399.677,182C404.26,182,413.427,182,424.429,178.953C435.431,175.905,448.269,169.81,454.688,166.763L461.107,163.716" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M531.07,120L541.777,109.833C552.484,99.667,573.898,79.333,591.51,69.167C609.122,59,622.932,59,629.837,59L636.742,59" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M567.813,141L572.396,141C576.979,141,586.146,141,594.646,141C603.146,141,610.979,141,614.896,141L618.813,141" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M531.07,162L541.777,172.167C552.484,182.333,573.898,202.667,593.917,212.833C613.935,223,632.557,223,641.868,223L651.18,223" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M762.258,59L769.829,59C777.401,59,792.544,59,804.699,59C816.854,59,826.021,59,835.188,59C844.354,59,853.521,59,862.021,59C870.521,59,878.354,59,882.271,59L886.188,59" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M780.188,141L784.771,141C789.354,141,798.521,141,807.688,141C816.854,141,826.021,141,835.188,141C844.354,141,853.521,141,862.277,141C871.034,141,879.38,141,883.553,141L887.727,141" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/><path d="M747.82,223L757.798,223C767.776,223,787.732,223,802.293,223C816.854,223,826.021,223,835.188,223C844.354,223,853.521,223,862.62,223C871.719,223,880.75,223,885.266,223L889.781,223" class="flowchart-link" marker-end="url(#rx_flowchart-v2-pointEnd)"/></g><g class="nodes"><g class="node adp" transform="translate(76.34375, 100)"><rect class="basic" x="-40.84375" y="-21" width="81.6875" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Rack</tspan></tspan></text></g></g></g><g class="node adp" transform="translate(76.34375, 182)"><rect class="basic" x="-39.9921875" y="-21" width="79.984375" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Thor</tspan></tspan></text></g></g></g><g class="node port" transform="translate(311.140625, 100)"><rect class="basic" x="-52.765625" y="-21" width="105.53125" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>HttpApp</tspan></tspan></text></g></g></g><g class="node port" transform="translate(311.140625, 182)"><rect class="basic" x="-83.953125" y="-21" width="167.90625" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>CommandInvoker</tspan></tspan></text></g></g></g><g class="node core" transform="translate(508.953125, 141)"><rect class="basic" x="-58.859375" y="-21" width="117.71875" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>pure</tspan><tspan> Ruby</tspan></tspan></text></g></g></g><g class="node port" transform="translate(701.5, 59)"><rect class="basic" x="-60.7578125" y="-21" width="121.515625" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Repository</tspan></tspan></text></g></g></g><g class="node port" transform="translate(701.5, 141)"><rect class="basic" x="-78.6875" y="-21" width="157.375" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>TemplateEngine</tspan></tspan></text></g></g></g><g class="node port" transform="translate(701.5, 223)"><rect class="basic" x="-46.3203125" y="-21" width="92.640625" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Server</tspan></tspan></text></g></g></g><g class="node adp" transform="translate(937.1171875, 59)"><rect class="basic" x="-46.9296875" y="-21" width="93.859375" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>SQLite</tspan></tspan></text></g></g></g><g class="node adp" transform="translate(937.1171875, 141)"><rect class="basic" x="-45.390625" y="-21" width="90.78125" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Erubis</tspan></tspan></text></g></g></g><g class="node adp" transform="translate(937.1171875, 223)"><rect class="basic" x="-43.3359375" y="-21" width="86.671875" height="42"/><g class="label" transform="translate(0, -9)"><g><text y="-10.1"><tspan x="0" y="-0.1em" dy="1.1em"><tspan>Puma</tspan></tspan></text></g></g></g></g></g></g></svg></div>
+        <figcaption>Calls enter from the left and leave on the right. Rack and Thor are the driving adapters, and each one calls a driving port: <code>HttpApp</code> or <code>CommandInvoker</code>. Both ports reach the same pure Ruby core. The core never calls an adapter directly. It calls a driven port instead, so <code>Repository</code> reaches SQLite, <code>TemplateEngine</code> reaches Erubis, and <code>Server</code> reaches Puma. Swap the adapter on the far side and the core does not change.</figcaption>
+      </figure>
 
       <h3>Why hexagonal</h3>
       <p>Alistair Cockburn named the pattern in 2005 to describe one recurring problem: applications get strangled by their I/O. The HTTP framework, the database, the template engine, and the queue each end up touching every layer. So a change to "use a different database" becomes a change everywhere.</p>
@@ -672,44 +763,44 @@ reins server</code></pre>
 
       <h3>Add your own port and adapter</h3>
       <p>App authors can extend the hexagon. To integrate a payment provider, generate the port and an adapter for it:</p>
-      <pre><code>reins generate port payment_gateway
-reins generate adapter stripe --port=payment_gateway</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> generate port payment_gateway
+<span class="t-kw">reins</span> generate adapter stripe <span class="t-const">--port</span>=payment_gateway</code></pre>
       <p>The port file declares its direction and contract through a small DSL:</p>
-      <pre><code>require "reins/port"
+      <pre><code class="lang-ruby"><span class="t-kw">require</span> <span class="t-str">"reins/port"</span>
 
-module PaymentGateway
-  extend Reins::Port
+<span class="t-kw">module</span> <span class="t-const">PaymentGateway</span>
+  <span class="t-kw">extend</span> <span class="t-const">Reins::Port</span>
 
-  direction :driven
+  direction <span class="t-sym">:driven</span>
 
-  contract  charge: 3,   # (amount, currency, source_id)
-            refund: 1    # (charge_id)
-end</code></pre>
+  contract  <span class="t-sym">charge:</span> <span class="t-num">3</span>,   <span class="t-com"># (amount, currency, source_id)</span>
+            <span class="t-sym">refund:</span> <span class="t-num">1</span>    <span class="t-com"># (charge_id)</span>
+<span class="t-kw">end</span></code></pre>
       <p>The <code>extend Reins::Port</code> line is the visible signal that this module is a port. <code>direction</code> and <code>contract</code> set up the <code>DIRECTION</code> and <code>CONTRACT</code> constants, then register the port in <code>Reins::Port.all</code>.</p>
       <p>The adapter <code>include</code>s the port and implements every method. A test adapter follows the same pattern with an in-memory store. Wire the adapter at the composition root, in <code>config/application.rb</code>:</p>
-      <pre><code>class Blog::Application &lt; Reins::Application
-  profile :standard
+      <pre><code class="lang-ruby"><span class="t-kw">class</span> <span class="t-const">Blog::Application</span> &lt; <span class="t-const">Reins::Application</span>
+  profile <span class="t-sym">:standard</span>
 
-  adapters do |a|
-    a.payment_gateway = MyApp::Adapters::Stripe.new(api_key: ENV.fetch("STRIPE_KEY"))
-  end
-end</code></pre>
+  adapters <span class="t-kw">do</span> |a|
+    a.payment_gateway = <span class="t-const">MyApp::Adapters::Stripe</span>.new(<span class="t-sym">api_key:</span> <span class="t-const">ENV</span>.fetch(<span class="t-str">"STRIPE_KEY"</span>))
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
 
       <h4>Port presets</h4>
       <p>The framework's own ports ship as presets. Reach for one when you want to swap a port wholesale, or when you want to read the pattern.</p>
-      <pre><code>reins generate port --rack     # HTTP driving port + Rack adapter
-reins generate port --sqlite   # Repository + SchemaInspector + SchemaMigrator
-reins generate port --puma     # Server port + Puma adapter
-reins generate port --memory   # in-memory test adapters
-reins generate port --list     # print every preset</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> generate port <span class="t-const">--rack</span>     <span class="t-com"># HTTP driving port + Rack adapter</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--sqlite</span>   <span class="t-com"># Repository + SchemaInspector + SchemaMigrator</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--puma</span>     <span class="t-com"># Server port + Puma adapter</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--memory</span>   <span class="t-com"># in-memory test adapters</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--list</span>     <span class="t-com"># print every preset</span></code></pre>
 
       <h4>Test your adapter</h4>
       <p>Every adapter spec asserts the port contract:</p>
-      <pre><code>it "responds to every method on the PaymentGateway port contract" do
-  PaymentGateway::CONTRACT.each_key do |name|
-    expect(adapter).to respond_to(name), "missing #{name}"
-  end
-end</code></pre>
+      <pre><code class="lang-ruby">it <span class="t-str">"responds to every method on the PaymentGateway port contract"</span> <span class="t-kw">do</span>
+  <span class="t-const">PaymentGateway::CONTRACT</span>.each_key <span class="t-kw">do</span> |name|
+    expect(adapter).to respond_to(name), <span class="t-str">"missing #{name}"</span>
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
       <p>That is the contract test. Beyond it, write the behavior specs you would write for any class: feed input, check output.</p>
     </section>
 
@@ -718,26 +809,26 @@ end</code></pre>
       <h2 id="cli-h">CLI reference</h2>
       <p class="sub">Every command the <code>reins</code> executable ships with.</p>
 
-      <pre><code>reins new &lt;name&gt; [--slim]                  # scaffold a runnable project
-reins server                               # boot Puma on port 8000
-reins routes                               # print the route table
-reins console                              # IRB with the app loaded
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> new &lt;name&gt; [<span class="t-const">--slim</span>]                  <span class="t-com"># scaffold a runnable project</span>
+<span class="t-kw">reins</span> server                               <span class="t-com"># boot Puma on port 8000</span>
+<span class="t-kw">reins</span> routes                               <span class="t-com"># print the route table</span>
+<span class="t-kw">reins</span> console                              <span class="t-com"># IRB with the app loaded</span>
 
-reins generate controller Posts index show
-reins generate model Post title:string body:text
-reins generate scaffold Post title:string body:text
-reins generate migration AddPublishedAtToPosts published_at:datetime
+<span class="t-kw">reins</span> generate controller Posts index show
+<span class="t-kw">reins</span> generate model Post title:string body:text
+<span class="t-kw">reins</span> generate scaffold Post title:string body:text
+<span class="t-kw">reins</span> generate migration AddPublishedAtToPosts published_at:datetime
 
-reins generate port NAME [--driving | --driven]   # new port module
-reins generate adapter NAME --port=PORT           # new adapter for a port
-reins generate port --PRESET                      # rack | sqlite | thor | puma | ...
-reins generate port --list                        # show every preset
-reins generate test PORT_NAME                     # spy + use-case spec for a port
-reins generate use_case NAME [dep ...]            # application service object
+<span class="t-kw">reins</span> generate port NAME [<span class="t-const">--driving</span> | <span class="t-const">--driven</span>]   <span class="t-com"># new port module</span>
+<span class="t-kw">reins</span> generate adapter NAME <span class="t-const">--port</span>=PORT           <span class="t-com"># new adapter for a port</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--PRESET</span>                      <span class="t-com"># rack | sqlite | thor | puma | ...</span>
+<span class="t-kw">reins</span> generate port <span class="t-const">--list</span>                        <span class="t-com"># show every preset</span>
+<span class="t-kw">reins</span> generate test PORT_NAME                     <span class="t-com"># spy + use-case spec for a port</span>
+<span class="t-kw">reins</span> generate use_case NAME [dep ...]            <span class="t-com"># application service object</span>
 
-reins generate config [--slim]             # write the default config block
-reins db:create / db:drop / db:migrate / db:rollback / db:schema:dump
-reins test                                 # runs `bundle exec rspec`</code></pre>
+<span class="t-kw">reins</span> generate config [<span class="t-const">--slim</span>]             <span class="t-com"># write the default config block</span>
+<span class="t-kw">reins</span> db:create / db:drop / db:migrate / db:rollback / db:schema:dump
+<span class="t-kw">reins</span> test                                 <span class="t-com"># runs `bundle exec rspec`</span></code></pre>
     </section>
 
     <!-- ================= GUIDE ================= -->
@@ -754,22 +845,22 @@ reins test                                 # runs `bundle exec rspec`</code></pr
         <li>Bundler. Run <code>gem install bundler</code> if you need it.</li>
         <li>The <code>reins</code> CLI, which arrives with the <code>reins-web</code> gem.</li>
       </ul>
-      <pre><code>gem install reins-web
-reins -h</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">gem</span> install reins-web
+<span class="t-kw">reins</span> <span class="t-const">-h</span></code></pre>
 
       <h3 id="create-app">1. Create the application</h3>
-      <pre><code>reins new blog
-cd blog
-bin/setup</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> new blog
+<span class="t-kw">cd</span> blog
+<span class="t-kw">bin/setup</span></code></pre>
       <p><code>reins new</code> writes the project skeleton. <code>bin/setup</code> then runs <code>bundle install</code> and creates the development database. Here is the tree it produces:</p>
-      <pre><code>blog/
-├── Gemfile              # reins-web, puma, sqlite3, erubis, zeitwerk, rackup, plus rspec and rerun
-├── config.ru            # Rack entry point
+      <pre><code class="lang-tree">blog/
+├── Gemfile              <span class="t-com"># reins-web, puma, sqlite3, erubis, zeitwerk, rackup, plus rspec and rerun</span>
+├── config.ru            <span class="t-com"># Rack entry point</span>
 ├── bin/{reins,setup,console}
 ├── config/
-│   ├── application.rb   # Blog::Application &lt; Reins::Application
-│   ├── routes.rb        # Reins.application.route do ... end
-│   ├── database.yml     # one section per env
+│   ├── application.rb   <span class="t-com"># Blog::Application &lt; Reins::Application</span>
+│   ├── routes.rb        <span class="t-com"># Reins.application.route do ... end</span>
+│   ├── database.yml     <span class="t-com"># one section per env</span>
 │   └── environments/{development,test,production}.rb
 ├── app/
 │   ├── controllers/{application_controller,welcome_controller}.rb
@@ -781,24 +872,24 @@ bin/setup</code></pre>
 ├── public/{404,422,500}.html
 └── spec/spec_helper.rb</code></pre>
       <p>Boot it:</p>
-      <pre><code>reins server</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> server</code></pre>
       <p>Visit <code>http://localhost:8000</code>. You will see "It works!", served from <code>app/views/welcome/index.html.erb</code>.</p>
 
       <h3 id="say-hello">2. Say hello</h3>
       <p><code>WelcomeController#index</code> renders the welcome page. Open <code>app/views/welcome/index.html.erb</code> and edit it:</p>
-      <pre><code>&lt;h1&gt;Welcome to my blog&lt;/h1&gt;
-&lt;p&gt;Built with &lt;a href="https://rubygems.org/gems/reins-web"&gt;Reins&lt;/a&gt;.&lt;/p&gt;</code></pre>
+      <pre><code class="lang-erb"><span class="t-tag">&lt;h1</span><span class="t-tag">&gt;</span>Welcome to my blog<span class="t-tag">&lt;/h1</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span>Built with <span class="t-tag">&lt;a</span> <span class="t-attr">href</span>=<span class="t-str">"https://rubygems.org/gems/reins-web"</span><span class="t-tag">&gt;</span>Reins<span class="t-tag">&lt;/a</span><span class="t-tag">&gt;</span>.<span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span></code></pre>
       <p>To see the change, stop the server with <code>Ctrl-C</code> and run <code>reins server</code> again. For automatic reloading during development, boot the server through rerun instead:</p>
-      <pre><code>bundle exec rerun reins server</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">bundle</span> exec rerun reins server</code></pre>
       <p><code>reins routes</code> prints the route table:</p>
       <div class="scroller">
-      <pre><code>Prefix  Verb  URI Pattern  Controller#Action
+      <pre><code class="lang-output"><span class="t-com">Prefix  Verb  URI Pattern  Controller#Action</span>
 root    GET   /            welcome#index</code></pre>
       </div>
 
       <h3 id="generate-post">3. Generate a Post resource</h3>
       <p>A blog needs posts. Generate the scaffold:</p>
-      <pre><code>reins generate scaffold Post title:string body:text</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> generate scaffold Post title:string body:text</code></pre>
       <p>That command creates:</p>
       <ul>
         <li><code>app/models/post.rb</code>, holding <code>class Post &lt; ApplicationRecord</code></li>
@@ -809,10 +900,10 @@ root    GET   /            welcome#index</code></pre>
         <li>A <code>resources :posts</code> line appended to <code>config/routes.rb</code></li>
       </ul>
       <p>Apply the migration:</p>
-      <pre><code>reins db:migrate</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> db:migrate</code></pre>
       <p>Boot the server again and visit <code>http://localhost:8000/posts</code>. You can create, list, edit, and delete posts. <code>reins routes</code> now includes the seven RESTful actions:</p>
       <div class="scroller">
-      <pre><code>Prefix     Verb    URI Pattern      Controller#Action
+      <pre><code class="lang-output"><span class="t-com">Prefix     Verb    URI Pattern      Controller#Action</span>
 root       GET     /                welcome#index
 posts      GET     /posts           posts#index
 new_post   GET     /posts/new       posts#new
@@ -827,160 +918,160 @@ edit_post  GET     /posts/:id/edit  posts#edit
 
       <h3 id="validations">4. Add validations</h3>
       <p>Open <code>app/models/post.rb</code>:</p>
-      <pre><code>class Post &lt; ApplicationRecord
-  validates :title, presence: true, length: { in: 1..100 }
-  validates :body, presence: true
-end</code></pre>
+      <pre><code class="lang-ruby"><span class="t-kw">class</span> <span class="t-const">Post</span> &lt; <span class="t-const">ApplicationRecord</span>
+  validates <span class="t-sym">:title</span>, <span class="t-sym">presence:</span> <span class="t-kw">true</span>, <span class="t-sym">length:</span> { <span class="t-sym">in:</span> <span class="t-num">1</span>..<span class="t-num">100</span> }
+  validates <span class="t-sym">:body</span>, <span class="t-sym">presence:</span> <span class="t-kw">true</span>
+<span class="t-kw">end</span></code></pre>
       <p>Visit <code>/posts/new</code> and submit an empty form. The scaffold renders the form again, but it does not show the errors yet. Edit <code>app/views/posts/_form.html.erb</code> to display them:</p>
-      <pre><code>&lt;%= form_with(url: "/posts", method: record.persisted? ? :put : :post) %&gt;
-  &lt;% if record.errors.full_messages.any? %&gt;
-    &lt;ul class="errors"&gt;
-      &lt;% record.errors.full_messages.each do |msg| %&gt;
-        &lt;li&gt;&lt;%== msg %&gt;&lt;/li&gt;
-      &lt;% end %&gt;
-    &lt;/ul&gt;
-  &lt;% end %&gt;
-  &lt;div&gt;
-    &lt;%= label :title %&gt;&lt;br&gt;
-    &lt;%= text_field :title, value: record.title %&gt;
-  &lt;/div&gt;
-  &lt;div&gt;
-    &lt;%= label :body %&gt;&lt;br&gt;
-    &lt;%= text_area :body, value: record.body %&gt;
-  &lt;/div&gt;
-  &lt;div&gt;&lt;%= submit %&gt;&lt;/div&gt;
-&lt;/form&gt;</code></pre>
+      <pre><code class="lang-erb"><span class="t-erb">&lt;%=</span> form_with(<span class="t-sym">url:</span> <span class="t-str">"/posts"</span>, <span class="t-sym">method:</span> record.persisted? ? <span class="t-sym">:put</span> : <span class="t-sym">:post</span>) <span class="t-erb">%&gt;</span>
+  <span class="t-erb">&lt;%</span> <span class="t-kw">if</span> record.errors.full_messages.any? <span class="t-erb">%&gt;</span>
+    <span class="t-tag">&lt;ul</span> <span class="t-attr">class</span>=<span class="t-str">"errors"</span><span class="t-tag">&gt;</span>
+      <span class="t-erb">&lt;%</span> record.errors.full_messages.each <span class="t-kw">do</span> |msg| <span class="t-erb">%&gt;</span>
+        <span class="t-tag">&lt;li</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%==</span> msg <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/li</span><span class="t-tag">&gt;</span>
+      <span class="t-erb">&lt;%</span> <span class="t-kw">end</span> <span class="t-erb">%&gt;</span>
+    <span class="t-tag">&lt;/ul</span><span class="t-tag">&gt;</span>
+  <span class="t-erb">&lt;%</span> <span class="t-kw">end</span> <span class="t-erb">%&gt;</span>
+  <span class="t-tag">&lt;div</span><span class="t-tag">&gt;</span>
+    <span class="t-erb">&lt;%=</span> label <span class="t-sym">:title</span> <span class="t-erb">%&gt;</span><span class="t-tag">&lt;br</span><span class="t-tag">&gt;</span>
+    <span class="t-erb">&lt;%=</span> text_field <span class="t-sym">:title</span>, <span class="t-sym">value:</span> record.title <span class="t-erb">%&gt;</span>
+  <span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;div</span><span class="t-tag">&gt;</span>
+    <span class="t-erb">&lt;%=</span> label <span class="t-sym">:body</span> <span class="t-erb">%&gt;</span><span class="t-tag">&lt;br</span><span class="t-tag">&gt;</span>
+    <span class="t-erb">&lt;%=</span> text_area <span class="t-sym">:body</span>, <span class="t-sym">value:</span> record.body <span class="t-erb">%&gt;</span>
+  <span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;div</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> submit <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/div</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre>
       <p>Invalid submissions now show their errors inline. The scaffold's <code>create</code> action already returns 422 on validation failure, so this edit only changes what the user sees.</p>
 
       <h3 id="index-view">5. Customize the index view</h3>
       <p>Open <code>app/views/posts/index.html.erb</code>. The scaffold writes a bare table, so replace it with something more useful:</p>
-      <pre><code>&lt;h1&gt;All posts&lt;/h1&gt;
-&lt;p&gt;&lt;%= link_to "New post", new_post_path, class: "btn" %&gt;&lt;/p&gt;
+      <pre><code class="lang-erb"><span class="t-tag">&lt;h1</span><span class="t-tag">&gt;</span>All posts<span class="t-tag">&lt;/h1</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> link_to <span class="t-str">"New post"</span>, new_post_path, <span class="t-sym">class:</span> <span class="t-str">"btn"</span> <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
 
-&lt;% @records.each do |post| %&gt;
-  &lt;article&gt;
-    &lt;h2&gt;&lt;%= link_to post.title, post_path(post.id) %&gt;&lt;/h2&gt;
-    &lt;p&gt;&lt;%= post.body %&gt;&lt;/p&gt;
-  &lt;/article&gt;
-&lt;% end %&gt;</code></pre>
+<span class="t-erb">&lt;%</span> <span class="t-sym">@records</span>.each <span class="t-kw">do</span> |post| <span class="t-erb">%&gt;</span>
+  <span class="t-tag">&lt;article</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;h2</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> link_to post.title, post_path(post.id) <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/h2</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> post.body <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;/article</span><span class="t-tag">&gt;</span>
+<span class="t-erb">&lt;%</span> <span class="t-kw">end</span> <span class="t-erb">%&gt;</span></code></pre>
       <p><code>link_to</code>, <code>new_post_path</code>, and <code>post_path</code> are all built-in helpers.</p>
 
       <h3 id="logger">6. Use Reins.logger</h3>
       <p>The framework writes to <code>log/&lt;env&gt;.log</code> at the configured level. Add a log line to the <code>create</code> action in <code>app/controllers/posts_controller.rb</code>:</p>
-      <pre><code>def create
-  @record = Post.new(record_params)
-  if @record.save
-    Reins.logger.info("Created post #{@record.id} - #{@record.title.inspect}")
-    redirect_to "/posts/#{@record.id}"
-  else
-    render :new, status: :unprocessable_entity
-  end
-end</code></pre>
+      <pre><code class="lang-ruby"><span class="t-kw">def</span> create
+  <span class="t-sym">@record</span> = <span class="t-const">Post</span>.new(record_params)
+  <span class="t-kw">if</span> <span class="t-sym">@record</span>.save
+    <span class="t-const">Reins</span>.logger.info(<span class="t-str">"Created post #{@record.id} - #{@record.title.inspect}"</span>)
+    redirect_to <span class="t-str">"/posts/#{@record.id}"</span>
+  <span class="t-kw">else</span>
+    render <span class="t-sym">:new</span>, <span class="t-sym">status:</span> <span class="t-sym">:unprocessable_entity</span>
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
       <p>Tail the log:</p>
-      <pre><code>tail -f log/development.log</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">tail</span> <span class="t-const">-f</span> log/development.log</code></pre>
 
       <h3 id="comments">7. Add comments</h3>
       <p>Posts need comments. Generate a model and its migration:</p>
-      <pre><code>reins generate model Comment post_id:integer body:text
-reins db:migrate</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> generate model Comment post_id:integer body:text
+<span class="t-kw">reins</span> db:migrate</code></pre>
       <p>Wire up the association in <code>app/models/post.rb</code>:</p>
-      <pre><code>class Post &lt; ApplicationRecord
-  has_many :comments, foreign_key: "post_id"
+      <pre><code class="lang-ruby"><span class="t-kw">class</span> <span class="t-const">Post</span> &lt; <span class="t-const">ApplicationRecord</span>
+  has_many <span class="t-sym">:comments</span>, <span class="t-sym">foreign_key:</span> <span class="t-str">"post_id"</span>
 
-  validates :title, presence: true, length: { in: 1..100 }
-  validates :body, presence: true
-end</code></pre>
+  validates <span class="t-sym">:title</span>, <span class="t-sym">presence:</span> <span class="t-kw">true</span>, <span class="t-sym">length:</span> { <span class="t-sym">in:</span> <span class="t-num">1</span>..<span class="t-num">100</span> }
+  validates <span class="t-sym">:body</span>, <span class="t-sym">presence:</span> <span class="t-kw">true</span>
+<span class="t-kw">end</span></code></pre>
       <p>And in <code>app/models/comment.rb</code>:</p>
-      <pre><code>class Comment &lt; ApplicationRecord
-  belongs_to :post
+      <pre><code class="lang-ruby"><span class="t-kw">class</span> <span class="t-const">Comment</span> &lt; <span class="t-const">ApplicationRecord</span>
+  belongs_to <span class="t-sym">:post</span>
 
-  validates :body, presence: true
-end</code></pre>
+  validates <span class="t-sym">:body</span>, <span class="t-sym">presence:</span> <span class="t-kw">true</span>
+<span class="t-kw">end</span></code></pre>
       <p>Now render the comments in <code>app/views/posts/show.html.erb</code>:</p>
-      <pre><code>&lt;h1&gt;&lt;%= @record.title %&gt;&lt;/h1&gt;
-&lt;p&gt;&lt;%= @record.body %&gt;&lt;/p&gt;
+      <pre><code class="lang-erb"><span class="t-tag">&lt;h1</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> <span class="t-sym">@record</span>.title <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/h1</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> <span class="t-sym">@record</span>.body <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
 
-&lt;h2&gt;Comments&lt;/h2&gt;
-&lt;% @record.comments.each do |comment| %&gt;
-  &lt;article&gt;
-    &lt;p&gt;&lt;%= comment.body %&gt;&lt;/p&gt;
-  &lt;/article&gt;
-&lt;% end %&gt;</code></pre>
+<span class="t-tag">&lt;h2</span><span class="t-tag">&gt;</span>Comments<span class="t-tag">&lt;/h2</span><span class="t-tag">&gt;</span>
+<span class="t-erb">&lt;%</span> <span class="t-sym">@record</span>.comments.each <span class="t-kw">do</span> |comment| <span class="t-erb">%&gt;</span>
+  <span class="t-tag">&lt;article</span><span class="t-tag">&gt;</span>
+    <span class="t-tag">&lt;p</span><span class="t-tag">&gt;</span><span class="t-erb">&lt;%=</span> comment.body <span class="t-erb">%&gt;</span><span class="t-tag">&lt;/p</span><span class="t-tag">&gt;</span>
+  <span class="t-tag">&lt;/article</span><span class="t-tag">&gt;</span>
+<span class="t-erb">&lt;%</span> <span class="t-kw">end</span> <span class="t-erb">%&gt;</span></code></pre>
       <p><code>@record.comments</code> returns a <code>Reins::Model::Relation</code>, so you can chain calls on it: <code>@record.comments.order(created_at: :desc).limit(5)</code>.</p>
       <p>To let readers post comments, add a route in <code>config/routes.rb</code>:</p>
-      <pre><code>Reins.application.route do
-  root "welcome#index"
-  resources :posts
-  post "/posts/:post_id/comments", "comments#create", as: :post_comments
-end</code></pre>
+      <pre><code class="lang-ruby"><span class="t-const">Reins</span>.application.route <span class="t-kw">do</span>
+  root <span class="t-str">"welcome#index"</span>
+  resources <span class="t-sym">:posts</span>
+  post <span class="t-str">"/posts/:post_id/comments"</span>, <span class="t-str">"comments#create"</span>, <span class="t-sym">as:</span> <span class="t-sym">:post_comments</span>
+<span class="t-kw">end</span></code></pre>
       <p>Generate a <code>CommentsController</code>:</p>
-      <pre><code>reins generate controller Comments create</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> generate controller Comments create</code></pre>
       <p>Then edit <code>app/controllers/comments_controller.rb</code>:</p>
-      <pre><code>class CommentsController &lt; ApplicationController
-  def create
-    post = Post.find(params[:post_id])
-    comment = Comment.new(body: params[:body], post_id: post.id)
+      <pre><code class="lang-ruby"><span class="t-kw">class</span> <span class="t-const">CommentsController</span> &lt; <span class="t-const">ApplicationController</span>
+  <span class="t-kw">def</span> create
+    post = <span class="t-const">Post</span>.find(params[<span class="t-sym">:post_id</span>])
+    comment = <span class="t-const">Comment</span>.new(<span class="t-sym">body:</span> params[<span class="t-sym">:body</span>], <span class="t-sym">post_id:</span> post.id)
 
-    if comment.save
+    <span class="t-kw">if</span> comment.save
       redirect_to post_path(post.id)
-    else
-      render plain: "Comment invalid: #{comment.errors.full_messages.join(', ')}",
-             status: :unprocessable_entity
-    end
-  end
-end</code></pre>
+    <span class="t-kw">else</span>
+      render <span class="t-sym">plain:</span> <span class="t-str">"Comment invalid: #{comment.errors.full_messages.join(', ')}"</span>,
+             <span class="t-sym">status:</span> <span class="t-sym">:unprocessable_entity</span>
+    <span class="t-kw">end</span>
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
       <p>Add a comment form to <code>app/views/posts/show.html.erb</code>:</p>
-      <pre><code>&lt;h2&gt;Add a comment&lt;/h2&gt;
-&lt;form action="&lt;%= post_comments_path(post_id: @record.id) %&gt;" method="post"&gt;
-  &lt;%= text_field :body %&gt;
-  &lt;%= submit "Post comment" %&gt;
-&lt;/form&gt;</code></pre>
+      <pre><code class="lang-erb"><span class="t-tag">&lt;h2</span><span class="t-tag">&gt;</span>Add a comment<span class="t-tag">&lt;/h2</span><span class="t-tag">&gt;</span>
+<span class="t-tag">&lt;form</span> <span class="t-attr">action</span>="<span class="t-erb">&lt;%=</span> post_comments_path(<span class="t-sym">post_id:</span> <span class="t-sym">@record</span>.id) <span class="t-erb">%&gt;</span><span class="t-str">" method="</span>post"<span class="t-tag">&gt;</span>
+  <span class="t-erb">&lt;%=</span> text_field <span class="t-sym">:body</span> <span class="t-erb">%&gt;</span>
+  <span class="t-erb">&lt;%=</span> submit <span class="t-str">"Post comment"</span> <span class="t-erb">%&gt;</span>
+<span class="t-tag">&lt;/form</span><span class="t-tag">&gt;</span></code></pre>
       <p>Visit a post, write a comment, and submit it. The comment appears.</p>
 
       <h3 id="test-model">8. Test the model</h3>
       <p>The model generator wrote a stub at <code>spec/models/post_spec.rb</code>. Open it and add real specs:</p>
-      <pre><code>require "spec_helper"
+      <pre><code class="lang-ruby"><span class="t-kw">require</span> <span class="t-str">"spec_helper"</span>
 
-RSpec.describe Post, type: :model do
-  it "requires a title" do
-    expect(Post.new(title: nil, body: "x")).not_to be_valid
-  end
+<span class="t-const">RSpec</span>.describe <span class="t-const">Post</span>, <span class="t-sym">type:</span> <span class="t-sym">:model</span> <span class="t-kw">do</span>
+  it <span class="t-str">"requires a title"</span> <span class="t-kw">do</span>
+    expect(<span class="t-const">Post</span>.new(<span class="t-sym">title:</span> <span class="t-kw">nil</span>, <span class="t-sym">body:</span> <span class="t-str">"x"</span>)).not_to be_valid
+  <span class="t-kw">end</span>
 
-  it "saves a valid post" do
-    post = Post.new(title: "Hello", body: "World")
-    expect(post.save).to be(true)
-    expect(Post.count).to eq(1)
-  end
-end</code></pre>
+  it <span class="t-str">"saves a valid post"</span> <span class="t-kw">do</span>
+    post = <span class="t-const">Post</span>.new(<span class="t-sym">title:</span> <span class="t-str">"Hello"</span>, <span class="t-sym">body:</span> <span class="t-str">"World"</span>)
+    expect(post.save).to be(<span class="t-kw">true</span>)
+    expect(<span class="t-const">Post</span>.count).to eq(<span class="t-num">1</span>)
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
       <p>The <code>type: :model</code> metadata wraps each example in a database transaction, and that transaction rolls back at the end. So tests do not leak state into each other. Run them:</p>
-      <pre><code>reins test</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">reins</span> test</code></pre>
       <p>Or run RSpec directly:</p>
-      <pre><code>bundle exec rspec</code></pre>
+      <pre><code class="lang-shell"><span class="t-kw">bundle</span> exec rspec</code></pre>
 
       <h3 id="test-controller">9. Test the controller</h3>
-      <pre><code># spec/controllers/posts_controller_spec.rb
-require "spec_helper"
+      <pre><code class="lang-ruby"><span class="t-com"># spec/controllers/posts_controller_spec.rb</span>
+<span class="t-kw">require</span> <span class="t-str">"spec_helper"</span>
 
-RSpec.describe PostsController, type: :controller do
-  let(:app) { Rack::Builder.parse_file("config.ru") }
+<span class="t-const">RSpec</span>.describe <span class="t-const">PostsController</span>, <span class="t-sym">type:</span> <span class="t-sym">:controller</span> <span class="t-kw">do</span>
+  let(<span class="t-sym">:app</span>) { <span class="t-const">Rack::Builder</span>.parse_file(<span class="t-str">"config.ru"</span>) }
 
-  it "GET /posts returns 200" do
-    get "/posts"
-    expect(last_response).to have_http_status(:ok)
-  end
+  it <span class="t-str">"GET /posts returns 200"</span> <span class="t-kw">do</span>
+    get <span class="t-str">"/posts"</span>
+    expect(last_response).to have_http_status(<span class="t-sym">:ok</span>)
+  <span class="t-kw">end</span>
 
-  it "POST /posts with valid params redirects to the new post" do
-    post "/posts", post: { title: "Hi", body: "There" }
-    expect(last_response).to redirect_to("/posts/1")
-  end
-end</code></pre>
+  it <span class="t-str">"POST /posts with valid params redirects to the new post"</span> <span class="t-kw">do</span>
+    post <span class="t-str">"/posts"</span>, <span class="t-sym">post:</span> { <span class="t-sym">title:</span> <span class="t-str">"Hi"</span>, <span class="t-sym">body:</span> <span class="t-str">"There"</span> }
+    expect(last_response).to redirect_to(<span class="t-str">"/posts/1"</span>)
+  <span class="t-kw">end</span>
+<span class="t-kw">end</span></code></pre>
       <p>The <code>type: :controller</code> metadata includes <code>Rack::Test::Methods</code> and the custom matchers, <code>have_http_status</code> and <code>redirect_to</code>.</p>
 
       <h3 id="deploy">10. Deploy notes</h3>
       <p>For production, set <code>REINS_ENV</code> on each command:</p>
-      <pre><code>REINS_ENV=production reins db:create
-REINS_ENV=production reins db:migrate
-REINS_ENV=production reins server</code></pre>
+      <pre><code class="lang-shell"><span class="t-attr">REINS_ENV=</span>production <span class="t-kw">reins</span> db:create
+<span class="t-attr">REINS_ENV=</span>production <span class="t-kw">reins</span> db:migrate
+<span class="t-attr">REINS_ENV=</span>production <span class="t-kw">reins</span> server</code></pre>
       <p><code>config/environments/production.rb</code> already sets <code>eager_load = true</code>, so the autoloader requires every file at boot and no per-request <code>Module#autoload</code> happens. That file also sets <code>log_level = :info</code>. Add or remove middleware in the same file.</p>
 
       <h3 id="recap">What you used</h3>
